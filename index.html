@@ -217,41 +217,76 @@
         }
 
         .marca-simbolo {
+            position: relative;
             width: 100%;
             max-width: 320px;
             aspect-ratio: 1/1;
-            border-radius: 4px;
-            background: rgba(236, 232, 226, 0.6);
+            border-radius: 2px;
+            /* Luz cálida entrando por arriba a la izquierda, como un papel grueso */
+            background:
+                radial-gradient(115% 115% at 28% 22%,
+                    rgba(255, 253, 250, 0.95) 0%,
+                    rgba(242, 237, 230, 0.8) 45%,
+                    rgba(226, 219, 208, 0.72) 100%);
             backdrop-filter: blur(2px);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border: 1px solid rgba(226, 221, 214, 0.5);
+            border: 1px solid rgba(214, 206, 194, 0.55);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.55),
+                0 14px 34px -14px rgba(122, 110, 96, 0.22);
             overflow: hidden;
+            transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.3, 1),
+                        box-shadow 0.6s cubic-bezier(0.2, 0.7, 0.3, 1);
+        }
+
+        /* Marco interior: le da aire de sello o placa grabada */
+        .marca-simbolo::before {
+            content: "";
+            position: absolute;
+            inset: 15px;
+            border: 1px solid rgba(203, 194, 181, 0.5);
+            pointer-events: none;
+        }
+
+        .marca-simbolo:hover {
+            transform: translateY(-3px);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.55),
+                0 20px 42px -14px rgba(122, 110, 96, 0.28);
         }
 
         .marca-simbolo .iniciales {
-            font-size: 4rem;
-            font-weight: 250;
-            color: #d5cfc7;
-            letter-spacing: 0.08em;
+            font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+            font-size: 3.5rem;
+            font-weight: 400;
+            color: #9d9285;
+            letter-spacing: 0.2em;
+            /* Compensa el hueco que el tracking deja a la derecha */
+            text-indent: 0.2em;
             line-height: 1;
         }
 
         .marca-simbolo .nombre-studio {
-            margin-top: 0.75rem;
-            font-size: 0.7rem;
-            color: #c5bfb7;
-            letter-spacing: 0.15em;
+            margin-top: 0.7rem;
+            font-size: 0.6rem;
+            color: #a89e91;
+            letter-spacing: 0.28em;
+            text-indent: 0.28em;
             text-transform: uppercase;
         }
 
         .marca-simbolo .linea-deco {
-            width: 30px;
+            width: 42px;
             height: 1px;
-            background: #d5cfc7;
-            margin: 0.5rem 0;
+            border: 0;
+            background: linear-gradient(to right,
+                transparent,
+                rgba(157, 146, 133, 0.55),
+                transparent);
+            margin: 0.85rem 0 0;
         }
 
         /* ===== PROYECTOS ===== */
@@ -277,9 +312,13 @@
             max-width: 600px;
         }
 
+        /* La tarjeta entera es el enlace */
         .proyecto-card {
+            display: block;
             border-top: 1px solid rgba(232, 228, 222, 0.6);
             padding-top: 1.5rem;
+            text-decoration: none;
+            color: inherit;
             transition: opacity 0.2s;
         }
 
@@ -291,24 +330,36 @@
             font-size: 1.3rem;
             font-weight: 400;
             color: #1a1a1a;
-            text-decoration: none;
             display: inline-block;
             border-bottom: 1px solid transparent;
             transition: border-color 0.2s;
         }
 
-        .proyecto-card .nombre:hover {
+        .proyecto-card:hover .nombre {
             border-bottom-color: #1a1a1a;
         }
 
+        .proyecto-card .flecha {
+            font-size: 0.8em;
+            color: #999;
+            display: inline-block;
+            transition: transform 0.2s, color 0.2s;
+        }
+
+        .proyecto-card:hover .flecha {
+            color: #1a1a1a;
+            transform: translate(2px, -2px);
+        }
+
         .proyecto-card .desc {
+            display: block;
             font-size: 0.9rem;
             color: #777;
             margin-top: 0.2rem;
         }
 
         .proyecto-card .tag {
-            display: inline-block;
+            display: block;
             font-size: 0.55rem;
             text-transform: uppercase;
             letter-spacing: 0.06em;
@@ -401,8 +452,19 @@
                 max-width: 200px;
                 margin: 0 auto;
             }
+            .marca-simbolo::before {
+                inset: 11px;
+            }
             .marca-simbolo .iniciales {
-                font-size: 3rem;
+                font-size: 2.5rem;
+            }
+            .marca-simbolo .linea-deco {
+                width: 32px;
+                margin-top: 0.6rem;
+            }
+            .marca-simbolo .nombre-studio {
+                margin-top: 0.55rem;
+                font-size: 0.52rem;
             }
             .proyectos-grid {
                 grid-template-columns: 1fr 1fr;
@@ -480,11 +542,11 @@
                     <div class="subtitulo">Barcelona · Uruguay</div>
 
                     <p class="desc">
-                        Difortuna Studio es mi incubadora personal. Construyo productos digitales desde cero, los pongo en marcha, los pruebo, y busco quien los lleve a largo plazo. Así puedo dedicarme a la <span class="destacar">siguiente idea</span>.
+                        Difortuna Studio es mi incubadora personal. Construyo productos digitales desde cero, los pongo en marcha, los pruebo y busco quien los lleve a largo plazo. Así puedo dedicarme a la <span class="destacar">siguiente idea</span>.
                     </p>
 
                     <p class="invitacion">
-                        ¿Te interesa alguna de las que tengo en marcha?
+                        ¿Te interesa alguno de los proyectos que tengo en marcha?
                     </p>
 
                     <a href="mailto:hola@difortunastudio.com" class="contacto-badge">
@@ -500,19 +562,19 @@
             <div class="label">Proyectos</div>
             <div class="proyectos-grid">
 
-                <div class="proyecto-card">
-                    <a href="https://fliia.app" target="_blank" class="nombre">Fliia</a>
+                <a href="https://fliia.es" target="_blank" rel="noopener" class="proyecto-card">
+                    <span class="nombre">Fliia <span class="flecha">↗</span></span>
                     <span class="badge beta">Beta</span>
-                    <div class="desc">Family Office digital para familias</div>
-                    <div class="tag">Fintech · B2C · Proyecto estrella</div>
-                </div>
+                    <span class="desc">Family Office digital para familias</span>
+                    <span class="tag">Fintech · B2C · Proyecto estrella</span>
+                </a>
 
-                <div class="proyecto-card">
-                    <a href="https://timons.es" target="_blank" class="nombre">TIMÓN</a>
+                <a href="https://timons.es" target="_blank" rel="noopener" class="proyecto-card">
+                    <span class="nombre">TIMÓN <span class="flecha">↗</span></span>
                     <span class="badge desarrollo">En desarrollo</span>
-                    <div class="desc">Control financiero para estudios y agencias</div>
-                    <div class="tag">SaaS · B2B</div>
-                </div>
+                    <span class="desc">Control financiero para estudios y agencias</span>
+                    <span class="tag">SaaS · B2B</span>
+                </a>
 
             </div>
         </section>
