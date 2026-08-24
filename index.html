@@ -70,6 +70,55 @@
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)' opacity='0.5'/%3E%3C/svg%3E");
         }
 
+        /* Rejilla técnica, muy tenue y difuminada hacia los bordes */
+        .capa-rejilla {
+            z-index: 1;
+            background-image:
+                linear-gradient(rgba(134, 239, 172, 0.055) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(134, 239, 172, 0.055) 1px, transparent 1px);
+            background-size: 72px 72px;
+            -webkit-mask-image: radial-gradient(78% 62% at 50% 38%, #000 0%, transparent 78%);
+            mask-image: radial-gradient(78% 62% at 50% 38%, #000 0%, transparent 78%);
+        }
+
+        /* Foco que persigue al cursor */
+        .foco {
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            width: 560px;
+            height: 560px;
+            margin: -280px 0 0 -280px;
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(circle,
+                rgba(134, 239, 172, 0.17) 0%,
+                rgba(74, 222, 128, 0.07) 42%,
+                rgba(134, 239, 172, 0) 68%);
+            filter: blur(26px);
+            opacity: 0;
+            transition: opacity 0.7s ease;
+            will-change: transform;
+        }
+
+        .foco.activo { opacity: 1; }
+
+        /* Aparición al entrar en pantalla */
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition:
+                opacity 1s cubic-bezier(0.2, 0.7, 0.3, 1),
+                transform 1s cubic-bezier(0.2, 0.7, 0.3, 1);
+            transition-delay: var(--d, 0s);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: none;
+        }
+
         /* ===== ESFERAS ===== */
         .esferas {
             position: fixed;
@@ -403,6 +452,8 @@
         @media (prefers-reduced-motion: reduce) {
             .esfera, .bajar { animation: none; }
             html { scroll-behavior: auto; }
+            .foco { display: none; }
+            .reveal { opacity: 1; transform: none; transition: none; }
         }
     </style>
 </head>
@@ -418,6 +469,9 @@
         <div class="esfera"></div>
     </div>
 
+    <div class="capa capa-rejilla"></div>
+    <div class="foco"></div>
+
     <div class="capa capa-vineta"></div>
     <div class="capa capa-grano"></div>
 
@@ -425,24 +479,24 @@
 
         <section class="hero">
             <div class="hero-inner">
-                <div class="marca">Difortuna Studio</div>
+                <div class="marca reveal" style="--d: 0.05s">Difortuna Studio</div>
 
-                <h1>
+                <h1 class="reveal" style="--d: 0.18s">
                     Fiorella Gallo
                     <span class="apellido">Di Fortuna</span>
                 </h1>
 
-                <div class="subtitulo">Barcelona · Uruguay</div>
+                <div class="subtitulo reveal" style="--d: 0.34s">Barcelona · Uruguay</div>
 
-                <div class="separador"></div>
+                <div class="separador reveal" style="--d: 0.46s"></div>
 
-                <p class="desc">
+                <p class="desc reveal" style="--d: 0.56s">
                     Difortuna Studio es mi incubadora personal. Construyo productos digitales desde cero, los pongo en marcha, los pruebo y busco quien los lleve a largo plazo. Así puedo dedicarme a la <span class="destacar">siguiente idea</span>.
                 </p>
 
-                <p class="invitacion">¿Te interesa alguno de los proyectos que tengo en marcha?</p>
+                <p class="invitacion reveal" style="--d: 0.68s">¿Te interesa alguno de los proyectos que tengo en marcha?</p>
 
-                <a href="mailto:hola@difortunastudio.com" class="contacto-badge">
+                <a href="mailto:hola@difortunastudio.com" class="contacto-badge reveal" style="--d: 0.8s">
                     <span>✉</span> hola@difortunastudio.com
                 </a>
             </div>
@@ -451,17 +505,17 @@
         </section>
 
         <section class="proyectos-section" id="proyectos">
-            <div class="label">Proyectos</div>
+            <div class="label reveal">Proyectos</div>
             <div class="proyectos-grid">
 
-                <a href="https://fliia.es" target="_blank" rel="noopener" class="proyecto-card">
+                <a href="https://fliia.es" target="_blank" rel="noopener" class="proyecto-card reveal" style="--d: 0.1s">
                     <span class="nombre">Fliia <span class="flecha">↗</span></span>
                     <span class="badge beta">Beta</span>
                     <span class="desc-p">Family Office digital para familias</span>
                     <span class="tag">Fintech · B2C · Proyecto estrella</span>
                 </a>
 
-                <a href="https://timons.es" target="_blank" rel="noopener" class="proyecto-card">
+                <a href="https://timons.es" target="_blank" rel="noopener" class="proyecto-card reveal" style="--d: 0.22s">
                     <span class="nombre">TIMÓN <span class="flecha">↗</span></span>
                     <span class="badge desarrollo">En desarrollo</span>
                     <span class="desc-p">Control financiero para estudios y agencias</span>
@@ -471,7 +525,7 @@
             </div>
         </section>
 
-        <div class="footer">
+        <div class="footer reveal">
             <span>© 2026 Difortuna Studio</span>
             <div class="footer-links">
                 <a href="mailto:hola@difortunastudio.com">hola@difortunastudio.com</a>
@@ -480,6 +534,64 @@
         </div>
 
     </div>
+
+    <script>
+        (function () {
+            var sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            /* --- Aparición al entrar en pantalla --- */
+            var aparecen = document.querySelectorAll('.reveal');
+
+            if (sinMovimiento || !('IntersectionObserver' in window)) {
+                aparecen.forEach(function (el) { el.classList.add('visible'); });
+            } else {
+                var observador = new IntersectionObserver(function (entradas) {
+                    entradas.forEach(function (e) {
+                        if (e.isIntersecting) {
+                            e.target.classList.add('visible');
+                            observador.unobserve(e.target);
+                        }
+                    });
+                }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+                aparecen.forEach(function (el) { observador.observe(el); });
+            }
+
+            /* --- Foco que persigue al cursor ---
+               Se mueve con interpolación suave, un poco por detrás del ratón. */
+            var foco = document.querySelector('.foco');
+            if (!foco || sinMovimiento || window.matchMedia('(hover: none)').matches) return;
+
+            var destinoX = window.innerWidth / 2,
+                destinoY = window.innerHeight * 0.4,
+                x = destinoX,
+                y = destinoY,
+                pedido = false;
+
+            function pintar() {
+                x += (destinoX - x) * 0.08;
+                y += (destinoY - y) * 0.08;
+                foco.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+
+                if (Math.abs(destinoX - x) > 0.5 || Math.abs(destinoY - y) > 0.5) {
+                    requestAnimationFrame(pintar);
+                } else {
+                    pedido = false;
+                }
+            }
+
+            window.addEventListener('mousemove', function (e) {
+                destinoX = e.clientX;
+                destinoY = e.clientY;
+                foco.classList.add('activo');
+                if (!pedido) { pedido = true; requestAnimationFrame(pintar); }
+            }, { passive: true });
+
+            window.addEventListener('mouseout', function (e) {
+                if (!e.relatedTarget) foco.classList.remove('activo');
+            });
+        })();
+    </script>
 
 </body>
 </html>
