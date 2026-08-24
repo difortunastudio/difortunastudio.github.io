@@ -402,6 +402,86 @@
             color: var(--texto-tenue);
         }
 
+        /* ===== NOVEDADES ===== */
+        .novedades-section {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem;
+        }
+
+        .linea-tiempo {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        /* El hilo vertical que une las entradas */
+        .linea-tiempo::before {
+            content: "";
+            position: absolute;
+            left: 4px;
+            top: 6px;
+            bottom: 6px;
+            width: 1px;
+            background: linear-gradient(to bottom,
+                rgba(134, 239, 172, 0.35),
+                rgba(134, 239, 172, 0.12) 60%,
+                transparent);
+        }
+
+        .novedad {
+            position: relative;
+            padding-bottom: 2.2rem;
+        }
+
+        .novedad:last-child {
+            padding-bottom: 0;
+        }
+
+        /* El punto de cada entrada */
+        .novedad::before {
+            content: "";
+            position: absolute;
+            left: -2rem;
+            top: 0.45rem;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--verde-brillo);
+            box-shadow: 0 0 0 4px rgba(134, 239, 172, 0.12),
+                        0 0 16px rgba(134, 239, 172, 0.6);
+        }
+
+        /* La más reciente destaca */
+        .novedad:first-child::before {
+            background: var(--verde-brillo);
+            box-shadow: 0 0 0 5px rgba(134, 239, 172, 0.18),
+                        0 0 22px rgba(134, 239, 172, 0.85);
+        }
+
+        .novedad .fecha {
+            display: block;
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--texto-tenue);
+            margin-bottom: 0.35rem;
+        }
+
+        .novedad .titulo {
+            display: block;
+            font-size: 1.05rem;
+            color: var(--texto-fuerte);
+            margin-bottom: 0.2rem;
+        }
+
+        .novedad .detalle {
+            display: block;
+            font-size: 0.92rem;
+            color: var(--texto);
+            opacity: 0.8;
+            max-width: 46em;
+        }
+
         /* ===== FOOTER ===== */
         .footer {
             max-width: 1000px;
@@ -525,6 +605,32 @@
                     <span class="desc-p">Control financiero para estudios y agencias</span>
                     <span class="tag">SaaS · B2B</span>
                 </a>
+
+            </div>
+        </section>
+
+        <!-- Para añadir una novedad: copia un bloque .novedad y ponlo el primero -->
+        <section class="novedades-section">
+            <div class="label reveal">Novedades</div>
+            <div class="linea-tiempo">
+
+                <div class="novedad reveal">
+                    <span class="fecha">24 agosto 2026</span>
+                    <span class="titulo">Fliia entra en beta cerrada</span>
+                    <span class="detalle">Primeras familias probando el Family Office digital.</span>
+                </div>
+
+                <div class="novedad reveal" style="--d: 0.12s">
+                    <span class="fecha">15 agosto 2026</span>
+                    <span class="titulo">TIMÓN en desarrollo</span>
+                    <span class="detalle">Construyendo el control financiero para estudios creativos.</span>
+                </div>
+
+                <div class="novedad reveal" style="--d: 0.24s">
+                    <span class="fecha">1 agosto 2026</span>
+                    <span class="titulo">Difortuna Studio</span>
+                    <span class="detalle">Nueva web, nueva etapa.</span>
+                </div>
 
             </div>
         </section>
