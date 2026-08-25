@@ -34,10 +34,11 @@
             --fondo: #061310;
             --fondo-alto: #0a1f18;
             --verde-luz: #4ade80;
-            --verde-brillo: #86efac;
-            --texto: #cfe3d8;
+            --verde-brillo: #86efac;      /* decorativo: bordes, puntos, halos */
+            --verde-texto: #b6f5cb;       /* el mismo verde, ya legible sobre el fondo */
+            --texto: #dceee5;
             --texto-fuerte: #f2fbf6;
-            --texto-tenue: #7d9a8c;
+            --texto-tenue: #a6c1b3;       /* micro-labels: sube a ~4.5:1 con el resplandor puesto */
             --linea: rgba(134, 239, 172, 0.16);
         }
 
@@ -73,11 +74,11 @@
             z-index: 0;
             background:
                 /* núcleo, lo más brillante */
-                radial-gradient(38% 26% at 50% 34%, rgba(134, 239, 172, 0.30) 0%, rgba(134, 239, 172, 0) 70%),
+                radial-gradient(38% 26% at 50% 34%, rgba(134, 239, 172, 0.19) 0%, rgba(134, 239, 172, 0) 70%),
                 /* halo medio */
-                radial-gradient(70% 52% at 50% 36%, rgba(74, 222, 128, 0.20) 0%, rgba(74, 222, 128, 0) 72%),
+                radial-gradient(70% 52% at 50% 36%, rgba(74, 222, 128, 0.13) 0%, rgba(74, 222, 128, 0) 72%),
                 /* resplandor amplio que tiñe toda la pantalla */
-                radial-gradient(120% 90% at 50% 30%, rgba(34, 150, 94, 0.22) 0%, rgba(6, 19, 16, 0) 68%);
+                radial-gradient(120% 90% at 50% 30%, rgba(34, 150, 94, 0.14) 0%, rgba(6, 19, 16, 0) 68%);
         }
 
         .capa-vineta {
@@ -117,8 +118,8 @@
             border-radius: 50%;
             pointer-events: none;
             background: radial-gradient(circle,
-                rgba(134, 239, 172, 0.17) 0%,
-                rgba(74, 222, 128, 0.07) 42%,
+                rgba(134, 239, 172, 0.11) 0%,
+                rgba(74, 222, 128, 0.045) 42%,
                 rgba(134, 239, 172, 0) 68%);
             filter: blur(26px);
             opacity: 0;
@@ -157,8 +158,8 @@
             border-radius: 50%;
             filter: blur(28px);
             background: radial-gradient(circle at 32% 30%,
-                rgba(134, 239, 172, 0.34) 0%,
-                rgba(52, 176, 112, 0.16) 45%,
+                rgba(134, 239, 172, 0.22) 0%,
+                rgba(52, 176, 112, 0.10) 45%,
                 rgba(6, 19, 16, 0) 72%);
             animation: flotar 22s infinite ease-in-out alternate;
         }
@@ -204,8 +205,8 @@
             text-transform: uppercase;
             letter-spacing: 0.42em;
             text-indent: 0.42em;
-            color: var(--verde-brillo);
-            opacity: 0.75;
+            color: var(--verde-texto);
+            opacity: 0.9;
             margin-bottom: 2.5rem;
         }
 
@@ -252,7 +253,7 @@
         }
 
         .desc .destacar {
-            color: var(--verde-brillo);
+            color: var(--verde-texto);
         }
 
         .invitacion {
@@ -312,7 +313,7 @@
         .proyectos-section {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 5rem 2rem;
+            padding: 4rem 2rem 3rem;
         }
 
         .label {
@@ -321,7 +322,7 @@
             letter-spacing: 0.3em;
             text-indent: 0.3em;
             color: var(--texto-tenue);
-            margin-bottom: 2.5rem;
+            margin-bottom: 1.8rem;
         }
 
         .proyectos-grid {
@@ -374,7 +375,7 @@
         .proyecto-card .flecha {
             display: inline-block;
             font-size: 0.75em;
-            color: var(--verde-brillo);
+            color: var(--verde-texto);
             transition: transform 0.3s;
         }
 
@@ -384,7 +385,7 @@
 
         .proyecto-card .badge {
             display: inline-block;
-            font-size: 0.5rem;
+            font-size: 0.6rem;
             text-transform: uppercase;
             letter-spacing: 0.12em;
             padding: 0.22rem 0.6rem;
@@ -396,7 +397,7 @@
 
         .badge.beta {
             background: rgba(134, 239, 172, 0.16);
-            color: var(--verde-brillo);
+            color: var(--verde-texto);
             border-color: rgba(134, 239, 172, 0.32);
         }
 
@@ -410,13 +411,12 @@
             margin-top: 0.6rem;
             font-size: 0.94rem;
             color: var(--texto);
-            opacity: 0.85;
         }
 
         .proyecto-card .tag {
             display: block;
             margin-top: 1.2rem;
-            font-size: 0.56rem;
+            font-size: 0.66rem;
             text-transform: uppercase;
             letter-spacing: 0.16em;
             color: var(--texto-tenue);
@@ -426,7 +426,7 @@
         .novedades-section {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 2rem 2rem 5rem;
+            padding: 0.5rem 2rem 4rem;
         }
 
         .linea-tiempo {
@@ -480,7 +480,7 @@
 
         .novedad .fecha {
             display: block;
-            font-size: 0.58rem;
+            font-size: 0.68rem;
             text-transform: uppercase;
             letter-spacing: 0.18em;
             color: var(--texto-tenue);
@@ -498,7 +498,6 @@
             display: block;
             font-size: 0.92rem;
             color: var(--texto);
-            opacity: 0.8;
             max-width: 46em;
         }
 
@@ -684,9 +683,15 @@
                             observador.unobserve(e.target);
                         }
                     });
-                }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+                }, { threshold: 0.05, rootMargin: '0px 0px -2% 0px' });
 
                 aparecen.forEach(function (el) { observador.observe(el); });
+
+                /* Red de seguridad: pase lo que pase, a los 2,5 s todo está visible.
+                   Nada de secciones en blanco si el observador no llega a disparar. */
+                setTimeout(function () {
+                    aparecen.forEach(function (el) { el.classList.add('visible'); });
+                }, 2500);
             }
 
             /* --- Foco que persigue al cursor ---
