@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aviso legal y privacidad · Difortuna Studio</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <meta name="theme-color" content="#061310" />
+
+    <meta name="description" content="Aviso legal, política de privacidad y uso de cookies de Difortuna Studio." />
+    <meta name="robots" content="noindex, follow" />
+    <link rel="canonical" href="https://difortunastudio.com/aviso-legal.html" />
+    <style>
+        /* ===== PALETA (la misma que la portada) ===== */
+        :root {
+            --fondo: #061310;
+            --verde-luz: #4ade80;
+            --verde-brillo: #86efac;
+            --texto: #cfe3d8;
+            --texto-fuerte: #f2fbf6;
+            --texto-tenue: #7d9a8c;
+            --linea: rgba(134, 239, 172, 0.16);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--fondo);
+            color: var(--texto);
+            line-height: 1.7;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Solo el resplandor y el grano: aquí manda el texto, no el decorado */
+        .capa {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .capa-luz {
+            z-index: 0;
+            background:
+                radial-gradient(60% 40% at 50% 0%, rgba(74, 222, 128, 0.16) 0%, rgba(6, 19, 16, 0) 70%),
+                radial-gradient(120% 80% at 50% 0%, rgba(34, 150, 94, 0.14) 0%, rgba(6, 19, 16, 0) 66%);
+        }
+
+        .capa-grano {
+            z-index: 1;
+            opacity: 0.28;
+            mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)' opacity='0.5'/%3E%3C/svg%3E");
+        }
+
+        /* ===== CONTENIDO ===== */
+        .contenido {
+            position: relative;
+            z-index: 2;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 4.5rem 2rem 5rem;
+        }
+
+        .volver {
+            display: inline-block;
+            font-size: 0.78rem;
+            color: var(--texto-tenue);
+            text-decoration: none;
+            margin-bottom: 3rem;
+            transition: color 0.25s;
+        }
+
+        .volver:hover { color: var(--verde-brillo); }
+
+        .marca {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.42em;
+            text-indent: 0.42em;
+            color: var(--verde-brillo);
+            opacity: 0.75;
+            margin-bottom: 1.2rem;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 2.9rem);
+            font-weight: 300;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            color: var(--texto-fuerte);
+            text-shadow: 0 0 30px rgba(134, 239, 172, 0.22);
+        }
+
+        .actualizado {
+            margin-top: 0.9rem;
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--texto-tenue);
+        }
+
+        h2 {
+            font-size: 1.15rem;
+            font-weight: 400;
+            color: var(--texto-fuerte);
+            letter-spacing: -0.01em;
+            margin: 3rem 0 0.9rem;
+            padding-top: 2.2rem;
+            border-top: 1px solid var(--linea);
+        }
+
+        h3 {
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: var(--verde-brillo);
+            margin: 1.8rem 0 0.5rem;
+        }
+
+        p {
+            font-size: 0.96rem;
+            margin-bottom: 1rem;
+            max-width: 42em;
+        }
+
+        ul {
+            margin: 0 0 1rem 1.1rem;
+            font-size: 0.96rem;
+            max-width: 42em;
+        }
+
+        li { margin-bottom: 0.4rem; }
+
+        a {
+            color: var(--verde-brillo);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(134, 239, 172, 0.3);
+            transition: border-color 0.25s;
+        }
+
+        a:hover { border-bottom-color: var(--verde-brillo); }
+
+        /* Ficha del titular: los datos que pide la LSSI, de un vistazo */
+        .ficha {
+            margin: 1.2rem 0 1.5rem;
+            padding: 1.4rem 1.6rem;
+            border-radius: 14px;
+            background: linear-gradient(160deg, rgba(134, 239, 172, 0.07) 0%, rgba(134, 239, 172, 0.02) 100%);
+            border: 1px solid var(--linea);
+        }
+
+        .ficha dl {
+            display: grid;
+            grid-template-columns: minmax(7rem, auto) 1fr;
+            gap: 0.5rem 1.4rem;
+            font-size: 0.92rem;
+        }
+
+        .ficha dt {
+            color: var(--texto-tenue);
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            padding-top: 0.35rem;
+        }
+
+        .ficha dd { color: var(--texto-fuerte); }
+
+        .footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--linea);
+            font-size: 0.78rem;
+            color: var(--texto-tenue);
+        }
+
+        @media (max-width: 560px) {
+            .contenido { padding: 3rem 1.4rem 4rem; }
+            .ficha { padding: 1.2rem 1.1rem; }
+            .ficha dl { grid-template-columns: 1fr; gap: 0.15rem; }
+            .ficha dd { margin-bottom: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="capa capa-luz"></div>
+    <div class="capa capa-grano"></div>
+
+    <div class="contenido">
+
+        <a href="/" class="volver">← Volver a Difortuna Studio</a>
+
+        <div class="marca">Difortuna Studio</div>
+        <h1>Aviso legal y privacidad</h1>
+        <p class="actualizado">Última actualización: agosto de 2026</p>
+
+        <h2>1. Titular del sitio web</h2>
+        <p>
+            En cumplimiento del artículo 10 de la Ley 34/2002, de servicios de la sociedad de la
+            información y de comercio electrónico (LSSI-CE), se facilitan los siguientes datos:
+        </p>
+
+        <div class="ficha">
+            <dl>
+                <dt>Titular</dt>
+                <dd>Fiorella Elizabeth Gallo</dd>
+
+                <dt>Nombre comercial</dt>
+                <dd>Difortuna Studio</dd>
+
+                <dt>NIE</dt>
+                <dd>X4318310Z</dd>
+
+                <dt>Domicilio</dt>
+                <dd>Calle Joan d'Àustria 95, 2º 3ª · 08018 Barcelona, España</dd>
+
+                <dt>Actividad</dt>
+                <dd>Desarrollo de productos digitales (trabajadora autónoma)</dd>
+
+                <dt>Correo</dt>
+                <dd><a href="mailto:hola@difortunastudio.com">hola@difortunastudio.com</a></dd>
+
+                <dt>Sitio web</dt>
+                <dd>difortunastudio.com</dd>
+            </dl>
+        </div>
+
+        <h2>2. Objeto y condiciones de uso</h2>
+        <p>
+            Este sitio web es la presentación de Difortuna Studio, la incubadora personal de
+            productos digitales de Fiorella Gallo Di Fortuna. Su finalidad es informativa: dar a
+            conocer los proyectos en marcha y facilitar una vía de contacto.
+        </p>
+        <p>
+            La información publicada se ofrece de buena fe y puede modificarse o actualizarse en
+            cualquier momento sin aviso previo. No constituye una oferta contractual ni asesoramiento
+            profesional de ningún tipo.
+        </p>
+        <p>
+            Al navegar por este sitio te comprometes a hacer un uso lícito del mismo y a no realizar
+            acciones que puedan dañarlo, alterarlo o impedir su normal funcionamiento.
+        </p>
+
+        <h2>3. Propiedad intelectual</h2>
+        <p>
+            Los textos, el diseño, el código, los logotipos y las marcas que aparecen en este sitio
+            (incluidas las denominaciones Difortuna Studio, Fliia y TIMÓN) son titularidad de
+            Fiorella Elizabeth Gallo, salvo que se indique otra cosa. Queda prohibida su
+            reproducción, distribución o transformación sin autorización expresa.
+        </p>
+
+        <h2>4. Enlaces a otros sitios</h2>
+        <p>
+            Este sitio contiene enlaces a páginas externas (entre otras, los proyectos Fliia y TIMÓN,
+            y un perfil de LinkedIn). No se asume responsabilidad alguna sobre los contenidos ni las
+            políticas de privacidad de esos sitios, que se rigen por sus propias condiciones.
+        </p>
+
+        <h2>5. Política de privacidad</h2>
+
+        <h3>Responsable del tratamiento</h3>
+        <p>
+            Fiorella Elizabeth Gallo, con los datos de contacto indicados en el apartado 1.
+        </p>
+
+        <h3>Qué datos se tratan y para qué</h3>
+        <p>
+            Este sitio <strong>no tiene formularios</strong> ni registro de usuarios. El único dato
+            personal que puede llegar es el que envíes voluntariamente al escribir a
+            <a href="mailto:hola@difortunastudio.com">hola@difortunastudio.com</a>: tu dirección de
+            correo y lo que incluyas en el mensaje.
+        </p>
+        <ul>
+            <li><strong>Finalidad:</strong> responder a tu consulta y mantener la conversación que se derive de ella.</li>
+            <li><strong>Base jurídica:</strong> tu consentimiento al escribir, y el interés legítimo en atender consultas recibidas (art. 6.1.a y 6.1.f del RGPD).</li>
+            <li><strong>Conservación:</strong> mientras dure la relación y, después, el tiempo necesario para atender posibles responsabilidades legales.</li>
+        </ul>
+
+        <h3>Destinatarios</h3>
+        <p>
+            No se ceden datos a terceros ni se elaboran perfiles ni decisiones automatizadas. El
+            correo se gestiona a través de un proveedor de servicios de correo electrónico, que actúa
+            como encargado del tratamiento.
+        </p>
+
+        <h3>Tus derechos</h3>
+        <p>
+            Puedes ejercer los derechos de acceso, rectificación, supresión, oposición, limitación y
+            portabilidad escribiendo a
+            <a href="mailto:hola@difortunastudio.com">hola@difortunastudio.com</a>. Si consideras que
+            tus datos no se han tratado correctamente, puedes reclamar ante la Agencia Española de
+            Protección de Datos (<a href="https://www.aepd.es" target="_blank" rel="noopener">aepd.es</a>).
+        </p>
+
+        <h2>6. Cookies y analítica</h2>
+        <p>
+            <strong>Este sitio no utiliza cookies</strong> ni ninguna otra tecnología de seguimiento
+            que permita identificarte.
+        </p>
+        <p>
+            Para saber cuántas visitas recibe la página se usa
+            <a href="https://www.goatcounter.com/help/privacy" target="_blank" rel="noopener">GoatCounter</a>,
+            una herramienta de analítica sin cookies que no recoge datos personales ni rastrea a los
+            visitantes entre sitios web. Únicamente registra información agregada y anónima —páginas
+            vistas, país aproximado, tipo de navegador y sitio de procedencia— sin almacenar
+            direcciones IP ni crear identificadores persistentes.
+        </p>
+        <p>
+            Por ese motivo no se solicita consentimiento previo: el tratamiento queda fuera del
+            ámbito del artículo 22.2 de la LSSI-CE.
+        </p>
+
+        <h2>7. Ley aplicable</h2>
+        <p>
+            Estas condiciones se rigen por la legislación española. Para cualquier controversia,
+            las partes se someten a los juzgados y tribunales del domicilio del titular, salvo que
+            la normativa aplicable determine otro fuero.
+        </p>
+
+        <div class="footer">
+            © 2026 Difortuna Studio · Barcelona · Uruguay
+        </div>
+
+    </div>
+
+    <!-- Contador de visitas sin cookies (panel: fiorellagallo.goatcounter.com) -->
+    <script data-goatcounter="https://fiorellagallo.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+</body>
+</html>
