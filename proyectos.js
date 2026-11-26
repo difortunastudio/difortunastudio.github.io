@@ -127,7 +127,8 @@ window.PROYECTOS = [
         /* Centro de mando: una empresa FICTICIA con datos coherentes entre
            todas las vistas. Las cifras se calculan a partir de estos datos. */
         centro: {
-            intro: "Disponer de información contable no significa disponer de información para decidir. Elige una pregunta y explora cómo responde TIMÓN.",
+            lema: "De los datos contables a las decisiones empresariales.",
+            intro: "Elige una pregunta y explora cómo responde TIMÓN.",
             empresa: {
                 nombre: "Estudio Ficticio",
                 personas: 12,
@@ -156,12 +157,12 @@ window.PROYECTOS = [
                 }
             },
             preguntas: [
-                { id: "socios", corto: "Socios", pregunta: "¿Cuánto puedo pagar a mis socios?", funcion: "Cálculo y reparto de remuneraciones entre socios", antes: "La contabilidad muestra el beneficio, no cuánto corresponde a cada socio." },
-                { id: "departamentos", corto: "Departamentos", pregunta: "¿Qué departamento es más rentable?", funcion: "Rentabilidad por departamentos", antes: "La contabilidad agrupa el resultado de la empresa, no el de cada área." },
-                { id: "costes", corto: "Punto muerto", pregunta: "¿Cubrimos los costes del año?", funcion: "Punto muerto", antes: "La contabilidad cuenta lo facturado, no cuánto falta para cubrir la estructura." },
-                { id: "hora", corto: "Coste por hora", pregunta: "¿Cuánto nos cuesta realmente una hora de trabajo?", funcion: "Coste por hora", antes: "Las nóminas y los gastos están registrados, pero no convertidos en el coste de una hora." },
-                { id: "cliente", corto: "Escenarios", pregunta: "¿Qué ocurriría si perdiéramos un cliente?", funcion: "Gestión de decisiones y previsiones", antes: "La contabilidad mira hacia atrás. Esta pregunta mira hacia delante." },
-                { id: "tesoreria", corto: "Tesorería", pregunta: "¿Podemos repartir beneficios sin comprometer la tesorería?", funcion: "Tesorería y previsiones", antes: "Que haya beneficio no significa que haya liquidez para repartirlo." }
+                { id: "socios", corto: "Socios", etiqueta: "Repartible", pregunta: "¿Cuánto puedo pagar a mis socios?", funcion: "Cálculo y reparto de remuneraciones entre socios", antes: "La contabilidad muestra el beneficio, no cuánto corresponde a cada socio." },
+                { id: "departamentos", corto: "Rentabilidad", etiqueta: "Más rentable", pregunta: "¿Qué departamento es más rentable?", funcion: "Rentabilidad por departamentos", antes: "La contabilidad agrupa el resultado de la empresa, no el de cada área." },
+                { id: "costes", corto: "Punto muerto", etiqueta: "Costes cubiertos en", pregunta: "¿Cubrimos los costes del año?", funcion: "Punto muerto", antes: "La contabilidad cuenta lo facturado, no cuánto falta para cubrir la estructura." },
+                { id: "hora", corto: "Coste/hora", etiqueta: "Coste por hora", pregunta: "¿Cuánto nos cuesta realmente una hora de trabajo?", funcion: "Coste por hora", antes: "Las nóminas y los gastos están registrados, pero no convertidos en el coste de una hora." },
+                { id: "cliente", corto: "Escenarios", etiqueta: "Beneficio previsto", pregunta: "¿Qué ocurriría si perdiéramos un cliente?", funcion: "Gestión de decisiones y previsiones", antes: "La contabilidad mira hacia atrás. Esta pregunta mira hacia delante." },
+                { id: "tesoreria", corto: "Tesorería", etiqueta: "Reparto posible hoy", pregunta: "¿Podemos repartir beneficios sin comprometer la tesorería?", funcion: "Tesorería y previsiones", antes: "Que haya beneficio no significa que haya liquidez para repartirlo." }
             ],
             otras: "Además, TIMÓN permite hacer consultas en lenguaje natural sobre los datos de la empresa."
         }

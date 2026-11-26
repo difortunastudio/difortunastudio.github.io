@@ -491,6 +491,14 @@
         var centro = document.getElementById('centro');
         var anillo = centro.querySelector('.tm-anillo');
         var display = centro.querySelector('.tm-display');
+        var displayEt = centro.querySelector('.tm-display-et');
+        function mostrar(m) {
+            var q = c.preguntas.filter(function (x) { return x.id === actual; })[0];
+            var v = P.valorTimon(actual, m, estado.modoDep);
+            display.textContent = v.esfera;
+            displayEt.textContent = q.etiqueta.toUpperCase();
+            document.getElementById('q-' + actual).querySelector('.tm-valor').textContent = v.valor;
+        }
         var tabs = Array.prototype.slice.call(centro.querySelectorAll('[role="tab"]'));
         var paneles = Array.prototype.slice.call(centro.querySelectorAll('[role="tabpanel"]'));
         var nodos = Array.prototype.slice.call(centro.querySelectorAll('.tm-nodo'));
@@ -530,9 +538,9 @@
                     al.hidden = m.repartible <= m.maxReparto;
                     al.innerHTML = 'Hay beneficio, pero la tesorería solo permite repartir hoy ' + e0.format(m.maxReparto) + '. <button type="button" data-ir="tesoreria">Ver tesorería →</button>';
                     ponLectura('socios', m);
-                    return corto(m.repartible);
+                    return m;
                 }
-                r.addEventListener('input', function () { display.textContent = pintar(); usadaCentro(); });
+                r.addEventListener('input', function () { mostrar(pintar()); usadaCentro(); });
                 return pintar;
             },
 
@@ -553,11 +561,11 @@
                             '<span class="pista"><i class="margen" style="width:' + (d.pct / 0.5 * 100) + '%"></i></span><span class="v">' + Math.round(d.pct * 100) + ' %</span></div>';
                     }).join('') + '<p class="tm-leyenda"><i class="coste"></i> Costes directos <i class="margen"></i> Margen</p>';
                     ponLectura('departamentos', m);
-                    return (estado.modoDep === 'euros' ? m.mejorEuros : m.mejorPct).n;
+                    return m;
                 }
                 viz.addEventListener('click', function (ev) {
                     var b = ev.target.closest('[data-modo]');
-                    if (b) { estado.modoDep = b.getAttribute('data-modo'); display.textContent = pintar(); usadaCentro(); }
+                    if (b) { estado.modoDep = b.getAttribute('data-modo'); mostrar(pintar()); usadaCentro(); }
                 });
                 return pintar;
             },
@@ -584,9 +592,9 @@
                         '<text x="44" y="' + (yPM - 8) + '" class="nota">Punto muerto · ' + e0.format(m.puntoMuerto) + '</text>' +
                         (m.mesPM <= 12 ? '<circle cx="' + mesX + '" cy="' + yPM + '" r="7" class="cruce"/>' : '');
                     ponLectura('costes', m);
-                    return m.mesPM > 12 ? '—' : P.nombreMes(m.mesPM);
+                    return m;
                 }
-                r.addEventListener('input', function () { display.textContent = pintar(); usadaCentro(); });
+                r.addEventListener('input', function () { mostrar(pintar()); usadaCentro(); });
                 return pintar;
             },
 
@@ -601,9 +609,9 @@
                         '<div class="tm-barra"><span class="et">Coste por hora</span><span class="pista"><i class="coste" style="width:' + (m.costeHora / max * 100) + '%"></i></span><span class="v">' + e2.format(m.costeHora) + '</span></div>' +
                         '<div class="tm-barra mejor"><span class="et">Precio medio por hora</span><span class="pista"><i class="margen" style="width:' + (m.precioHora / max * 100) + '%"></i></span><span class="v">' + e2.format(m.precioHora) + '</span></div>';
                     ponLectura('hora', m);
-                    return e2.format(m.costeHora).replace(',00', '') + '/h';
+                    return m;
                 }
-                r.addEventListener('input', function () { display.textContent = pintar(); usadaCentro(); });
+                r.addEventListener('input', function () { mostrar(pintar()); usadaCentro(); });
                 return pintar;
             },
 
@@ -624,11 +632,11 @@
                         fila('Para ' + e.socios[0].n, e0.format(base.socios[0].importe), e0.format(m.socios[0].importe)) +
                         '</tbody></table>';
                     ponLectura('cliente', m);
-                    return corto(m.beneficio);
+                    return m;
                 }
                 viz.addEventListener('click', function (ev) {
                     var b = ev.target.closest('[data-cli]');
-                    if (b) { estado.cliente = b.getAttribute('data-cli') || null; display.textContent = pintar(); usadaCentro(); }
+                    if (b) { estado.cliente = b.getAttribute('data-cli') || null; mostrar(pintar()); usadaCentro(); }
                 });
                 return pintar;
             },
@@ -655,9 +663,9 @@
                     est.textContent = ok ? 'La tesorería aguanta: el saldo no baja de ' + e0.format(minimo) + '.' :
                         'Con este reparto, el saldo bajaría a ' + e0.format(minimo) + ': por debajo del colchón.';
                     ponLectura('tesoreria', m);
-                    return corto(m.maxReparto);
+                    return m;
                 }
-                r.addEventListener('input', function () { display.textContent = pintar(); usadaCentro(); });
+                r.addEventListener('input', function () { mostrar(pintar()); usadaCentro(); });
                 return pintar;
             }
         };
@@ -684,7 +692,7 @@
             paneles.forEach(function (pn) { pn.hidden = pn.id !== 'q-' + id; });
             nodos.forEach(function (n) { n.classList.toggle('activo', n.getAttribute('data-q') === id); });
             anillo.style.setProperty('--giro', (-(360 / nodos.length) * k) + 'deg');
-            display.textContent = pintores[id]();
+            mostrar(pintores[id]());
             medir('timon-pregunta-' + id, true);
         }
 

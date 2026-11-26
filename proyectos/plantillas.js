@@ -201,71 +201,122 @@
         return '';
     }
 
-    /* Esfera de navegación del centro de mando */
-    function esferaTimon(c) {
+    /* Cifra principal de cada pregunta: en grande en el panel y abreviada en la esfera */
+    function valorTimon(id, m, modoDep) {
+        var k = function (v) { return Math.round(v / 1000) + 'k €'; };
+        var mes = function (n) { var t = nombreMes(n); return n > 12 ? 'No se cubren' : t.charAt(0).toUpperCase() + t.slice(1); };
+        switch (id) {
+            case 'socios': return { valor: eur0.format(m.repartible), esfera: k(m.repartible) };
+            case 'departamentos': var d = modoDep === 'pct' ? m.mejorPct : m.mejorEuros; return { valor: d.n, esfera: d.n };
+            case 'costes': return { valor: mes(m.mesPM), esfera: mes(m.mesPM) };
+            case 'hora': return { valor: eur2.format(m.costeHora), esfera: eur2.format(m.costeHora) };
+            case 'cliente': return { valor: eur0.format(m.beneficio), esfera: k(m.beneficio) };
+            case 'tesoreria': return { valor: eur0.format(m.maxReparto), esfera: k(m.maxReparto) };
+        }
+        return { valor: '', esfera: '' };
+    }
+
+    /* Esfera de navegación: el anillo gira y trae la pregunta elegida hacia el panel */
+    function esferaTimon(c, primera) {
         var n = c.preguntas.length;
         return '<svg class="tm-svg" viewBox="0 0 600 600" aria-hidden="true">' +
             '<defs><radialGradient id="tmc-s" cx="42%" cy="38%" r="60%"><stop offset="0" stop-color="#cfe0ff"/><stop offset=".35" stop-color="#4f8cff"/><stop offset="1" stop-color="#0a1a4a"/></radialGradient>' +
-            '<radialGradient id="tmc-h" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#4f8cff" stop-opacity=".4"/><stop offset="1" stop-color="#4f8cff" stop-opacity="0"/></radialGradient></defs>' +
-            '<circle cx="300" cy="300" r="250" fill="url(#tmc-h)"/>' +
-            '<g class="tm-decor" fill="none" stroke="#4f8cff">' +
-                '<ellipse cx="300" cy="300" rx="270" ry="80" stroke-opacity=".16" transform="rotate(-18 300 300)"/>' +
-                '<ellipse cx="300" cy="300" rx="250" ry="66" stroke-opacity=".12" transform="rotate(30 300 300)"/></g>' +
-            '<circle cx="300" cy="300" r="215" fill="none" stroke="#4f8cff" stroke-opacity=".38"/>' +
-            '<line class="tm-haz" x1="392" y1="300" x2="500" y2="300"/>' +
+            '<radialGradient id="tmc-h" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#4f8cff" stop-opacity=".45"/><stop offset="1" stop-color="#4f8cff" stop-opacity="0"/></radialGradient></defs>' +
+            '<circle cx="300" cy="300" r="260" fill="url(#tmc-h)"/>' +
+            '<g class="tm-decor" fill="none" stroke="#6f9eff">' +
+                '<ellipse cx="300" cy="300" rx="265" ry="100" stroke-opacity=".45" transform="rotate(-28 300 300)"/>' +
+                '<ellipse cx="300" cy="300" rx="265" ry="100" stroke-opacity=".35" transform="rotate(32 300 300)"/>' +
+                '<ellipse cx="300" cy="300" rx="110" ry="262" stroke-opacity=".22"/></g>' +
+            '<circle cx="300" cy="300" r="215" fill="none" stroke="#4f8cff" stroke-opacity=".3" stroke-dasharray="2 6"/>' +
+            '<line class="tm-haz" x1="408" y1="300" x2="498" y2="300"/>' +
             '<g class="tm-anillo">' +
             c.preguntas.map(function (q, k) {
-                var a = (360 / n) * k;
-                return '<g class="tm-nodo" data-q="' + esc(q.id) + '" style="--a:' + a + 'deg">' +
-                    '<circle class="tm-nodo-halo" cx="300" cy="300" r="22"/>' +
-                    '<circle class="tm-nodo-punto" cx="300" cy="300" r="9"/>' +
-                    '<text x="300" y="336">' + esc(q.corto) + '</text></g>';
+                return '<g class="tm-nodo" data-q="' + esc(q.id) + '" style="--a:' + ((360 / n) * k) + 'deg">' +
+                    '<circle class="tm-nodo-halo" cx="300" cy="300" r="24"/>' +
+                    '<circle class="tm-nodo-punto" cx="300" cy="300" r="10"/>' +
+                    '<text x="300" y="338">' + esc(q.corto) + '</text></g>';
             }).join('') +
             '</g>' +
-            '<circle cx="300" cy="300" r="92" fill="url(#tmc-s)"/>' +
-            '<text class="tm-display-et" x="300" y="284">TIMÓN</text>' +
-            '<text class="tm-display" x="300" y="318"></text>' +
+            '<circle class="tm-nucleo" cx="300" cy="300" r="108" fill="url(#tmc-s)"/>' +
+            '<text class="tm-display-et" x="300" y="284">' + esc(primera.etiqueta) + '</text>' +
+            '<text class="tm-display" x="300" y="322">' + esc(primera.esfera) + '</text>' +
             '</svg>';
     }
 
     function centroTimon(p) {
         var c = p.centro, e = c.empresa, m = modeloTimon(e), base = m;
-        var resumen = e.nombre + ' · ' + e.personas + ' personas · ' + e.socios.length + ' socios · ' + e.departamentos.length + ' departamentos · facturación prevista ' + eur0.format(m.ingresos);
-        return '<section class="tm-centro" id="centro" aria-labelledby="centro-titulo">' +
-            '<div class="tm-cabecera">' +
-                '<span class="u-demo-aviso">Simulación · empresa ficticia · datos inventados y coherentes entre sí</span>' +
-                '<h2 class="tm-titulo" id="centro-titulo">Centro de mando financiero</h2>' +
-                '<p class="tm-intro">' + esc(c.intro) + '</p>' +
-                '<p class="tm-empresa">' + esc(resumen) + '</p>' +
-            '</div>' +
-            '<div class="tm-mando">' +
-                '<div class="tm-nav">' +
-                    '<div class="tm-esfera">' + esferaTimon(c) + '</div>' +
-                    '<ol class="tm-preguntas" role="tablist" aria-label="Preguntas empresariales">' +
-                    c.preguntas.map(function (q, k) {
-                        return '<li role="presentation"><a href="#q-' + esc(q.id) + '" role="tab" id="tab-' + esc(q.id) + '" aria-controls="q-' + esc(q.id) + '" data-q="' + esc(q.id) + '">' +
-                            '<span class="n">' + String(k + 1).padStart(2, '0') + '</span>' + esc(q.pregunta) + '</a></li>';
-                    }).join('') +
-                    '</ol>' +
+        var q0 = c.preguntas[0], v0 = valorTimon(q0.id, m);
+        var resumen = e.nombre + ': ' + e.personas + ' personas, ' + e.socios.length + ' socios, ' + e.departamentos.length + ' departamentos y ' + eur0.format(m.ingresos) + ' de facturación prevista';
+        return '<section class="tm-escena" id="centro" aria-labelledby="tm-nombre">' +
+            '<div class="tm-fondo" aria-hidden="true"></div>' +
+            '<header class="tm-cabecera">' +
+                '<div>' +
+                    '<span class="u-rol entra" style="--d:.1s" lang="en">' + esc(p.rolEtiqueta) + '</span>' +
+                    '<h1 class="tm-nombre entra" id="tm-nombre" style="--d:.18s">' + esc(p.nombre) + '</h1>' +
+                    '<p class="tm-claim entra" style="--d:.26s">' + esc(p.claim) + '</p>' +
                 '</div>' +
+                '<p class="tm-lema entra" style="--d:.34s">' + esc(c.lema) + ' <span>' + esc(c.intro) + '</span></p>' +
+            '</header>' +
+            '<div class="tm-mando entra" style="--d:.42s">' +
+                '<div class="tm-esfera">' + esferaTimon(c, { etiqueta: q0.etiqueta, esfera: v0.esfera }) + '</div>' +
                 '<div class="tm-paneles">' +
-                c.preguntas.map(function (q) {
+                c.preguntas.map(function (q, k) {
+                    var v = valorTimon(q.id, m);
                     return '<article class="tm-panel" id="q-' + esc(q.id) + '" role="tabpanel" aria-labelledby="tab-' + esc(q.id) + '">' +
-                        '<p class="tm-funcion">Funcionalidad · ' + esc(q.funcion) + '</p>' +
-                        '<h3 class="tm-pregunta">' + esc(q.pregunta) + '</h3>' +
+                        '<div class="tm-panel-cab">' +
+                            '<p class="tm-num">' + String(k + 1).padStart(2, '0') + ' / ' + esc(q.corto) + '</p>' +
+                            '<p class="tm-funcion">Funcionalidad · ' + esc(q.funcion) + '</p>' +
+                        '</div>' +
+                        '<div class="tm-panel-top">' +
+                            '<h2 class="tm-pregunta">' + esc(q.pregunta) + '</h2>' +
+                            '<div class="tm-cifra"><span>' + esc(q.etiqueta) + '</span><strong class="tm-valor">' + esc(v.valor) + '</strong></div>' +
+                        '</div>' +
                         '<div class="tm-viz" data-viz="' + esc(q.id) + '"></div>' +
-                        '<p class="tm-lectura" aria-live="polite">' + esc(lecturaTimon(q.id, e, m, base)) + '</p>' +
                         '<dl class="tm-cifras">' + cifrasTimon(q.id, m) + '</dl>' +
-                        '<div class="tm-antes"><p><span>Antes</span>' + esc(q.antes) + '</p><p><span>Con ' + esc(p.nombre) + '</span>' + esc(q.funcion) + '.</p></div>' +
+                        '<div class="tm-panel-pie">' +
+                            '<p class="tm-lectura" aria-live="polite">' + esc(lecturaTimon(q.id, e, m, base)) + '</p>' +
+                            '<div class="tm-antes"><p><span>Antes</span>' + esc(q.antes) + '</p><p><span>Con ' + esc(p.nombre) + '</span>' + esc(q.funcion) + '.</p></div>' +
+                        '</div>' +
                     '</article>';
                 }).join('') +
                 '</div>' +
+            '<div class="tm-pestanas">' +
+                '<ol role="tablist" aria-label="Preguntas empresariales">' +
+                c.preguntas.map(function (q, k) {
+                    return '<li role="presentation"><a href="#q-' + esc(q.id) + '" role="tab" id="tab-' + esc(q.id) + '" aria-controls="q-' + esc(q.id) + '" data-q="' + esc(q.id) + '">' +
+                        '<span class="n">' + String(k + 1).padStart(2, '0') + '</span>' + esc(q.corto) + '</a></li>';
+                }).join('') +
+                '</ol>' +
+                '<p class="tm-aviso">Simulación con datos ficticios · ' + esc(resumen) + '</p>' +
             '</div>' +
-            '<div class="tm-pie">' +
-                (p.caso ? '<p class="u-caso-cierre">' + esc(p.caso.cierre) + '</p>' : '') +
-                (c.otras ? '<p class="tm-otras">' + esc(c.otras) + '</p>' : '') +
             '</div>' +
         '</section>';
+    }
+
+    /* Después de la escena: prueba real y contexto. Nada más. */
+    function despuesTimon(p, raiz) {
+        var c = p.centro, capturas = [];
+        (p.funcionalidades || []).forEach(function (f) {
+            var cap = f.captura && p.capturas && p.capturas[f.captura];
+            if (cap) capturas.push({ cap: cap, titulo: f.titulo });
+        });
+        return (capturas.length ?
+            '<section class="tm-prueba" aria-labelledby="tm-prueba-t">' +
+                '<h2 class="tm-sub aparece" id="tm-prueba-t">' + esc(p.nombre) + ' en uso</h2>' +
+                '<div class="tm-capturas">' + capturas.map(function (x) {
+                    return '<figure class="aparece"><img src="' + raiz + esc(x.cap.src) + '" alt="' + esc(x.cap.alt || x.titulo) + '" loading="lazy" /><figcaption>' + esc(x.titulo) + '</figcaption></figure>';
+                }).join('') + '</div>' +
+                '<p class="tm-nota aparece">Capturas reales con los datos de la empresa anonimizados.</p>' +
+            '</section>' : '') +
+            '<section class="tm-contexto" aria-labelledby="tm-contexto-t">' +
+                '<h2 class="tm-sub aparece" id="tm-contexto-t">Dónde nació</h2>' +
+                '<div class="tm-contexto-texto aparece">' +
+                    '<p>' + esc(p.origen) + '</p>' +
+                    '<p>' + esc(p.problema) + '</p>' +
+                    (p.caso ? '<p class="tm-destacado">' + esc(p.caso.cierre) + '</p>' : '') +
+                    (c.otras ? '<p class="tm-otras">' + esc(c.otras) + '</p>' : '') +
+                '</div>' +
+            '</section>';
     }
 
     /* Contenido completo de un universo (todo lo que va dentro de <main>) */
@@ -284,7 +335,7 @@
 
         var html = '';
 
-        html += '<section class="u-hero" id="inicio">' +
+        if (!p.centro) html += '<section class="u-hero" id="inicio">' +
             '<div class="u-escena" aria-hidden="true">' + (escenas[p.id] || '') + '</div>' +
             '<div class="u-hero-inner">' +
                 '<span class="u-rol entra" style="--d:.1s"' + (/^[A-Z][a-z]+ [A-Z]/.test(p.rolEtiqueta) ? ' lang="en"' : '') + '>' + esc(p.rolEtiqueta) + '</span>' +
@@ -298,7 +349,7 @@
             '<a href="' + (p.centro ? '#centro' : '#problema') + '" class="u-bajar" aria-label="Empezar">↓</a>' +
         '</section>';
 
-        if (p.centro) html += centroTimon(p);
+        if (p.centro) html += centroTimon(p) + despuesTimon(p, raiz);
         else {
         html += '<section class="u-bloque" id="problema">' + cab('El problema') +
             '<h2 class="u-titulo aparece">Todo empezó con una necesidad real.</h2>' +
@@ -479,7 +530,7 @@
         };
     }
 
-    var api = { esc: esc, escenas: escenas, universo: universo, portada: portada, modeloTimon: modeloTimon, lecturaTimon: lecturaTimon, nombreMes: nombreMes };
+    var api = { esc: esc, escenas: escenas, universo: universo, portada: portada, modeloTimon: modeloTimon, lecturaTimon: lecturaTimon, valorTimon: valorTimon, nombreMes: nombreMes };
     raizGlobal.DFS_PLANTILLAS = api;
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
