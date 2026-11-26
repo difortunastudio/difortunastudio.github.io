@@ -5,6 +5,9 @@
    (tarjetas y caso de estudio) y las páginas de cada universo
    (proyectos/*.html) leen esta lista.
 
+   ⚠️ Después de editar este archivo, ejecuta:  node generar.mjs
+      (escribe el contenido en el HTML de la portada y de los universos).
+
    ⚠️ Capturas: solo imágenes ANONIMIZADAS en img/proyectos/<id>/.
       Las originales con datos reales van en _privado/ (ignorada por git).
    ===================================================================== */
@@ -35,7 +38,7 @@ window.PROYECTOS = [
         diseno: [
             { titulo: "Hablar en lugar de rellenar", texto: "Registrar un movimiento debería ser tan sencillo como decirlo. El lenguaje natural reduce la fricción que hace que la gente abandone el control de su economía." },
             { titulo: "Todo en un mismo espacio", texto: "El día a día, el patrimonio, las previsiones y los objetivos dejan de vivir en lugares distintos y pasan a formar parte de una misma visión." },
-            { titulo: "Una economía que se comparte", texto: "Las decisiones económicas de una familia rara vez son individuales. Fliia está pensada para espacios económicos compartidos." }
+            { titulo: "Compartir sin mezclarlo todo", texto: "Con los Kipus, cada persona puede compartir una economía común con otras —el hogar, un viaje, los cuidados de unos padres— respetando la privacidad de su economía personal." }
         ],
         funcionalidades: [
             { titulo: "Dashboard orbital", texto: "Una vista central de la situación económica de la familia.", captura: "dashboard" },
@@ -43,8 +46,19 @@ window.PROYECTOS = [
             { titulo: "Día a día", texto: "Los ingresos y gastos cotidianos, organizados sin esfuerzo.", captura: "dia-a-dia" },
             { titulo: "Sueños", texto: "Los objetivos de la familia, conectados con su economía real.", captura: "suenos" },
             { titulo: "Patrimonio", texto: "Una visión del patrimonio familiar.", captura: "patrimonio" },
-            { titulo: "Kipus", texto: "", captura: "kipus" },   /* PENDIENTE: descripción de Kipus */
-            { titulo: "Decisiones económicas", texto: "Apoyo para pensar las decisiones económicas antes de tomarlas.", captura: "decisiones" }
+            { titulo: "Decisiones económicas", texto: "Apoyo para pensar las decisiones económicas antes de tomarlas.", captura: "decisiones" },
+            {
+                titulo: "KIPU",
+                texto: "Espacios económicos compartidos e independientes. Una economía común con otras personas, sin compartir toda tu información financiera privada. Puedes formar parte de varios Kipus sin mezclar tu vida financiera.",
+                ejemplos: [
+                    "Una pareja que comparte los gastos del hogar.",
+                    "Hermanos que gestionan los gastos y cuidados de sus padres.",
+                    "Un grupo de amigos que organiza un viaje.",
+                    "Una familia con una segunda residencia.",
+                    "Personas que comparten piso."
+                ],
+                captura: "kipus"
+            }
         ],
         valor: [
             "Menos fricción para registrar lo que ocurre cada día.",
