@@ -356,7 +356,7 @@ window.PROYECTOS = [
             tarjetas: [
                 { id: "marta", n: "Marta Ejemplo", cargo: "Refit Project Manager", empresa: "Astillero Demo", ciudad: "Palma" },
                 { id: "jordi", n: "Jordi Muestra", cargo: "Capitán", barco: "M/Y Demo One", ciudad: "Barcelona" },
-                { id: "ana", n: "Ana Prueba", cargo: "Yacht broker", empresa: "Broker Demo", ciudad: "Mónaco" },
+                { id: "ana", n: "Ana Prueba", cargo: "Yacht broker", empresa: "Broker Demo", ciudad: "Mónaco", presentadoPor: "Jordi Muestra" },
                 { id: "luca", n: "Luca Ficticio", cargo: "Ingeniero naval", empresa: "Astillero Demo", ciudad: "Génova" }
             ],
             busqueda: { texto: "Busco un astillero para un refit en Palma", destino: "Astillero Demo" }

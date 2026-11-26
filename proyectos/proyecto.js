@@ -826,45 +826,62 @@
        NÁUTICO · una red que crece con cada tarjeta
        ============================================================= */
     function expNautico(P, e) {
+        /* Como en Binako: un mapa GEOGRÁFICO. Cada contacto en su ciudad y líneas
+           por lo que comparten: empresa, evento, barco o quién os presentó. */
         var escena = document.getElementById('escena');
         var mapa = escena.querySelector('[data-mapa]');
-        var pos = {
-            yo: [600, 300], evento: [600, 100],
-            marta: [800, 200], jordi: [390, 200], ana: [400, 385], luca: [1000, 310],
-            'Astillero Demo': [1010, 165], 'M/Y Demo One': [200, 280], 'Broker Demo': [200, 380]
-        };
-        var nodos = { yo: { t: 'yo', n: 'Tú' }, evento: { t: 'evento', n: e.evento } };
-        var enlaces = [['yo', 'evento']];
-        var ruta = [], resaltados = {};
+        var ciudades = { Barcelona: [480, 236], Palma: [575, 392], 'Mónaco': [842, 168], 'Génova': [1040, 150] };
+        var desplaza = { jordi: [44, 50] };      /* separar a quien comparte ciudad contigo */
+        function posicion(t) { var c = ciudades[t.ciudad], d = desplaza[t.id] || [0, 0]; return [c[0] + d[0], c[1] + d[1]]; }
+        var yo = ciudades.Barcelona;
+        var dentro = [];                       /* tarjetas digitalizadas */
+        var resaltados = {};
 
-        function forma(id, n) {
-            var x = pos[id][0], y = pos[id][1], cls = 'nt-n nt-' + n.t + (n.nuevo ? ' nuevo' : '') + (ruta.indexOf(id) > -1 ? ' ruta' : '');
-            var f = n.t === 'empresa' ? '<rect x="' + (x - 13) + '" y="' + (y - 13) + '" width="26" height="26" rx="5"/>' :
-                n.t === 'barco' ? '<path d="M' + x + ' ' + (y - 15) + 'L' + (x + 15) + ' ' + (y + 12) + 'H' + (x - 15) + 'Z"/>' :
-                n.t === 'evento' ? '<path d="M' + x + ' ' + (y - 16) + 'L' + (x + 16) + ' ' + y + 'L' + x + ' ' + (y + 16) + 'L' + (x - 16) + ' ' + y + 'Z"/>' :
-                '<circle cx="' + x + '" cy="' + y + '" r="' + (n.t === 'yo' ? 16 : 11) + '"/>';
-            return '<g class="' + cls + '">' + f + '<text x="' + x + '" y="' + (y + (n.t === 'yo' ? 36 : 32)) + '">' + esc(n.n) + '</text>' +
-                (n.sub ? '<text class="sub" x="' + x + '" y="' + (y + 48) + '">' + esc(n.sub) + '</text>' : '') + '</g>';
+        function relaciones() {
+            var r = [];
+            dentro.forEach(function (a, x) {
+                r.push({ a: 'yo', b: a.id, tipo: 'contacto' });
+                dentro.forEach(function (b, y) {
+                    if (y <= x) return;
+                    if (a.empresa && a.empresa === b.empresa) r.push({ a: a.id, b: b.id, tipo: 'empresa', et: a.empresa });
+                    else if (a.barco && a.barco === b.barco) r.push({ a: a.id, b: b.id, tipo: 'barco', et: a.barco });
+                    else r.push({ a: a.id, b: b.id, tipo: 'evento', et: e.evento });
+                    if (a.presentadoPor === b.n || b.presentadoPor === a.n) r.push({ a: a.id, b: b.id, tipo: 'presentacion', et: 'Te presentó' });
+                });
+            });
+            return r;
         }
-        function dibujar() {
-            var enRuta = function (a, b) { return !!(resaltados[a + '|' + b] || resaltados[b + '|' + a]); };
+        function pos(id) { if (id === 'yo') return yo; return posicion(dentro.filter(function (t) { return t.id === id; })[0]); }
+        function curva(a, b, n) {
+            var mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, dx = b[0] - a[0], dy = b[1] - a[1], f = 0.18 + 0.08 * (n || 0);
+            return 'M' + a[0] + ' ' + a[1] + 'Q' + (mx - dy * f) + ' ' + (my + dx * f) + ' ' + b[0] + ' ' + b[1];
+        }
+        function dibujar(nuevo) {
             var estrecho = window.matchMedia('(max-width: 900px)').matches;
-            mapa.innerHTML = '<svg viewBox="' + (estrecho ? '70 45 1060 420' : '0 0 1200 700') + '" preserveAspectRatio="xMidYMid meet">' +
-                '<g class="nt-olas"><path d="M0 640C200 600 380 680 600 640S980 590 1200 650"/><path d="M0 675C220 635 400 715 620 675S1000 625 1200 685"/></g>' +
-                enlaces.map(function (l) {
-                    var a = pos[l[0]], b = pos[l[1]];
-                    return '<line class="nt-l' + (l[2] ? ' nuevo' : '') + (enRuta(l[0], l[1]) ? ' ruta' : '') + '" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>';
+            var rel = relaciones(), vistos = {};
+            mapa.innerHTML = '<svg viewBox="' + (estrecho ? '300 60 840 400' : '0 0 1200 700') + '" preserveAspectRatio="xMidYMid meet">' +
+                /* costa del Mediterráneo occidental, solo como referencia */
+                '<g class="nt-costa"><path d="M300 330C360 300 410 250 455 222S560 175 620 158S730 128 790 140S880 150 940 132S1020 128 1090 160"/>' +
+                '<ellipse cx="575" cy="392" rx="46" ry="22"/></g>' +
+                Object.keys(ciudades).map(function (c) { var p = ciudades[c]; return '<text class="nt-ciudad" x="' + (p[0] - 12) + '" y="' + (p[1] - 20) + '" text-anchor="end">' + esc(c) + '</text>'; }).join('') +
+                rel.map(function (r) {
+                    var clave = r.a + '|' + r.b, n = vistos[clave] = (vistos[clave] || 0) + 1;
+                    var on = resaltados[r.a + '|' + r.b] || resaltados[r.b + '|' + r.a];
+                    return '<path class="nt-l nt-' + r.tipo + (nuevo && (r.a === nuevo || r.b === nuevo) ? ' nuevo' : '') + (on ? ' ruta' : '') + '" d="' + curva(pos(r.a), pos(r.b), n - 1) + '"/>';
                 }).join('') +
-                Object.keys(nodos).map(function (k) { return forma(k, nodos[k]); }).join('') + '</svg>';
-            Object.keys(nodos).forEach(function (k) { nodos[k].nuevo = false; });
-            enlaces.forEach(function (l) { l[2] = false; });
-            var personas = Object.keys(nodos).filter(function (k) { return nodos[k].t === 'persona'; }).length;
-            var entidades = Object.keys(nodos).filter(function (k) { return nodos[k].t === 'empresa' || nodos[k].t === 'barco'; }).length;
-            escena.querySelector('[data-c="contactos"]').textContent = personas;
-            escena.querySelector('[data-c="entidades"]').textContent = entidades;
-            escena.querySelector('[data-c="conexiones"]').textContent = enlaces.length - 1;
+                '<g class="nt-n nt-yo"><circle cx="' + yo[0] + '" cy="' + yo[1] + '" r="13"/><text x="' + (yo[0] - 22) + '" y="' + (yo[1] + 5) + '" text-anchor="end">Tú</text></g>' +
+                dentro.map(function (t) {
+                    var q = posicion(t);
+                    return '<g class="nt-n nt-persona' + (t.id === nuevo ? ' nuevo' : '') + (resaltados[t.id] ? ' ruta' : '') + '"><circle cx="' + q[0] + '" cy="' + q[1] + '" r="10"/>' +
+                        '<text x="' + q[0] + '" y="' + (q[1] + 30) + '">' + esc(t.n) + '</text><text class="sub" x="' + q[0] + '" y="' + (q[1] + 44) + '">' + esc(t.cargo) + '</text></g>';
+                }).join('') + '</svg>' +
+                '<p class="nt-leyenda"><span class="l-empresa">Misma empresa</span><span class="l-evento">Mismo evento</span><span class="l-presentacion">Os presentó</span></p>';
+            var entidades = {};
+            dentro.forEach(function (t) { entidades[t.empresa || t.barco] = 1; });
+            escena.querySelector('[data-c="contactos"]').textContent = dentro.length;
+            escena.querySelector('[data-c="entidades"]').textContent = Object.keys(entidades).length;
+            escena.querySelector('[data-c="conexiones"]').textContent = rel.filter(function (r) { return r.tipo !== 'contacto'; }).length;
         }
-        function enlazar(a, b) { enlaces.push([a, b, true]); }
 
         escena.querySelectorAll('[data-tarjeta]').forEach(function (b) {
             b.addEventListener('click', function () {
@@ -873,30 +890,30 @@
                 b.disabled = true; b.classList.add('escaneando');
                 setTimeout(function () {
                     b.classList.remove('escaneando'); b.classList.add('digitalizada');
-                    nodos[t.id] = { t: 'persona', n: t.n, sub: t.cargo, nuevo: true };
-                    enlazar('yo', t.id); enlazar(t.id, 'evento');
-                    var ent = t.empresa || t.barco;
-                    if (!nodos[ent]) nodos[ent] = { t: t.empresa ? 'empresa' : 'barco', n: ent, nuevo: true };
-                    enlazar(t.id, ent);
-                    ruta = []; resaltados = {};
-                    dibujar();
+                    dentro.push(t);
+                    resaltados = {};
+                    dibujar(t.id);
+                    var res = escena.querySelector('[data-resultado]');
+                    res.textContent = 'Contacto creado: ' + t.n + ' · ' + t.cargo + ' · ' + (t.empresa || t.barco) + ' · ' + t.ciudad + '. Os conocisteis en el ' + e.evento + '.' +
+                        (t.presentadoPor ? ' Os presentó ' + t.presentadoPor + '.' : '');
                     escena.querySelector('[data-buscar]').disabled = false;
                     medir('demo-nautico', true);
                 }, sinMovimiento ? 0 : 900);
             });
         });
         escena.querySelector('[data-buscar]').addEventListener('click', function () {
-            var destino = e.busqueda.destino;
-            var res = escena.querySelector('[data-resultado]');
-            var quienes = e.tarjetas.filter(function (t) { return nodos[t.id] && t.empresa === destino; });
+            var destino = e.busqueda.destino, res = escena.querySelector('[data-resultado]');
+            var quienes = dentro.filter(function (t) { return t.empresa === destino; });
+            resaltados = {};
             if (!quienes.length) {
-                ruta = []; resaltados = {};
                 res.textContent = 'Todavía no hay nadie de ' + destino + ' en tu red. Digitaliza más tarjetas de la feria.';
             } else {
-                ruta = ['yo', destino]; resaltados = {};
-                quienes.forEach(function (t) { ruta.push(t.id); resaltados['yo|' + t.id] = 1; resaltados[t.id + '|' + destino] = 1; });
-                res.textContent = quienes.map(function (t) { return t.n + ' (' + t.cargo + ', ' + t.ciudad + ')'; }).join(' y ') +
-                    (quienes.length > 1 ? ' trabajan' : ' trabaja') + ' en ' + destino + '. ' + (quienes.length > 1 ? 'Los conociste' : 'La conociste') + ' en el ' + e.evento + ': ya tienes por dónde empezar.';
+                quienes.forEach(function (t) { resaltados[t.id] = 1; resaltados['yo|' + t.id] = 1; });
+                if (quienes.length > 1) resaltados[quienes[0].id + '|' + quienes[1].id] = 1;
+                var q0 = quienes[0];
+                res.textContent = 'Directo: ' + q0.n + ', ' + q0.cargo + ' en ' + destino + ' (' + q0.ciudad + ').' +
+                    (quienes[1] ? ' También conoces a ' + quienes[1].n + ', de la misma empresa.' : '') +
+                    ' Binako lo responde leyendo tus contactos y tus notas con IA.';
             }
             dibujar();
             medir('nautico-oportunidad', true);
