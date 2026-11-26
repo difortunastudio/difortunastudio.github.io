@@ -477,5 +477,235 @@
         });
     };
 
-    if (demos[p.demo]) demos[p.demo]();
+    if (caja && demos[p.demo]) demos[p.demo]();
+
+    /* =============================================================
+       TIMÓN · CENTRO DE MANDO
+       La esfera gira para traer la pregunta elegida hacia el panel.
+       Todas las vistas comparten la misma empresa ficticia.
+       ============================================================= */
+    if (p.centro && window.DFS_PLANTILLAS) iniciarCentro();
+
+    function iniciarCentro() {
+        var P = window.DFS_PLANTILLAS, c = p.centro, e = c.empresa;
+        var centro = document.getElementById('centro');
+        var anillo = centro.querySelector('.tm-anillo');
+        var display = centro.querySelector('.tm-display');
+        var tabs = Array.prototype.slice.call(centro.querySelectorAll('[role="tab"]'));
+        var paneles = Array.prototype.slice.call(centro.querySelectorAll('[role="tabpanel"]'));
+        var nodos = Array.prototype.slice.call(centro.querySelectorAll('.tm-nodo'));
+        var e0 = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+        var e2 = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        var corto = function (v) { return Math.abs(v) >= 1000 ? (Math.round(v / 1000) + ' k€') : e0.format(v); };
+        var base = P.modeloTimon(e);
+        var estado = { reservas: e.reservas, modoDep: 'euros', estructura: e.estructura, horas: e.horasPersona, cliente: null, reparto: Math.round(base.repartible / 10000) * 10000 };
+        var actual = null;
+
+        centro.classList.add('interactivo');
+
+        function lectura(id, m) { return P.lecturaTimon(id, e, m, base); }
+        function panel(id) { return document.getElementById('q-' + id); }
+        function ponLectura(id, m) { panel(id).querySelector('.tm-lectura').textContent = lectura(id, m); }
+        function rango(id, etiqueta, min, max, paso, valor, formato) {
+            return '<div class="demo-control tm-control"><label for="' + id + '"><span>' + etiqueta + '</span><strong id="' + id + '-v">' + formato(valor) + '</strong></label>' +
+                '<input type="range" id="' + id + '" min="' + min + '" max="' + max + '" step="' + paso + '" value="' + valor + '" /></div>';
+        }
+
+        /* ---------- Las seis vistas ---------- */
+        var vistas = {
+            socios: function (viz) {
+                viz.innerHTML = rango('tv-res', 'Destinar a reservas', 0, 40, 5, estado.reservas, function (v) { return v + ' %'; }) +
+                    '<div class="tm-orbes" id="tv-orbes"></div><div class="tm-alerta" id="tv-alerta" hidden></div>';
+                var r = viz.querySelector('#tv-res');
+                function pintar() {
+                    estado.reservas = +r.value;
+                    viz.querySelector('#tv-res-v').textContent = r.value + ' %';
+                    var m = P.modeloTimon(e, { reservas: estado.reservas });
+                    var max = P.modeloTimon(e, { reservas: 0 }).socios[0].importe;
+                    viz.querySelector('#tv-orbes').innerHTML = m.socios.map(function (s) {
+                        var t = 56 + 74 * Math.sqrt(s.importe / max);
+                        return '<div class="tm-orbe"><span style="width:' + t + 'px;height:' + t + 'px"><b>' + s.pct + '%</b></span><strong>' + e0.format(s.importe) + '</strong><em>' + s.n + '</em></div>';
+                    }).join('') + '<div class="tm-orbe res"><span style="width:56px;height:56px"><b>Res.</b></span><strong>' + e0.format(m.beneficio - m.repartible) + '</strong><em>Reservas</em></div>';
+                    var al = viz.querySelector('#tv-alerta');
+                    al.hidden = m.repartible <= m.maxReparto;
+                    al.innerHTML = 'Hay beneficio, pero la tesorería solo permite repartir hoy ' + e0.format(m.maxReparto) + '. <button type="button" data-ir="tesoreria">Ver tesorería →</button>';
+                    ponLectura('socios', m);
+                    return corto(m.repartible);
+                }
+                r.addEventListener('input', function () { display.textContent = pintar(); usadaCentro(); });
+                return pintar;
+            },
+
+            departamentos: function (viz) {
+                viz.innerHTML = '<div class="tm-conmuta" role="group" aria-label="Unidad"><button type="button" data-modo="euros">En euros</button><button type="button" data-modo="pct">En % de sus ingresos</button></div><div id="tv-deps"></div>';
+                function pintar() {
+                    var m = base;
+                    viz.querySelectorAll('[data-modo]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-modo') === estado.modoDep ? 'true' : 'false'); });
+                    var maxIng = Math.max.apply(null, m.deps.map(function (d) { return d.ingresos; }));
+                    viz.querySelector('#tv-deps').innerHTML = m.deps.map(function (d) {
+                        var mejor = (estado.modoDep === 'euros' ? m.mejorEuros : m.mejorPct).n === d.n;
+                        if (estado.modoDep === 'euros') {
+                            return '<div class="tm-barra' + (mejor ? ' mejor' : '') + '"><span class="et">' + d.n + '</span>' +
+                                '<span class="pista"><i class="coste" style="width:' + (d.costes / maxIng * 100) + '%"></i><i class="margen" style="width:' + (d.margen / maxIng * 100) + '%"></i></span>' +
+                                '<span class="v">' + e0.format(d.margen) + '</span></div>';
+                        }
+                        return '<div class="tm-barra' + (mejor ? ' mejor' : '') + '"><span class="et">' + d.n + '</span>' +
+                            '<span class="pista"><i class="margen" style="width:' + (d.pct / 0.5 * 100) + '%"></i></span><span class="v">' + Math.round(d.pct * 100) + ' %</span></div>';
+                    }).join('') + '<p class="tm-leyenda"><i class="coste"></i> Costes directos <i class="margen"></i> Margen</p>';
+                    ponLectura('departamentos', m);
+                    return (estado.modoDep === 'euros' ? m.mejorEuros : m.mejorPct).n;
+                }
+                viz.addEventListener('click', function (ev) {
+                    var b = ev.target.closest('[data-modo]');
+                    if (b) { estado.modoDep = b.getAttribute('data-modo'); display.textContent = pintar(); usadaCentro(); }
+                });
+                return pintar;
+            },
+
+            costes: function (viz) {
+                viz.innerHTML = rango('tv-est', 'Costes de estructura anuales', 180000, 320000, 10000, estado.estructura, e0.format) +
+                    '<svg class="tm-grafico" viewBox="0 0 520 220" id="tv-pm" role="img" aria-label="Facturación acumulada frente al punto muerto"></svg>';
+                var r = viz.querySelector('#tv-est');
+                function pintar() {
+                    estado.estructura = +r.value;
+                    viz.querySelector('#tv-est-v').textContent = e0.format(estado.estructura);
+                    var m = P.modeloTimon(e, { estructura: estado.estructura });
+                    var X = function (i) { return 40 + i * 38; }, Y = function (v) { return 190 - v / m.ingresos * 170; };
+                    var pts = [];
+                    for (var i = 0; i <= 12; i++) pts.push(X(i) + ',' + Y(m.ingresos / 12 * i));
+                    var yPM = Y(Math.min(m.puntoMuerto, m.ingresos));
+                    var mesX = X(Math.min(12, m.puntoMuerto / (m.ingresos / 12)));
+                    var letras = 'EFMAMJJASOND';
+                    viz.querySelector('#tv-pm').innerHTML =
+                        '<line x1="40" y1="190" x2="496" y2="190" class="eje"/>' +
+                        letras.split('').map(function (l, k) { return '<text x="' + X(k + 1) + '" y="208" class="mes' + (k + 1 === m.mesPM ? ' activo' : '') + '">' + l + '</text>'; }).join('') +
+                        '<polyline points="' + pts.join(' ') + '" class="linea"/>' +
+                        '<line x1="40" x2="496" y1="' + yPM + '" y2="' + yPM + '" class="umbral"/>' +
+                        '<text x="44" y="' + (yPM - 8) + '" class="nota">Punto muerto · ' + e0.format(m.puntoMuerto) + '</text>' +
+                        (m.mesPM <= 12 ? '<circle cx="' + mesX + '" cy="' + yPM + '" r="7" class="cruce"/>' : '');
+                    ponLectura('costes', m);
+                    return m.mesPM > 12 ? '—' : P.nombreMes(m.mesPM);
+                }
+                r.addEventListener('input', function () { display.textContent = pintar(); usadaCentro(); });
+                return pintar;
+            },
+
+            hora: function (viz) {
+                viz.innerHTML = rango('tv-h', 'Horas productivas por persona al año', 1200, 1700, 50, estado.horas, function (v) { return new Intl.NumberFormat('es-ES').format(v) + ' h'; }) + '<div id="tv-hora"></div>';
+                var r = viz.querySelector('#tv-h');
+                function pintar() {
+                    estado.horas = +r.value;
+                    viz.querySelector('#tv-h-v').textContent = new Intl.NumberFormat('es-ES').format(estado.horas) + ' h';
+                    var m = P.modeloTimon(e, { horas: estado.horas }), max = 100;
+                    viz.querySelector('#tv-hora').innerHTML =
+                        '<div class="tm-barra"><span class="et">Coste por hora</span><span class="pista"><i class="coste" style="width:' + (m.costeHora / max * 100) + '%"></i></span><span class="v">' + e2.format(m.costeHora) + '</span></div>' +
+                        '<div class="tm-barra mejor"><span class="et">Precio medio por hora</span><span class="pista"><i class="margen" style="width:' + (m.precioHora / max * 100) + '%"></i></span><span class="v">' + e2.format(m.precioHora) + '</span></div>';
+                    ponLectura('hora', m);
+                    return e2.format(m.costeHora).replace(',00', '') + '/h';
+                }
+                r.addEventListener('input', function () { display.textContent = pintar(); usadaCentro(); });
+                return pintar;
+            },
+
+            cliente: function (viz) {
+                viz.innerHTML = '<div class="tm-conmuta" role="group" aria-label="Cliente que se pierde"><button type="button" data-cli="">Ninguno</button>' +
+                    e.clientes.map(function (cl) { return '<button type="button" data-cli="' + esc(cl.n) + '">' + esc(cl.n) + ' · ' + e0.format(cl.ingresos) + '</button>'; }).join('') +
+                    '</div><div id="tv-cli"></div>';
+                function pintar() {
+                    viz.querySelectorAll('[data-cli]').forEach(function (b) { b.setAttribute('aria-pressed', (b.getAttribute('data-cli') || null) === estado.cliente ? 'true' : 'false'); });
+                    var m = P.modeloTimon(e, { clienteFuera: estado.cliente });
+                    var fila = function (et, a, b) {
+                        return '<tr><th scope="row">' + et + '</th><td>' + a + '</td><td' + (a !== b ? ' class="cambia"' : '') + '>' + b + '</td></tr>';
+                    };
+                    viz.querySelector('#tv-cli').innerHTML = '<table class="tm-tabla"><thead><tr><th></th><th>Hoy</th><th>' + (estado.cliente ? 'Sin ' + esc(estado.cliente) : 'Escenario') + '</th></tr></thead><tbody>' +
+                        fila('Ingresos', e0.format(base.ingresos), e0.format(m.ingresos)) +
+                        fila('Beneficio', e0.format(base.beneficio), e0.format(m.beneficio)) +
+                        fila('Costes cubiertos en', P.nombreMes(base.mesPM), P.nombreMes(m.mesPM)) +
+                        fila('Para ' + e.socios[0].n, e0.format(base.socios[0].importe), e0.format(m.socios[0].importe)) +
+                        '</tbody></table>';
+                    ponLectura('cliente', m);
+                    return corto(m.beneficio);
+                }
+                viz.addEventListener('click', function (ev) {
+                    var b = ev.target.closest('[data-cli]');
+                    if (b) { estado.cliente = b.getAttribute('data-cli') || null; display.textContent = pintar(); usadaCentro(); }
+                });
+                return pintar;
+            },
+
+            tesoreria: function (viz) {
+                viz.innerHTML = rango('tv-rep', 'Reparto de beneficios hoy', 0, 180000, 10000, estado.reparto, e0.format) +
+                    '<svg class="tm-grafico" viewBox="0 0 520 220" id="tv-tes" role="img" aria-label="Saldo de tesorería previsto en los próximos seis meses"></svg><p class="tm-estado" id="tv-tes-est"></p>';
+                var r = viz.querySelector('#tv-rep');
+                function pintar() {
+                    estado.reparto = +r.value;
+                    viz.querySelector('#tv-rep-v').textContent = e0.format(estado.reparto);
+                    var m = base, serie = m.proyeccion(estado.reparto);
+                    var top = Math.max(Math.max.apply(null, serie), m.colchon) * 1.3, X = function (i) { return 50 + i * 74; }, Y = function (v) { return 190 - Math.max(0, v) / top * 170; };
+                    var minimo = Math.min.apply(null, serie), ok = minimo >= m.colchon;
+                    viz.querySelector('#tv-tes').innerHTML =
+                        '<line x1="40" y1="' + Y(0) + '" x2="510" y2="' + Y(0) + '" class="eje"/>' +
+                        '<rect x="40" y="' + Y(m.colchon) + '" width="470" height="' + (Y(0) - Y(m.colchon)) + '" class="zona"/>' +
+                        '<line x1="40" x2="510" y1="' + Y(m.colchon) + '" y2="' + Y(m.colchon) + '" class="umbral alerta"/>' +
+                        '<text x="44" y="' + (Y(m.colchon) + 16) + '" class="nota">Colchón mínimo · ' + e0.format(m.colchon) + '</text>' +
+                        '<polyline points="' + serie.map(function (v, i) { return X(i) + ',' + Y(v); }).join(' ') + '" class="linea"/>' +
+                        serie.map(function (v, i) { return '<circle cx="' + X(i) + '" cy="' + Y(v) + '" r="5" class="punto' + (v < m.colchon ? ' mal' : '') + '"/><text x="' + X(i) + '" y="210" class="mes">' + (i === 0 ? 'Hoy' : '+' + i) + '</text>'; }).join('');
+                    var est = viz.querySelector('#tv-tes-est');
+                    est.className = 'tm-estado ' + (ok ? 'bien' : 'mal');
+                    est.textContent = ok ? 'La tesorería aguanta: el saldo no baja de ' + e0.format(minimo) + '.' :
+                        'Con este reparto, el saldo bajaría a ' + e0.format(minimo) + ': por debajo del colchón.';
+                    ponLectura('tesoreria', m);
+                    return corto(m.maxReparto);
+                }
+                r.addEventListener('input', function () { display.textContent = pintar(); usadaCentro(); });
+                return pintar;
+            }
+        };
+
+        var pintores = {};
+        paneles.forEach(function (pn) {
+            var id = pn.id.replace('q-', '');
+            if (vistas[id]) pintores[id] = vistas[id](pn.querySelector('.tm-viz'));
+        });
+
+        function usadaCentro() { medir('timon-simulacion', true); }
+
+        function elegir(id, foco) {
+            if (!pintores[id]) return;
+            actual = id;
+            var k = 0;
+            tabs.forEach(function (t, i) {
+                var si = t.getAttribute('data-q') === id;
+                if (si) k = i;
+                t.setAttribute('aria-selected', si ? 'true' : 'false');
+                t.setAttribute('tabindex', si ? '0' : '-1');
+                if (si && foco) t.focus();
+            });
+            paneles.forEach(function (pn) { pn.hidden = pn.id !== 'q-' + id; });
+            nodos.forEach(function (n) { n.classList.toggle('activo', n.getAttribute('data-q') === id); });
+            anillo.style.setProperty('--giro', (-(360 / nodos.length) * k) + 'deg');
+            display.textContent = pintores[id]();
+            medir('timon-pregunta-' + id, true);
+        }
+
+        tabs.forEach(function (t, i) {
+            t.addEventListener('click', function (ev) { ev.preventDefault(); elegir(t.getAttribute('data-q')); });
+            t.addEventListener('keydown', function (ev) {
+                var d = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[ev.key];
+                if (ev.key === 'Home') d = -i; if (ev.key === 'End') d = tabs.length - 1 - i;
+                if (d === undefined) return;
+                ev.preventDefault();
+                elegir(tabs[(i + d + tabs.length) % tabs.length].getAttribute('data-q'), true);
+            });
+        });
+        nodos.forEach(function (n) {
+            n.addEventListener('click', function () { elegir(n.getAttribute('data-q')); });
+        });
+        centro.addEventListener('click', function (ev) {
+            var b = ev.target.closest('[data-ir]');
+            if (b) elegir(b.getAttribute('data-ir'), true);
+        });
+
+        elegir(c.preguntas[0].id);
+    }
 })();

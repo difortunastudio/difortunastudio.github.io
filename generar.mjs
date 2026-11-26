@@ -107,7 +107,7 @@ for (const p of proyectos) {
     <link rel="stylesheet" href="proyecto.css" />
 </head>
 <body data-proyecto="${esc(p.id)}">
-    <a href="#problema" class="saltar">Saltar al contenido</a>
+    <a href="${p.centro ? '#centro' : '#problema'}" class="saltar">Saltar al contenido</a>
     <header class="barra">
         <div class="barra-inner">
             <a href="../index.html#proyectos" class="volver" data-salir="portfolio">← Portfolio</a>
@@ -119,7 +119,7 @@ for (const p of proyectos) {
 ${P.universo(p, proyectos)}
     </main>
     <script src="../proyectos.js"></script>
-    <script src="proyecto.js"></script>
+${p.centro ? '    <script src="plantillas.js"></script>\n' : ''}    <script src="proyecto.js"></script>
     <!-- Contador de visitas sin cookies -->
     <script data-goatcounter="https://fiorellagallo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>

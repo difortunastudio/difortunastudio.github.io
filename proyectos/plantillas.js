@@ -95,6 +95,179 @@
     };
 
 
+
+    /* =============================================================
+       TIMÓN · MODELO DE LA EMPRESA FICTICIA
+       Un único cálculo para el texto estático y para la simulación.
+       ============================================================= */
+    var MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    var eur0 = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+    var eur2 = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    var pct0 = function (v) { return Math.round(v * 100) + ' %'; };
+
+    function modeloTimon(e, o) {
+        o = o || {};
+        var reservas = o.reservas != null ? o.reservas : e.reservas;
+        var estructura = o.estructura != null ? o.estructura : e.estructura;
+        var horasPersona = o.horas != null ? o.horas : e.horasPersona;
+        var fuera = null;
+        e.clientes.forEach(function (c) { if (c.n === o.clienteFuera) fuera = c; });
+
+        var deps = e.departamentos.map(function (d) {
+            var ing = d.ingresos, cos = d.costes;
+            if (fuera && fuera.dep === d.n) {
+                var proporcion = d.costes / d.ingresos;      /* los costes directos se mueven con la actividad */
+                ing -= fuera.ingresos;
+                cos -= fuera.ingresos * proporcion;
+            }
+            return { n: d.n, ingresos: ing, costes: cos, margen: ing - cos, pct: (ing - cos) / ing };
+        });
+        var ingresos = deps.reduce(function (s, d) { return s + d.ingresos; }, 0);
+        var directos = deps.reduce(function (s, d) { return s + d.costes; }, 0);
+        var margen = ingresos - directos;
+        var mc = margen / ingresos;
+        var beneficio = margen - estructura;
+        var puntoMuerto = estructura / mc;
+        var mesPM = Math.ceil(puntoMuerto / (ingresos / 12));   /* 1-12; >12 = no se cubre */
+
+        var horas = e.personas * horasPersona;
+        var costeHora = (directos + estructura) / horas;
+        var precioHora = ingresos / horas;
+
+        var repartible = Math.max(0, beneficio) * (1 - reservas / 100);
+        var socios = e.socios.map(function (s) { return { n: s.n, pct: s.pct, importe: repartible * s.pct / 100 }; });
+
+        var t = e.tesoreria, acum = 0, minAcum = 0;
+        t.flujos.forEach(function (f) { acum += f; minAcum = Math.min(minAcum, acum); });
+        var maxReparto = Math.max(0, Math.floor((t.saldo + minAcum - t.colchon) / 1000) * 1000);
+        function proyeccion(reparto) {
+            var serie = [t.saldo - reparto], sal = t.saldo - reparto;
+            t.flujos.forEach(function (f) { sal += f; serie.push(sal); });
+            return serie;
+        }
+
+        var mejorEuros = deps.slice().sort(function (a, b) { return b.margen - a.margen; })[0];
+        var mejorPct = deps.slice().sort(function (a, b) { return b.pct - a.pct; })[0];
+
+        return {
+            deps: deps, ingresos: ingresos, directos: directos, margen: margen, mc: mc, estructura: estructura,
+            beneficio: beneficio, puntoMuerto: puntoMuerto, mesPM: mesPM, horas: horas, horasPersona: horasPersona,
+            costeHora: costeHora, precioHora: precioHora, reservas: reservas, repartible: repartible, socios: socios,
+            maxReparto: maxReparto, proyeccion: proyeccion, colchon: t.colchon, fuera: fuera,
+            mejorEuros: mejorEuros, mejorPct: mejorPct
+        };
+    }
+
+    function nombreMes(m) { return m > 12 ? 'no se cubren este año' : MESES[m - 1]; }
+
+    /* Lectura en una frase de cada pregunta (también se usa en la simulación) */
+    function lecturaTimon(id, e, m, base) {
+        switch (id) {
+            case 'socios':
+                return 'Con un ' + m.reservas + ' % a reservas, el beneficio repartible es de ' + eur0.format(m.repartible) + ': ' +
+                    m.socios.map(function (s) { return eur0.format(s.importe) + ' para ' + s.n; }).join(', ').replace(/, ([^,]*)$/, ' y $1') + '.';
+            case 'departamentos':
+                return m.mejorEuros.n + ' aporta más margen en euros (' + eur0.format(m.mejorEuros.margen) + '), pero ' +
+                    (m.mejorPct.n === m.mejorEuros.n ? 'también ' : '') + m.mejorPct.n + ' es la más rentable en proporción (' + pct0(m.mejorPct.pct) + ' sobre sus ingresos).';
+            case 'costes':
+                return 'Con ' + eur0.format(m.estructura) + ' de costes de estructura y un margen del ' + pct0(m.mc) + ', la empresa necesita facturar ' +
+                    eur0.format(m.puntoMuerto) + ' para cubrir costes: ' + (m.mesPM > 12 ? 'este año no los cubre.' : 'lo consigue en ' + nombreMes(m.mesPM) + '.');
+            case 'hora':
+                var dif = m.precioHora - m.costeHora;
+                return 'Cada hora productiva cuesta ' + eur2.format(m.costeHora) + ' y se vende de media a ' + eur2.format(m.precioHora) + ': ' +
+                    (dif >= 0 ? 'un margen de ' + eur2.format(dif) + ' por hora.' : 'se pierden ' + eur2.format(-dif) + ' por hora.');
+            case 'cliente':
+                if (!m.fuera) return 'Elige un cliente para ver qué pasaría si se fuera. Hoy el beneficio previsto es de ' + eur0.format(m.beneficio) + ' y los costes se cubren en ' + nombreMes(m.mesPM) + '.';
+                return 'Perder al ' + m.fuera.n + ' (' + eur0.format(m.fuera.ingresos) + ' en ' + m.fuera.dep + ') reduciría el beneficio de ' + eur0.format(base.beneficio) +
+                    ' a ' + eur0.format(m.beneficio) + (m.mesPM !== base.mesPM ? ' y retrasaría a ' + nombreMes(m.mesPM) + ' el momento de cubrir costes.' : '.');
+            case 'tesoreria':
+                return 'Hay ' + eur0.format(m.beneficio) + ' de beneficio, pero para no bajar del colchón de ' + eur0.format(m.colchon) +
+                    ' en los próximos seis meses, hoy se pueden repartir como máximo ' + eur0.format(m.maxReparto) + '.';
+        }
+        return '';
+    }
+
+    /* Cifras clave en texto (visibles sin JavaScript) */
+    function cifrasTimon(id, m) {
+        var f = function (a, b) { return '<div><dt>' + esc(a) + '</dt><dd>' + esc(b) + '</dd></div>'; };
+        switch (id) {
+            case 'socios': return m.socios.map(function (s) { return f(s.n + ' · ' + s.pct + ' %', eur0.format(s.importe)); }).join('') + f('A reservas', eur0.format(m.beneficio - m.repartible));
+            case 'departamentos': return m.deps.map(function (d) { return f(d.n, eur0.format(d.margen) + ' · ' + pct0(d.pct)); }).join('');
+            case 'costes': return f('Punto muerto', eur0.format(m.puntoMuerto)) + f('Facturación prevista', eur0.format(m.ingresos)) + f('Costes cubiertos en', nombreMes(m.mesPM));
+            case 'hora': return f('Coste por hora', eur2.format(m.costeHora)) + f('Precio medio por hora', eur2.format(m.precioHora)) + f('Horas productivas al año', new Intl.NumberFormat('es-ES').format(m.horas));
+            case 'cliente': return f('Beneficio previsto', eur0.format(m.beneficio)) + f('Costes cubiertos en', nombreMes(m.mesPM));
+            case 'tesoreria': return f('Saldo actual', eur0.format(m.proyeccion(0)[0])) + f('Colchón mínimo', eur0.format(m.colchon)) + f('Reparto máximo hoy', eur0.format(m.maxReparto));
+        }
+        return '';
+    }
+
+    /* Esfera de navegación del centro de mando */
+    function esferaTimon(c) {
+        var n = c.preguntas.length;
+        return '<svg class="tm-svg" viewBox="0 0 600 600" aria-hidden="true">' +
+            '<defs><radialGradient id="tmc-s" cx="42%" cy="38%" r="60%"><stop offset="0" stop-color="#cfe0ff"/><stop offset=".35" stop-color="#4f8cff"/><stop offset="1" stop-color="#0a1a4a"/></radialGradient>' +
+            '<radialGradient id="tmc-h" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#4f8cff" stop-opacity=".4"/><stop offset="1" stop-color="#4f8cff" stop-opacity="0"/></radialGradient></defs>' +
+            '<circle cx="300" cy="300" r="250" fill="url(#tmc-h)"/>' +
+            '<g class="tm-decor" fill="none" stroke="#4f8cff">' +
+                '<ellipse cx="300" cy="300" rx="270" ry="80" stroke-opacity=".16" transform="rotate(-18 300 300)"/>' +
+                '<ellipse cx="300" cy="300" rx="250" ry="66" stroke-opacity=".12" transform="rotate(30 300 300)"/></g>' +
+            '<circle cx="300" cy="300" r="215" fill="none" stroke="#4f8cff" stroke-opacity=".38"/>' +
+            '<line class="tm-haz" x1="392" y1="300" x2="500" y2="300"/>' +
+            '<g class="tm-anillo">' +
+            c.preguntas.map(function (q, k) {
+                var a = (360 / n) * k;
+                return '<g class="tm-nodo" data-q="' + esc(q.id) + '" style="--a:' + a + 'deg">' +
+                    '<circle class="tm-nodo-halo" cx="300" cy="300" r="22"/>' +
+                    '<circle class="tm-nodo-punto" cx="300" cy="300" r="9"/>' +
+                    '<text x="300" y="336">' + esc(q.corto) + '</text></g>';
+            }).join('') +
+            '</g>' +
+            '<circle cx="300" cy="300" r="92" fill="url(#tmc-s)"/>' +
+            '<text class="tm-display-et" x="300" y="284">TIMÓN</text>' +
+            '<text class="tm-display" x="300" y="318"></text>' +
+            '</svg>';
+    }
+
+    function centroTimon(p) {
+        var c = p.centro, e = c.empresa, m = modeloTimon(e), base = m;
+        var resumen = e.nombre + ' · ' + e.personas + ' personas · ' + e.socios.length + ' socios · ' + e.departamentos.length + ' departamentos · facturación prevista ' + eur0.format(m.ingresos);
+        return '<section class="tm-centro" id="centro" aria-labelledby="centro-titulo">' +
+            '<div class="tm-cabecera">' +
+                '<span class="u-demo-aviso">Simulación · empresa ficticia · datos inventados y coherentes entre sí</span>' +
+                '<h2 class="tm-titulo" id="centro-titulo">Centro de mando financiero</h2>' +
+                '<p class="tm-intro">' + esc(c.intro) + '</p>' +
+                '<p class="tm-empresa">' + esc(resumen) + '</p>' +
+            '</div>' +
+            '<div class="tm-mando">' +
+                '<div class="tm-nav">' +
+                    '<div class="tm-esfera">' + esferaTimon(c) + '</div>' +
+                    '<ol class="tm-preguntas" role="tablist" aria-label="Preguntas empresariales">' +
+                    c.preguntas.map(function (q, k) {
+                        return '<li role="presentation"><a href="#q-' + esc(q.id) + '" role="tab" id="tab-' + esc(q.id) + '" aria-controls="q-' + esc(q.id) + '" data-q="' + esc(q.id) + '">' +
+                            '<span class="n">' + String(k + 1).padStart(2, '0') + '</span>' + esc(q.pregunta) + '</a></li>';
+                    }).join('') +
+                    '</ol>' +
+                '</div>' +
+                '<div class="tm-paneles">' +
+                c.preguntas.map(function (q) {
+                    return '<article class="tm-panel" id="q-' + esc(q.id) + '" role="tabpanel" aria-labelledby="tab-' + esc(q.id) + '">' +
+                        '<p class="tm-funcion">Funcionalidad · ' + esc(q.funcion) + '</p>' +
+                        '<h3 class="tm-pregunta">' + esc(q.pregunta) + '</h3>' +
+                        '<div class="tm-viz" data-viz="' + esc(q.id) + '"></div>' +
+                        '<p class="tm-lectura" aria-live="polite">' + esc(lecturaTimon(q.id, e, m, base)) + '</p>' +
+                        '<dl class="tm-cifras">' + cifrasTimon(q.id, m) + '</dl>' +
+                        '<div class="tm-antes"><p><span>Antes</span>' + esc(q.antes) + '</p><p><span>Con ' + esc(p.nombre) + '</span>' + esc(q.funcion) + '.</p></div>' +
+                    '</article>';
+                }).join('') +
+                '</div>' +
+            '</div>' +
+            '<div class="tm-pie">' +
+                (p.caso ? '<p class="u-caso-cierre">' + esc(p.caso.cierre) + '</p>' : '') +
+                (c.otras ? '<p class="tm-otras">' + esc(c.otras) + '</p>' : '') +
+            '</div>' +
+        '</section>';
+    }
+
     /* Contenido completo de un universo (todo lo que va dentro de <main>) */
     function universo(p, proyectos) {
         /* =============================================================
@@ -122,9 +295,11 @@
                     '<span>Estado<strong>' + esc(p.estado) + '</strong></span>' +
                 '</div>' +
             '</div>' +
-            '<a href="#problema" class="u-bajar" aria-label="Empezar">↓</a>' +
+            '<a href="' + (p.centro ? '#centro' : '#problema') + '" class="u-bajar" aria-label="Empezar">↓</a>' +
         '</section>';
 
+        if (p.centro) html += centroTimon(p);
+        else {
         html += '<section class="u-bloque" id="problema">' + cab('El problema') +
             '<h2 class="u-titulo aparece">Todo empezó con una necesidad real.</h2>' +
             '<p class="u-grande aparece">' + esc(p.problema) + '</p>' +
@@ -181,6 +356,7 @@
             (p.vision ? '<div class="u-vision aparece"><span class="et">Visión de futuro</span>' + esc(p.vision) + '</div>' : '') +
             (p.aviso ? '<p class="u-aviso aparece">' + esc(p.aviso) + '</p>' : '') +
         '</section>';
+        }
 
         var cta;
         if (p.rol === 'caso') {
@@ -303,7 +479,7 @@
         };
     }
 
-    var api = { esc: esc, escenas: escenas, universo: universo, portada: portada };
+    var api = { esc: esc, escenas: escenas, universo: universo, portada: portada, modeloTimon: modeloTimon, lecturaTimon: lecturaTimon, nombreMes: nombreMes };
     raizGlobal.DFS_PLANTILLAS = api;
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
