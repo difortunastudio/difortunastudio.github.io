@@ -76,12 +76,13 @@ window.PROYECTOS = [
             ingresos: 3200,
             fijos: 1650,                 /* alquiler, suministros, colegio… */
             variables: 640,              /* lo gastado ya este mes */
-            colchon: 300,                /* lo que la familia quiere dejar sin tocar */
+            cajitas: 300,                /* lo apartado en cajitas (por ejemplo, un colchón) */
             sueno: { n: "Viaje en familia", objetivo: 3000, ahorrado: 1800 },
-            patrimonio: [["Cuentas", 12400], ["Inversión", 21200], ["Plan de pensiones", 15000]],
+            patrimonio: [["Dinero en cuentas", 12400], ["Inversión", 21200], ["Vehículo", 15000]],
+            /* saldo > 0: tienes a favor · saldo < 0: debes */
             kipus: [
-                { n: "Casa de la playa", personas: 3, tuParte: 120 },
-                { n: "Cuidado de mamá", personas: 2, tuParte: 260 }
+                { n: "Casa de la playa", con: ["Ana", "Luis"], saldo: 40 },
+                { n: "Cuidado de mamá", con: ["Pablo"], saldo: -25 }
             ],
             decision: { pregunta: "¿Podemos permitirnos un sofá de 900 €?", importe: 900 },
             ejemplos: ["Gasté 23,50 € en el súper", "45 € de cena con amigos", "Me han ingresado 300 € de un trabajo extra"]
@@ -113,15 +114,15 @@ window.PROYECTOS = [
                 { antes: "¿Cuánto corresponde a cada socio?", despues: "Cálculo y reparto de remuneraciones entre socios." },
                 { antes: "¿Cuánto tenemos que facturar para cubrir costes?", despues: "Punto muerto y coste por hora." },
                 { antes: "¿Con qué tesorería contamos y qué viene?", despues: "Tesorería y previsiones." },
-                { antes: "¿Qué pasa si tomamos esta decisión?", despues: "Gestión de decisiones." },
-                { antes: "¿Dónde busco el dato que necesito?", despues: "Consultas en lenguaje natural." }
+                { antes: "¿Qué pasa si bajan los ingresos?", despues: "Simulador de escenarios." },
+                { antes: "¿Cuánto ha aportado cada socio?", despues: "Equilibrio entre socios." }
             ],
             cierre: "TIMÓN no sustituye a la contabilidad: se apoya en ella y la convierte en información útil para gestionar y decidir."
         },
         diseno: [
             { titulo: "Respetar lo que ya existe", texto: "La contabilidad sigue siendo la fuente. TIMÓN se construye encima, sin obligar a cambiar de sistema." },
             { titulo: "Modelar la empresa real", texto: "Socios, departamentos, costes y reparto: el modelo refleja cómo funciona la empresa, no cómo lo haría una herramienta genérica." },
-            { titulo: "Preguntar como se pregunta en una reunión", texto: "Las consultas en lenguaje natural acercan los datos a quien tiene que decidir." }
+            { titulo: "Todo en una sola vista", texto: "El universo orbital reúne rentabilidad, costes, tesorería y previsiones para quien tiene que decidir." }
         ],
         funcionalidades: [
             { titulo: "Universo TIMÓN", texto: "Una vista orbital que conecta toda la información financiera de la empresa.", captura: "universo" },
@@ -130,8 +131,8 @@ window.PROYECTOS = [
             { titulo: "Coste por hora", texto: "El coste real de cada hora de trabajo.", captura: "coste-hora" },
             { titulo: "Tesorería", texto: "Control de la liquidez de la empresa.", captura: "tesoreria" },
             { titulo: "Previsiones", texto: "Una mirada hacia los próximos meses.", captura: "previsiones" },
-            { titulo: "Gestión de decisiones", texto: "Plantear decisiones y entender sus consecuencias.", captura: "decisiones" },
-            { titulo: "Consultas en lenguaje natural", texto: "Preguntar a los datos como se le pregunta a una persona.", captura: "consultas" },
+            { titulo: "Simulador de escenarios", texto: "Plantear un cambio y ver su efecto en el beneficio y la caja.", captura: "decisiones" },
+            { titulo: "Preguntas rápidas", texto: "Preguntas por voz o por texto que llevan al panel adecuado.", captura: "consultas" },
             { titulo: "Remuneraciones entre socios", texto: "Un sistema de cálculo y reparto transparente.", captura: "socios" }
         ],
         valor: [
@@ -153,36 +154,33 @@ window.PROYECTOS = [
                 horasPersona: 1400,          /* horas productivas al año por persona */
                 estructura: 240000,          /* costes de estructura anuales */
                 reservas: 10,                /* % del beneficio a reservas */
+                /* Cada socio recibe el resultado de su departamento (como en TIMÓN) */
                 socios: [
-                    { n: "Socia A", pct: 40 },
-                    { n: "Socio B", pct: 35 },
-                    { n: "Socia C", pct: 25 }
+                    { n: "Socia A", dep: "Diseño" },
+                    { n: "Socio B", dep: "Desarrollo" },
+                    { n: "Socia C", dep: "Consultoría" }
                 ],
+                facturado: { importe: 610000, fecha: "30 de junio" },
                 departamentos: [
                     { n: "Diseño", ingresos: 480000, costes: 330000 },
                     { n: "Desarrollo", ingresos: 520000, costes: 340000 },
                     { n: "Consultoría", ingresos: 200000, costes: 110000 }
                 ],
-                clientes: [
-                    { n: "Cliente A", dep: "Desarrollo", ingresos: 180000 },
-                    { n: "Cliente B", dep: "Diseño", ingresos: 120000 },
-                    { n: "Cliente C", dep: "Consultoría", ingresos: 60000 }
-                ],
+                bajas: [60000, 120000, 180000],   /* escenarios de bajada de ingresos */
                 tesoreria: {
                     saldo: 210000,
                     colchon: 60000,          /* saldo mínimo que la empresa quiere mantener */
-                    flujos: [-20000, 15000, -35000, 10000, 5000, -10000]   /* próximos 6 meses */
+                    flujos: [-20000, 15000, -35000, 10000, 5000, -10000]   /* próximas 13 semanas, por quincenas */
                 }
             },
             preguntas: [
-                { id: "socios", corto: "Socios", etiqueta: "Repartible", pregunta: "¿Cuánto puedo pagar a mis socios?", funcion: "Cálculo y reparto de remuneraciones entre socios", antes: "La contabilidad muestra el beneficio, no cuánto corresponde a cada socio." },
+                { id: "socios", corto: "Socios", etiqueta: "Repartible", pregunta: "¿Cuánto puedo pagar a mis socios?", funcion: "Reparto entre socios según su departamento", antes: "La contabilidad muestra el beneficio, no cuánto corresponde a cada socio." },
                 { id: "departamentos", corto: "Rentabilidad", etiqueta: "Más rentable", pregunta: "¿Qué departamento es más rentable?", funcion: "Rentabilidad por departamentos", antes: "La contabilidad agrupa el resultado de la empresa, no el de cada área." },
-                { id: "costes", corto: "Punto muerto", etiqueta: "Costes cubiertos en", pregunta: "¿Cubrimos los costes del año?", funcion: "Punto muerto", antes: "La contabilidad cuenta lo facturado, no cuánto falta para cubrir la estructura." },
+                { id: "costes", corto: "Punto muerto", etiqueta: "Costes del año", pregunta: "¿Cubrimos los costes del año?", funcion: "Punto muerto", antes: "La contabilidad cuenta lo facturado, no cuánto falta para cubrir la estructura." },
                 { id: "hora", corto: "Coste/hora", etiqueta: "Coste por hora", pregunta: "¿Cuánto nos cuesta realmente una hora de trabajo?", funcion: "Coste por hora", antes: "Las nóminas y los gastos están registrados, pero no convertidos en el coste de una hora." },
-                { id: "cliente", corto: "Escenarios", etiqueta: "Beneficio previsto", pregunta: "¿Qué ocurriría si perdiéramos un cliente?", funcion: "Gestión de decisiones y previsiones", antes: "La contabilidad mira hacia atrás. Esta pregunta mira hacia delante." },
-                { id: "tesoreria", corto: "Tesorería", etiqueta: "Reparto posible hoy", pregunta: "¿Podemos repartir beneficios sin comprometer la tesorería?", funcion: "Tesorería y previsiones", antes: "Que haya beneficio no significa que haya liquidez para repartirlo." }
-            ],
-            otras: "Además, TIMÓN permite hacer consultas en lenguaje natural sobre los datos de la empresa."
+                { id: "cliente", corto: "Escenarios", etiqueta: "Beneficio previsto", pregunta: "¿Qué pasa si bajan los ingresos?", funcion: "Simulador de escenarios", antes: "La contabilidad mira hacia atrás. Esta pregunta mira hacia delante." },
+                { id: "tesoreria", corto: "Tesorería", etiqueta: "Reparto posible hoy", pregunta: "¿Podemos repartir beneficios sin comprometer la tesorería?", funcion: "Previsión de tesorería y colchón", antes: "Que haya beneficio no significa que haya liquidez para repartirlo." }
+            ]
         }
     },
 
@@ -250,7 +248,7 @@ window.PROYECTOS = [
                 { id: "d1", tipo: "Ticket", emisor: "Papelería Ejemplo", empresa: "A", total: 50.00, impuesto: 8.68, cat: "Material de oficina" },
                 { id: "d2", tipo: "Factura", emisor: "Hosting Demo", empresa: "A", total: 121.00, impuesto: 21.00, cat: "Software" },
                 { id: "d3", tipo: "Ticket", emisor: "Example Stationery", empresa: "B", total: 48.00, impuesto: 8.00, cat: "Office supplies" },
-                { id: "d4", tipo: "Ticket", emisor: "Taxi Muestra", empresa: "A", total: 22.00, impuesto: 2.00, cat: "Desplazamientos", revisar: "Fecha poco legible" },
+                { id: "d4", tipo: "Ticket", emisor: "Taxi Muestra", empresa: "A", total: 22.00, impuesto: 2.00, cat: "Desplazamientos", revisar: "Falta la fecha" },
                 { id: "d5", tipo: "Factura", emisor: "Cloud Tools Ltd", empresa: "B", total: 24.00, impuesto: 4.00, cat: "Software" },
                 { id: "d6", tipo: "Factura", emisor: "Mensajería Demo", empresa: "A", total: 36.30, impuesto: 6.30, cat: "Envíos" }
             ]
@@ -300,12 +298,14 @@ window.PROYECTOS = [
         escena: {
             lema: "Cada cuota, cada vencimiento y cada cliente, bajo control.",
             fecha: "Martes, 15 de marzo",
+            lugar: "Jornada de una automotora ficticia en Montevideo",
+            /* Como en la aplicación: cada operación en dólares (USD) o pesos uruguayos (UYU), sin mezclar monedas */
             tareas: [
-                { id: "t1", hora: "09:00", tipo: "cobro", cliente: "J. Ficticio", vehiculo: "Monovolumen", cuota: 22, importe: 245, texto: "Cuota que vence hoy" },
-                { id: "t2", hora: "10:30", tipo: "retraso", cliente: "M. Ejemplo", vehiculo: "Turismo compacto", cuota: 14, importe: 189, dias: 10, texto: "Cuota vencida hace 10 días",
-                  historial: ["12/01 · Cuota 12 pagada", "12/02 · Cuota 13 pagada con 3 días de retraso", "05/03 · Cuota 14 vencida"] },
-                { id: "t3", hora: "12:00", tipo: "cobro", cliente: "L. Muestra", vehiculo: "Utilitario", cuota: 6, importe: 156, texto: "Cuota que vence hoy" },
-                { id: "t4", hora: "16:00", tipo: "aviso", cliente: "R. Prueba", vehiculo: "Furgoneta", cuota: 31, importe: 312, texto: "Vence en 3 días" }
+                { id: "t1", hora: "09:00", tipo: "cobro", cliente: "J. Ficticio", vehiculo: "Monovolumen", cuota: 22, importe: 245, moneda: "USD", texto: "Cuota que vence hoy" },
+                { id: "t2", hora: "10:30", tipo: "retraso", cliente: "M. Ejemplo", vehiculo: "Auto compacto", cuota: 14, importe: 8900, moneda: "UYU", dias: 10, vencio: "5 de marzo", texto: "Cuota vencida hace 10 días",
+                  historial: ["12/01 · Cuota 12 pagada", "12/02 · Cuota 13 pagada con 3 días de atraso", "05/03 · Cuota 14 vencida"] },
+                { id: "t3", hora: "12:00", tipo: "cobro", cliente: "L. Muestra", vehiculo: "Utilitario", cuota: 6, importe: 156, moneda: "USD", texto: "Cuota que vence hoy" },
+                { id: "t4", hora: "16:00", tipo: "aviso", cliente: "R. Prueba", vehiculo: "Camioneta", cuota: 31, importe: 12400, moneda: "UYU", vence: "18 de marzo", texto: "Vence en 3 días" }
             ]
         }
     },

@@ -1292,3 +1292,24 @@ body[data-proyecto="fliia"] .u-hero + .fl-escena { min-height: 0; padding-top: 4
 @media (prefers-reduced-motion: reduce) { .obh-entradas li::after, .obh-salidas li::before { animation: none; } }
 html { scroll-padding-top: 4.2rem; }
 .u-hero + .nt-escena { padding-top: 4.4rem; }
+
+/* TIMÓN · punto muerto: facturado frente a la meta (sin meses) */
+.tm-meta { margin-top: 1.6rem; }
+.tm-meta-pista { position: relative; height: 22px; border-radius: 11px; background: var(--linea); margin-top: 2.2rem; }
+.tm-meta-fact { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 11px; background: linear-gradient(90deg, rgba(79, 140, 255, .5), var(--c)); transition: width .6s cubic-bezier(.2,.7,.3,1); }
+.tm-meta-fact.ok { background: linear-gradient(90deg, rgba(79, 140, 255, .5), #86efac); }
+.tm-meta-pm { position: absolute; top: -10px; bottom: -10px; width: 2px; background: #fbbf24; transition: left .6s cubic-bezier(.2,.7,.3,1); }
+.tm-meta-pm em { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); white-space: nowrap; font-style: normal; font-size: .78rem; color: #fde68a; }
+.tm-meta-pie { margin-top: .9rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: .88rem; color: var(--tenue); }
+.tm-meta-pie b { color: var(--texto-fuerte); }
+.tm-orbe b { font-size: .68rem; }
+/* Outbill · selector de empresa (sin vista conjunta) */
+.obh-tabs button { display: grid; text-align: left; gap: .05rem; padding: .55rem .9rem; }
+.obh-tabs button em { font-style: normal; font-size: .7rem; color: var(--tenue); }
+.obh-tabs button[aria-selected="true"] em { color: rgba(255, 255, 255, .75); }
+.exp-viva .obh-panel .obh-detalle + .obh-detalle { display: none; }
+.obh-panel .obh-detalle + .obh-detalle { margin-top: 1.2rem; padding-top: 1.2rem; border-top: 1px dashed var(--linea); }
+/* Automotive · importes por moneda y envío manual */
+.am-kpi.grande strong { font-size: clamp(1.8rem, 3vw, 2.4rem); }
+.am-kpi strong { font-size: 1.4rem; }
+.am-nota-envio { margin-top: .5rem; font-size: .76rem; color: var(--tenue); }

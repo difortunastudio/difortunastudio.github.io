@@ -110,92 +110,101 @@
         var reservas = o.reservas != null ? o.reservas : e.reservas;
         var estructura = o.estructura != null ? o.estructura : e.estructura;
         var horasPersona = o.horas != null ? o.horas : e.horasPersona;
-        var fuera = null;
-        e.clientes.forEach(function (c) { if (c.n === o.clienteFuera) fuera = c; });
-
-        var deps = e.departamentos.map(function (d) {
-            var ing = d.ingresos, cos = d.costes;
-            if (fuera && fuera.dep === d.n) {
-                var proporcion = d.costes / d.ingresos;      /* los costes directos se mueven con la actividad */
-                ing -= fuera.ingresos;
-                cos -= fuera.ingresos * proporcion;
-            }
-            return { n: d.n, ingresos: ing, costes: cos, margen: ing - cos, pct: (ing - cos) / ing };
-        });
+        var baja = o.baja || 0;
+        var ingBase = e.departamentos.reduce(function (t, d) { return t + d.ingresos; }, 0);
+        var f = Math.max(0, 1 - baja / ingBase);   /* la bajada se reparte en proporción; los costes directos acompañan */
+        var deps = e.departamentos.map(function (d) { return { n: d.n, ingresos: d.ingresos * f, directos: d.costes * f }; });
         var ingresos = deps.reduce(function (s, d) { return s + d.ingresos; }, 0);
-        var directos = deps.reduce(function (s, d) { return s + d.costes; }, 0);
+        var directos = deps.reduce(function (s, d) { return s + d.directos; }, 0);
         var margen = ingresos - directos;
         var mc = margen / ingresos;
+        deps.forEach(function (d) {
+            d.estructura = estructura * d.ingresos / ingresos;          /* su parte de los costes comunes */
+            d.costes = d.directos + d.estructura;
+            d.resultado = d.ingresos - d.costes;
+            d.pct = d.resultado / d.ingresos;
+        });
         var beneficio = margen - estructura;
         var puntoMuerto = estructura / mc;
-        var mesPM = Math.ceil(puntoMuerto / (ingresos / 12));   /* 1-12; >12 = no se cubre */
+        var facturado = e.facturado.importe;
+        var cubierto = facturado >= puntoMuerto;
+        var falta = Math.max(0, puntoMuerto - facturado);
 
         var horas = e.personas * horasPersona;
         var costeHora = (directos + estructura) / horas;
         var precioHora = ingresos / horas;
 
-        var repartible = Math.max(0, beneficio) * (1 - reservas / 100);
-        var socios = e.socios.map(function (s) { return { n: s.n, pct: s.pct, importe: repartible * s.pct / 100 }; });
+        var socios = e.socios.map(function (s) {
+            var d = deps.filter(function (x) { return x.n === s.dep; })[0];
+            return { n: s.n, dep: s.dep, importe: Math.max(0, d.resultado) * (1 - reservas / 100) };
+        });
+        var repartible = socios.reduce(function (t, s) { return t + s.importe; }, 0);
+        var reservasImp = deps.reduce(function (t, d) { return t + Math.max(0, d.resultado) * reservas / 100; }, 0);
 
         var t = e.tesoreria, acum = 0, minAcum = 0;
-        t.flujos.forEach(function (f) { acum += f; minAcum = Math.min(minAcum, acum); });
+        t.flujos.forEach(function (x) { acum += x; minAcum = Math.min(minAcum, acum); });
         var maxReparto = Math.max(0, Math.floor((t.saldo + minAcum - t.colchon) / 1000) * 1000);
         function proyeccion(reparto) {
             var serie = [t.saldo - reparto], sal = t.saldo - reparto;
-            t.flujos.forEach(function (f) { sal += f; serie.push(sal); });
+            t.flujos.forEach(function (x) { sal += x; serie.push(sal); });
             return serie;
         }
 
-        var mejorEuros = deps.slice().sort(function (a, b) { return b.margen - a.margen; })[0];
+        var mejorEuros = deps.slice().sort(function (a, b) { return b.resultado - a.resultado; })[0];
         var mejorPct = deps.slice().sort(function (a, b) { return b.pct - a.pct; })[0];
 
         return {
-            deps: deps, ingresos: ingresos, directos: directos, margen: margen, mc: mc, estructura: estructura,
-            beneficio: beneficio, puntoMuerto: puntoMuerto, mesPM: mesPM, horas: horas, horasPersona: horasPersona,
-            costeHora: costeHora, precioHora: precioHora, reservas: reservas, repartible: repartible, socios: socios,
-            maxReparto: maxReparto, proyeccion: proyeccion, colchon: t.colchon, fuera: fuera,
+            deps: deps, ingresos: ingresos, directos: directos, margen: margen, mc: mc, estructura: estructura, baja: baja,
+            beneficio: beneficio, puntoMuerto: puntoMuerto, facturado: facturado, cubierto: cubierto, falta: falta,
+            horas: horas, horasPersona: horasPersona, costeHora: costeHora, precioHora: precioHora,
+            reservas: reservas, repartible: repartible, reservasImp: reservasImp, socios: socios,
+            maxReparto: maxReparto, proyeccion: proyeccion, colchon: t.colchon,
             mejorEuros: mejorEuros, mejorPct: mejorPct
         };
     }
 
     function nombreMes(m) { return m > 12 ? 'no se cubren este año' : MESES[m - 1]; }
+    var pct1 = function (v) { return (v * 100).toFixed(1).replace('.', ',') + ' %'; };
+    function lista(partes) { return partes.length > 1 ? partes.slice(0, -1).join(', ') + ' y ' + partes[partes.length - 1] : partes.join(''); }
 
     /* Lectura en una frase de cada pregunta (también se usa en la simulación) */
     function lecturaTimon(id, e, m, base) {
         switch (id) {
             case 'socios':
-                return 'Con un ' + m.reservas + ' % a reservas, el beneficio repartible es de ' + eur0.format(m.repartible) + ': ' +
-                    m.socios.map(function (s) { return eur0.format(s.importe) + ' para ' + s.n; }).join(', ').replace(/, ([^,]*)$/, ' y $1') + '.';
+                return 'Cada socio recibe el resultado de su departamento, después de un ' + m.reservas + ' % a reservas: ' +
+                    lista(m.socios.map(function (s) { return eur0.format(s.importe) + ' para ' + s.n + ' (' + s.dep + ')'; })) + '.';
             case 'departamentos':
-                return m.mejorEuros.n + ' aporta más margen en euros (' + eur0.format(m.mejorEuros.margen) + '), pero ' +
-                    (m.mejorPct.n === m.mejorEuros.n ? 'también ' : '') + m.mejorPct.n + ' es la más rentable en proporción (' + pct0(m.mejorPct.pct) + ' sobre sus ingresos).';
+                return m.mejorEuros.n + ' aporta más beneficio en euros (' + eur0.format(m.mejorEuros.resultado) + ')' +
+                    (m.mejorPct.n === m.mejorEuros.n ? ' y además es la más rentable en proporción' : ', pero ' + m.mejorPct.n + ' es la más rentable en proporción') +
+                    ' (' + pct0(m.mejorPct.pct) + ' sobre sus ingresos), ya con su parte de los costes comunes.';
             case 'costes':
-                return 'Con ' + eur0.format(m.estructura) + ' de costes de estructura y un margen del ' + pct0(m.mc) + ', la empresa necesita facturar ' +
-                    eur0.format(m.puntoMuerto) + ' para cubrir costes: ' + (m.mesPM > 12 ? 'este año no los cubre.' : 'lo consigue en ' + nombreMes(m.mesPM) + '.');
+                return 'Con ' + eur0.format(m.estructura) + ' de costes de estructura y un margen del ' + pct0(m.mc) + ', el punto muerto está en ' +
+                    eur0.format(m.puntoMuerto) + '. A ' + e.facturado.fecha + ' se han facturado ' + eur0.format(m.facturado) + ': ' +
+                    (m.cubierto ? 'los costes del año ya están cubiertos.' : 'faltan ' + eur0.format(m.falta) + ' para cubrirlos.');
             case 'hora':
                 var dif = m.precioHora - m.costeHora;
                 return 'Cada hora productiva cuesta ' + eur2.format(m.costeHora) + ' y se vende de media a ' + eur2.format(m.precioHora) + ': ' +
                     (dif >= 0 ? 'un margen de ' + eur2.format(dif) + ' por hora.' : 'se pierden ' + eur2.format(-dif) + ' por hora.');
             case 'cliente':
-                if (!m.fuera) return 'Elige un cliente para ver qué pasaría si se fuera. Hoy el beneficio previsto es de ' + eur0.format(m.beneficio) + ' y los costes se cubren en ' + nombreMes(m.mesPM) + '.';
-                return 'Perder al ' + m.fuera.n + ' (' + eur0.format(m.fuera.ingresos) + ' en ' + m.fuera.dep + ') reduciría el beneficio de ' + eur0.format(base.beneficio) +
-                    ' a ' + eur0.format(m.beneficio) + (m.mesPM !== base.mesPM ? ' y retrasaría a ' + nombreMes(m.mesPM) + ' el momento de cubrir costes.' : '.');
+                if (!m.baja) return 'Elige una bajada de ingresos para simularla. Hoy el beneficio previsto es de ' + eur0.format(m.beneficio) + ' y el margen, del ' + pct1(m.beneficio / m.ingresos) + '.';
+                return 'Si los ingresos bajaran ' + eur0.format(m.baja) + ', el beneficio pasaría de ' + eur0.format(base.beneficio) + ' a ' + eur0.format(m.beneficio) +
+                    ' y el margen, del ' + pct1(base.beneficio / base.ingresos) + ' al ' + pct1(m.beneficio / m.ingresos) + '.';
             case 'tesoreria':
                 return 'Hay ' + eur0.format(m.beneficio) + ' de beneficio, pero para no bajar del colchón de ' + eur0.format(m.colchon) +
-                    ' en los próximos seis meses, hoy se pueden repartir como máximo ' + eur0.format(m.maxReparto) + '.';
+                    ' en las próximas 13 semanas, hoy se pueden repartir como máximo ' + eur0.format(m.maxReparto) + '.';
         }
         return '';
     }
 
     /* Cifras clave en texto (visibles sin JavaScript) */
-    function cifrasTimon(id, m) {
+    function cifrasTimon(id, m, e) {
         var f = function (a, b) { return '<div><dt>' + esc(a) + '</dt><dd>' + esc(b) + '</dd></div>'; };
         switch (id) {
-            case 'socios': return m.socios.map(function (s) { return f(s.n + ' · ' + s.pct + ' %', eur0.format(s.importe)); }).join('') + f('A reservas', eur0.format(m.beneficio - m.repartible));
-            case 'departamentos': return m.deps.map(function (d) { return f(d.n, eur0.format(d.margen) + ' · ' + pct0(d.pct)); }).join('');
-            case 'costes': return f('Punto muerto', eur0.format(m.puntoMuerto)) + f('Facturación prevista', eur0.format(m.ingresos)) + f('Costes cubiertos en', nombreMes(m.mesPM));
+            case 'socios': return m.socios.map(function (s) { return f(s.n + ' · ' + s.dep, eur0.format(s.importe)); }).join('') + f('A reservas', eur0.format(m.reservasImp));
+            case 'departamentos': return m.deps.map(function (d) { return f(d.n, eur0.format(d.resultado) + ' · ' + pct0(d.pct)); }).join('');
+            case 'costes': return f('Punto muerto', eur0.format(m.puntoMuerto)) + f('Facturado a ' + e.facturado.fecha, eur0.format(m.facturado)) + f('Estado', m.cubierto ? 'Cubiertos' : 'Faltan ' + eur0.format(m.falta));
             case 'hora': return f('Coste por hora', eur2.format(m.costeHora)) + f('Precio medio por hora', eur2.format(m.precioHora)) + f('Horas productivas al año', new Intl.NumberFormat('es-ES').format(m.horas));
-            case 'cliente': return f('Beneficio previsto', eur0.format(m.beneficio)) + f('Costes cubiertos en', nombreMes(m.mesPM));
+            case 'cliente': return f('Beneficio previsto', eur0.format(m.beneficio)) + f('Margen', pct1(m.beneficio / m.ingresos));
             case 'tesoreria': return f('Saldo actual', eur0.format(m.proyeccion(0)[0])) + f('Colchón mínimo', eur0.format(m.colchon)) + f('Reparto máximo hoy', eur0.format(m.maxReparto));
         }
         return '';
@@ -204,11 +213,10 @@
     /* Cifra principal de cada pregunta: en grande en el panel y abreviada en la esfera */
     function valorTimon(id, m, modoDep) {
         var k = function (v) { return Math.round(v / 1000) + 'k €'; };
-        var mes = function (n) { var t = nombreMes(n); return n > 12 ? 'No se cubren' : t.charAt(0).toUpperCase() + t.slice(1); };
         switch (id) {
             case 'socios': return { valor: eur0.format(m.repartible), esfera: k(m.repartible) };
             case 'departamentos': var d = modoDep === 'pct' ? m.mejorPct : m.mejorEuros; return { valor: d.n, esfera: d.n };
-            case 'costes': return { valor: mes(m.mesPM), esfera: mes(m.mesPM) };
+            case 'costes': return m.cubierto ? { valor: 'Cubiertos', esfera: 'Cubiertos' } : { valor: 'Faltan ' + eur0.format(m.falta), esfera: '−' + k(m.falta) };
             case 'hora': return { valor: eur2.format(m.costeHora), esfera: eur2.format(m.costeHora) };
             case 'cliente': return { valor: eur0.format(m.beneficio), esfera: k(m.beneficio) };
             case 'tesoreria': return { valor: eur0.format(m.maxReparto), esfera: k(m.maxReparto) };
@@ -272,7 +280,7 @@
                             '<div class="tm-cifra"><span>' + esc(q.etiqueta) + '</span><strong class="tm-valor">' + esc(v.valor) + '</strong></div>' +
                         '</div>' +
                         '<div class="tm-viz" data-viz="' + esc(q.id) + '"></div>' +
-                        '<dl class="tm-cifras">' + cifrasTimon(q.id, m) + '</dl>' +
+                        '<dl class="tm-cifras">' + cifrasTimon(q.id, m, e) + '</dl>' +
                         '<div class="tm-panel-pie">' +
                             '<p class="tm-lectura" aria-live="polite">' + esc(lecturaTimon(q.id, e, m, base)) + '</p>' +
                             '<div class="tm-antes"><p><span>Antes</span>' + esc(q.antes) + '</p><p><span>Con ' + esc(p.nombre) + '</span>' + esc(q.funcion) + '.</p></div>' +
@@ -334,31 +342,34 @@
         extra = extra || {};
         var ingresos = e.ingresos + (extra.ingresos || 0);
         var variables = e.variables + (extra.gastos || 0);
-        var queda = ingresos - e.fijos - variables;
-        var puedes = queda - e.colchon;
+        var puedes = ingresos - e.fijos - variables - e.cajitas;     /* como en Fliia: lo apartado en cajitas no se cuenta */
         var restante = e.sueno.objetivo - e.sueno.ahorrado;
-        var meses = puedes > 0 ? Math.ceil(restante / puedes) : null;
         var patrimonio = e.patrimonio.reduce(function (t, x) { return t + x[1]; }, 0);
-        return { ingresos: ingresos, variables: variables, queda: queda, puedes: puedes, restante: restante, meses: meses, patrimonio: patrimonio,
+        return { ingresos: ingresos, variables: variables, puedes: puedes, restante: restante, patrimonio: patrimonio,
                  pctSueno: e.sueno.ahorrado / e.sueno.objetivo };
     }
-    function frasesSueno(e, m) {
-        return m.meses ? 'Si el mes termina así, podréis aportar ' + eur0.format(m.puedes) + ' al ' + e.sueno.n.toLowerCase() + ' y llegaréis en ' + (m.meses === 1 ? '1 mes' : m.meses + ' meses') + '.'
-            : 'Este mes no quedaría margen para el ' + e.sueno.n.toLowerCase() + ' sin tocar el colchón.';
+    function textoKipu(k) {
+        return k.saldo > 0 ? 'tienes ' + eur0.format(k.saldo) + ' a favor' : k.saldo < 0 ? 'debes ' + eur0.format(-k.saldo) : 'estás al día';
+    }
+    function respuestaDecision(e, m) {
+        var queda = m.puedes - e.decision.importe;
+        return (queda >= 0 ? 'Sí: con ' + eur0.format(m.puedes) + ' para gastar este mes, te quedarían ' + eur0.format(queda) + '.' :
+            'Este mes no llega: tienes ' + eur0.format(Math.max(0, m.puedes)) + ' para gastar y te faltarían ' + eur0.format(-queda) + '.') +
+            ' En Decisiones puedes comparar pagarlo con ahorros, a plazos, a medias o esperar.';
     }
     function escenaFliia(p, raiz, o) {
         var e = p.escena, m = modeloFliia(e), conPortada = o && o.conPortada;
         var planetas = [
             { id: 'dia', n: 'Día a día', v: eur0.format(m.variables) + ' gastados',
               d: '<p>Este mes: ' + eur0.format(m.ingresos) + ' de ingresos, ' + eur0.format(e.fijos) + ' de gastos fijos y ' + eur0.format(m.variables) + ' en el día a día.</p><ul class="fl-movs" data-movs></ul>' },
-            { id: 'suenos', n: 'Sueños', v: Math.round(m.pctSueno * 100) + ' %',
-              d: '<p class="fl-sueno-n">' + esc(e.sueno.n) + '</p><div class="fl-progreso"><i style="width:' + (m.pctSueno * 100) + '%"></i></div><p>' + eur0.format(e.sueno.ahorrado) + ' de ' + eur0.format(e.sueno.objetivo) + '.</p><p class="fl-futuro" data-futuro>' + esc(frasesSueno(e, m)) + '</p>' },
+            { id: 'suenos', n: 'Sueños', v: 'faltan ' + eur0.format(m.restante),
+              d: '<p class="fl-sueno-n">' + esc(e.sueno.n) + '</p><div class="fl-progreso"><i style="width:' + (m.pctSueno * 100) + '%"></i></div><p>' + eur0.format(e.sueno.ahorrado) + ' ahorrados de ' + eur0.format(e.sueno.objetivo) + '. Te faltan ' + eur0.format(m.restante) + '.</p>' },
             { id: 'patrimonio', n: 'Patrimonio', v: eur0.format(m.patrimonio),
               d: '<dl class="fl-lista">' + e.patrimonio.map(function (x) { return '<div><dt>' + esc(x[0]) + '</dt><dd>' + eur0.format(x[1]) + '</dd></div>'; }).join('') + '<div class="total"><dt>Total</dt><dd>' + eur0.format(m.patrimonio) + '</dd></div></dl>' },
             { id: 'kipus', n: 'Kipus', v: e.kipus.length + ' compartidos',
-              d: '<p>Economías compartidas con otras personas, sin mezclar toda tu vida financiera.</p><dl class="fl-lista">' + e.kipus.map(function (k) { return '<div><dt>' + esc(k.n) + ' · ' + k.personas + ' personas</dt><dd>tu parte: ' + eur0.format(k.tuParte) + '</dd></div>'; }).join('') + '</dl>' },
+              d: '<p>Economías compartidas con otras personas, sin mezclar toda tu vida financiera.</p><dl class="fl-lista">' + e.kipus.map(function (k) { return '<div><dt>' + esc(k.n) + ' · con ' + esc(lista(k.con)) + '</dt><dd>' + textoKipu(k) + '</dd></div>'; }).join('') + '</dl>' },
             { id: 'decisiones', n: 'Decisiones', v: '1 pendiente',
-              d: '<p class="fl-pregunta">' + esc(e.decision.pregunta) + '</p><button type="button" class="fl-boton" data-decidir hidden>Analizar la decisión</button><p class="fl-respuesta" data-respuesta></p>' }
+              d: '<p class="fl-pregunta">' + esc(e.decision.pregunta) + '</p><button type="button" class="fl-boton" data-decidir hidden>Preguntar a Fliia</button><p class="fl-respuesta" data-respuesta></p>' }
         ];
         return '<section class="fl-escena" id="escena" aria-labelledby="fl-nombre">' +
             (conPortada ? '' : '<div class="fl-fondo" aria-hidden="true"><i></i><i></i><i></i></div>') +
@@ -373,7 +384,7 @@
                 '<div class="fl-nucleo" role="status" aria-live="polite">' +
                     '<span class="et">Puedes gastar este mes</span>' +
                     '<strong class="fl-cifra" data-cifra>' + eur0.format(m.puedes) + '</strong>' +
-                    '<span class="sub" data-sub>sin tocar tu colchón de ' + eur0.format(e.colchon) + '</span>' +
+                    '<span class="sub" data-sub>después de tus gastos fijos y lo apartado en cajitas</span>' +
                 '</div>' +
                 '<ul class="fl-planetas" aria-label="Dimensiones de la economía familiar">' +
                 planetas.map(function (pl, k) {
@@ -449,22 +460,31 @@
         '</section>';
     }
 
-    /* ---------- AUTOMOTIVE FINANCE: tu día bajo control ---------- */
+    /* ---------- AUTOMOTIVE FINANCE: tu día bajo control (mercado uruguayo) ---------- */
+    var uy = { USD: new Intl.NumberFormat('es-UY', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }),
+               UYU: new Intl.NumberFormat('es-UY', { style: 'currency', currency: 'UYU', maximumFractionDigits: 0 }) };
+    function dineroUY(moneda, v) { return uy[moneda].format(v); }
+    /* Importes por moneda, sin sumar dólares y pesos */
+    function porMoneda(totales) {
+        var partes = ['USD', 'UYU'].filter(function (m) { return totales[m]; }).map(function (m) { return dineroUY(m, totales[m]); });
+        return partes.length ? partes.join(' · ') : dineroUY('USD', 0);
+    }
     function escenaAutomotive(p, raiz, o) {
         var e = p.escena, conPortada = o && o.conPortada;
-        var porCobrar = e.tareas.filter(function (t) { return t.tipo !== 'aviso'; }).reduce(function (s, t) { return s + t.importe; }, 0);
-        var atencion = e.tareas.filter(function (t) { return t.tipo === 'retraso' || t.tipo === 'aviso'; }).length;
-        var accion = { cobro: 'Registrar el cobro', retraso: 'Revisar historial y preparar la comunicación de seguimiento', aviso: 'Programar un aviso al cliente' };
+        var porCobrar = {};
+        e.tareas.forEach(function (t) { if (t.tipo !== 'aviso') porCobrar[t.moneda] = (porCobrar[t.moneda] || 0) + t.importe; });
+        var atencion = e.tareas.filter(function (t) { return t.tipo !== 'cobro'; }).length;
+        var accion = { cobro: 'Registrar el cobro', retraso: 'Revisar el historial y preparar el aviso de atraso', aviso: 'Preparar un recordatorio amable' };
         return '<section class="am-escena" id="escena" aria-labelledby="am-nombre">' +
             '<header class="am-cabecera">' +
                 (conPortada ? '<div><h2 class="am-nombre aparece" id="am-nombre">' + esc(e.lema) + '</h2></div>' :
                 '<div>' + rolHTML(p) + '<h1 class="am-nombre entra" id="am-nombre" style="--d:.18s">' + esc(p.nombre) + '</h1>' +
                 '<p class="am-lema entra" style="--d:.26s">' + esc(e.lema) + '</p></div>') +
-                '<p class="am-fecha entra" style="--d:.3s">' + esc(e.fecha) + '<span>Jornada de un concesionario ficticio</span></p>' +
+                '<p class="am-fecha entra" style="--d:.3s">' + esc(e.fecha) + '<span>' + esc(e.lugar) + '</span></p>' +
             '</header>' +
             '<div class="am-kpis entra" style="--d:.36s" aria-live="polite">' +
-                '<div class="am-kpi grande"><span>Por cobrar hoy</span><strong data-kpi="pendiente">' + eur0.format(porCobrar) + '</strong></div>' +
-                '<div class="am-kpi"><span>Cobrado hoy</span><strong data-kpi="cobrado">' + eur0.format(0) + '</strong></div>' +
+                '<div class="am-kpi grande"><span>Por cobrar hoy</span><strong data-kpi="pendiente">' + porMoneda(porCobrar) + '</strong></div>' +
+                '<div class="am-kpi"><span>Cobrado hoy</span><strong data-kpi="cobrado">' + porMoneda({}) + '</strong></div>' +
                 '<div class="am-kpi"><span>Requieren atención</span><strong data-kpi="atencion">' + atencion + '</strong></div>' +
                 '<div class="am-kpi"><span>Jornada</span><strong><b data-kpi="hechas">0</b> / ' + e.tareas.length + '</strong><i class="am-barra"><i data-kpi="barra"></i></i></div>' +
             '</div>' +
@@ -475,14 +495,14 @@
                         '<span class="am-hora">' + esc(t.hora) + '</span>' +
                         '<span class="am-punto" aria-hidden="true"></span>' +
                         '<span class="am-cliente">' + esc(t.cliente) + ' <em>' + esc(t.vehiculo) + '</em></span>' +
-                        '<span class="am-texto">' + esc(t.texto) + ' · cuota ' + t.cuota + ' · ' + eur0.format(t.importe) + '</span>' +
+                        '<span class="am-texto">' + esc(t.texto) + ' · cuota ' + t.cuota + ' · ' + dineroUY(t.moneda, t.importe) + '</span>' +
                     '</button>' +
                     '<div class="am-acciones" data-acciones><p class="am-accion-txt">' + esc(accion[t.tipo]) + '.</p></div>' +
                 '</li>';
             }).join('') +
             '</ol>' +
             '<div class="am-final" data-final hidden><strong>Tu día, bajo control.</strong><span data-final-txt></span></div>' +
-            avisoSim('concesionario, clientes y cuotas ficticios. La demo no envía ninguna comunicación.') +
+            avisoSim('automotora, clientes y cuotas ficticios. La demo no envía ningún mensaje: se preparan para enviarlos por WhatsApp o email.') +
         '</section>';
     }
 
@@ -531,13 +551,15 @@
     function estadoNegocio(n, pendientes) {
         return pendientes > 0 ? { ok: false, txt: (pendientes === 1 ? 'Falta 1 movimiento' : 'Faltan ' + pendientes + ' movimientos') + ' por conciliar' } : { ok: true, txt: 'Lista para la gestoría' };
     }
-    function tarjetaNegocio(n, pendientes) {
+    /* Una empresa: lo que se ve al elegirla en el selector */
+    function detalleNegocio(n, pendientes, periodo) {
         var est = estadoNegocio(n, pendientes);
-        return '<article class="obh-negocio' + (est.ok ? ' ok' : '') + '" data-negocio="' + esc(n.id) + '">' +
-            '<header><strong>' + esc(n.n) + '</strong><span>' + esc(n.pais) + ' · ' + esc(n.moneda) + '</span></header>' +
-            '<dl><div><dt>Ingresos</dt><dd>' + dineroOutbill(n, n.ingresos) + '</dd></div><div><dt>Gastos</dt><dd>' + dineroOutbill(n, n.gastos) + '</dd></div>' +
-            '<div><dt>Resultado</dt><dd>' + dineroOutbill(n, n.ingresos - n.gastos) + '</dd></div></dl>' +
+        return '<article class="obh-detalle' + (est.ok ? ' ok' : '') + '" data-detalle="' + esc(n.id) + '">' +
+            '<header><strong>' + esc(n.n) + '</strong><span>' + esc(n.pais) + ' · ' + esc(n.moneda) + ' · ' + esc(periodo.toLowerCase()) + '</span></header>' +
+            '<div class="obh-cifras"><div><span>Ingresos</span><b>' + dineroOutbill(n, n.ingresos) + '</b></div><div><span>Gastos</span><b>' + dineroOutbill(n, n.gastos) + '</b></div><div class="res"><span>Resultado</span><b>' + dineroOutbill(n, n.ingresos - n.gastos) + '</b></div></div>' +
             '<p class="obh-estado">' + esc(est.txt) + '</p>' +
+            (pendientes ? '<button type="button" class="ob-boton principal" data-conciliar="' + esc(n.id) + '" hidden>Conciliar ' + (pendientes === 1 ? 'el movimiento pendiente' : 'los ' + pendientes + ' movimientos pendientes') + '</button>' :
+                '<p class="obh-listo">✓ Documentos revisados, banco conciliado e ' + esc(n.impuesto) + ' estimado: listo para exportar a la gestoría.</p>') +
         '</article>';
     }
     function escenaOutbill(p) {
@@ -545,16 +567,15 @@
         var entradas = [
             { id: 'recibidas', t: 'Tickets y facturas', s: 'Lectura con IA' },
             { id: 'emitidas', t: 'Facturas emitidas', s: 'Facturación' },
-            { id: 'banco', t: 'Movimientos bancarios', s: 'Conciliación bancaria' },
-            { id: 'holded', t: 'Datos de Holded', s: 'Importación' }
+            { id: 'banco', t: 'Movimientos bancarios', s: 'Conciliación desde extractos' },
+            { id: 'holded', t: 'Datos de Holded', s: 'Importación de archivos' }
         ];
         var salidas = [
-            { id: 'contabilidad', t: 'Contabilidad', s: 'Registrada en cada empresa' },
+            { id: 'contabilidad', t: 'Contabilidad', s: 'Libro contable de la empresa' },
             { id: 'impuestos', t: 'Impuestos preparados', s: 'Estimación orientativa' },
-            { id: 'gestoria', t: 'Paquete para la gestoría', s: 'Datos y justificantes' }
+            { id: 'gestoria', t: 'Paquete para la gestoría', s: 'Datos y justificantes para exportar' }
         ];
-        var total = function (k) { return e.negocios.reduce(function (t, n) { return t + n[k]; }, 0); };
-        var listas = e.negocios.filter(function (n) { return !n.pendientes; }).length;
+        var n0 = e.negocios[0];
         return '<section class="obh-escena" id="escena" aria-labelledby="obh-titulo">' +
             '<header class="obh-cabecera">' + rolHTML(p) +
                 '<h1 class="obh-titulo entra" id="obh-titulo" style="--d:.18s"><span class="obh-marca">' + esc(p.nombre) + '</span>' + esc(e.lema) + '</h1>' +
@@ -563,22 +584,17 @@
             '<div class="obh-tablero entra" style="--d:.38s">' +
                 '<section class="obh-col obh-entradas" aria-labelledby="obh-in"><h2 id="obh-in">Lo que entra</h2><ul>' +
                 entradas.map(function (x) {
-                    return '<li data-in="' + x.id + '"><span class="obh-ico" aria-hidden="true"></span><div><strong>' + esc(x.t) + '</strong><span>' + esc(x.s) + '</span></div>' +
-                        '<b data-v="' + x.id + '">' + (x.id === 'holded' ? 'Importados' : total(x.id)) + '</b></li>';
+                    return '<li data-in="' + x.id + '"><span class="obh-ico" aria-hidden="true"></span><div><strong>' + esc(x.t) + '</strong><span>' + esc(x.s) + '</span></div><b data-v="' + x.id + '"></b></li>';
                 }).join('') + '</ul></section>' +
                 '<section class="obh-centro" aria-labelledby="obh-emp"><h2 id="obh-emp">' + esc(e.periodo) + ' · tus empresas</h2>' +
-                    '<div class="obh-tabs" role="tablist" aria-label="Empresas" data-tabs hidden>' +
-                        '<button type="button" role="tab" data-tab="todas" aria-selected="true">Todas</button>' +
-                        e.negocios.map(function (n) { return '<button type="button" role="tab" data-tab="' + esc(n.id) + '" aria-selected="false">' + esc(n.n) + '</button>'; }).join('') +
+                    '<div class="obh-tabs" role="tablist" aria-label="Empresa activa">' +
+                        e.negocios.map(function (n, k) { return '<button type="button" role="tab" data-tab="' + esc(n.id) + '" aria-selected="' + (k === 0) + '"><span>' + esc(n.n) + '</span><em>' + esc(n.pais) + '</em></button>'; }).join('') +
                     '</div>' +
-                    '<div class="obh-panel" data-panel>' +
-                        '<p class="obh-resumen"><strong>' + e.negocios.length + ' empresas</strong> · ' + listas + ' listas para la gestoría</p>' +
-                        '<div class="obh-negocios">' + e.negocios.map(function (n) { return tarjetaNegocio(n, n.pendientes); }).join('') + '</div>' +
-                    '</div>' +
+                    '<div class="obh-panel" data-panel>' + e.negocios.map(function (n) { return detalleNegocio(n, n.pendientes, e.periodo); }).join('') + '</div>' +
                 '</section>' +
                 '<section class="obh-col obh-salidas" aria-labelledby="obh-out"><h2 id="obh-out">Lo que obtienes</h2><ul>' +
                 salidas.map(function (x) {
-                    return '<li data-out="' + x.id + '"><div><strong>' + esc(x.t) + '</strong><span>' + esc(x.s) + '</span></div><b data-o="' + x.id + '"></b></li>';
+                    return '<li data-out="' + x.id + '"><div><strong>' + esc(x.t) + '</strong><span data-sub="' + x.id + '">' + esc(x.s) + '</span></div><b data-o="' + x.id + '"></b></li>';
                 }).join('') + '</ul></section>' +
             '</div>' +
             avisoSim('empresas y cifras ficticias. ' + p.aviso) +
@@ -802,8 +818,9 @@
     }
 
     var api = { esc: esc, escenas: escenas, universo: universo, portada: portada, modeloTimon: modeloTimon, lecturaTimon: lecturaTimon, valorTimon: valorTimon, nombreMes: nombreMes,
-        modeloFliia: modeloFliia, frasesSueno: frasesSueno, formatoOutbill: formatoOutbill,
-        dineroOutbill: dineroOutbill, estadoNegocio: estadoNegocio, tarjetaNegocio: tarjetaNegocio };
+        modeloFliia: modeloFliia, respuestaDecision: respuestaDecision, formatoOutbill: formatoOutbill,
+        dineroOutbill: dineroOutbill, estadoNegocio: estadoNegocio, detalleNegocio: detalleNegocio,
+        dineroUY: dineroUY, porMoneda: porMoneda };
     raizGlobal.DFS_PLANTILLAS = api;
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

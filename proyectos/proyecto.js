@@ -507,6 +507,7 @@
         var e2 = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
         var planetas = escena.querySelectorAll('[data-planeta]'), detalles = escena.querySelectorAll('.fl-detalle');
         var actual = null, ultimo = P.modeloFliia(e).puedes;
+        var cifraTxt = function (v) { return (Math.round(v * 100) % 100 ? e2 : e0).format(v); };
 
         function abrir(id) {
             actual = actual === id ? null : id;
@@ -528,12 +529,11 @@
 
         function pintar(pulso) {
             var m = P.modeloFliia(e, extra);
-            animarCifra(cifra, ultimo, m.puedes, function (v) { return e0.format(v); });
+            animarCifra(cifra, ultimo, m.puedes, function (v) { return cifraTxt(v); });
+            setTimeout(function () { cifra.textContent = cifraTxt(m.puedes); }, sinMovimiento ? 0 : 750);
             ultimo = m.puedes;
-            sub.textContent = m.puedes >= 0 ? 'sin tocar tu colchón de ' + e0.format(e.colchon) : 'tendrías que tocar el colchón';
+            sub.textContent = m.puedes >= 0 ? 'después de tus gastos fijos y lo apartado en cajitas' : 'tendrías que tirar de lo apartado en cajitas';
             escena.querySelector('[data-valor="dia"]').textContent = e0.format(m.variables) + ' gastados';
-            escena.querySelector('[data-futuro]').textContent = P.frasesSueno(e, m);
-            escena.querySelector('[data-valor="suenos"]').textContent = m.meses ? 'en ' + m.meses + (m.meses === 1 ? ' mes' : ' meses') : 'en pausa';
             escena.querySelector('[data-movs]').innerHTML = movs.slice(0, 4).map(function (x) {
                 return '<li><span>' + esc(x.c) + '</span><b>' + (x.v > 0 ? '+' : '') + e2.format(x.v) + '</b></li>';
             }).join('');
@@ -563,10 +563,9 @@
             categorias.forEach(function (c) { if (concepto === 'Gasto' && c[0].test(texto)) concepto = c[1]; });
             if (ingreso) extra.ingresos += importe; else extra.gastos += importe;
             movs.unshift({ c: concepto, v: ingreso ? importe : -importe });
-            var m = pintar(['dia', 'suenos']);
+            var m = pintar(['dia']);
             msg.textContent = (ingreso ? 'Ingreso de ' : 'Gasto de ') + e2.format(importe) + ' registrado. ' +
-                (m.puedes >= 0 ? 'Puedes gastar ' + e0.format(m.puedes) + ' este mes' : 'Este mes tendrías que tocar el colchón') +
-                (m.meses ? ' y el viaje queda a ' + m.meses + (m.meses === 1 ? ' mes.' : ' meses.') : '.');
+                (m.puedes >= 0 ? 'Puedes gastar ' + cifraTxt(m.puedes) + ' este mes.' : 'Este mes tendrías que tirar de lo apartado en cajitas.');
             medir('demo-fliia', true);
         }
 
@@ -601,11 +600,7 @@
         });
 
         escena.querySelector('[data-decidir]').addEventListener('click', function () {
-            var m = P.modeloFliia(e, extra), despues = m.puedes - e.decision.importe;
-            var conDecision = P.modeloFliia(e, { ingresos: extra.ingresos, gastos: extra.gastos + e.decision.importe });
-            escena.querySelector('[data-respuesta]').textContent = despues >= 0 ?
-                'Sí. Después de la compra podrías gastar ' + e0.format(despues) + ' este mes sin tocar el colchón. ' + P.frasesSueno(e, conDecision) :
-                'Mejor esperar: faltarían ' + e0.format(-despues) + ' para no tocar el colchón y el viaje quedaría en pausa este mes.';
+            escena.querySelector('[data-respuesta]').textContent = P.respuestaDecision(e, P.modeloFliia(e, extra));
             medir('fliia-decision', true);
         });
         pintar();
@@ -619,57 +614,39 @@
         expOutbillDocs(P, e);
     }
 
-    /* Ecosistema: elegir empresa y resolver lo pendiente */
+    /* Ecosistema: el selector de empresa cambia todo el tablero (como en Outbill) */
     function expOutbillHub(P, e) {
         var escena = document.getElementById('escena');
-        escena.querySelector('[data-tabs]').hidden = false;
-        var pend = {}, actual = 'todas';
+        var pend = {}, actual = e.negocios[0].id;
         e.negocios.forEach(function (n) { pend[n.id] = n.pendientes; });
         var panel = escena.querySelector('[data-panel]');
         var v = function (k) { return escena.querySelector('[data-v="' + k + '"]'); };
         var o = function (k) { return escena.querySelector('[data-o="' + k + '"]'); };
-        function suma(lista, k) { return lista.reduce(function (t, n) { return t + n[k]; }, 0); }
         function pintar() {
-            var lista = actual === 'todas' ? e.negocios : e.negocios.filter(function (n) { return n.id === actual; });
+            var n = e.negocios.filter(function (x) { return x.id === actual; })[0], es = n.pais === 'España';
             escena.querySelectorAll('[data-tab]').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === actual ? 'true' : 'false'); });
-            v('recibidas').textContent = suma(lista, 'recibidas');
-            v('emitidas').textContent = suma(lista, 'emitidas');
-            var pendientes = lista.reduce(function (t, n) { return t + pend[n.id]; }, 0);
-            v('banco').textContent = (suma(lista, 'banco') - pendientes) + ' / ' + suma(lista, 'banco');
-            v('holded').textContent = 'Importados';
-            o('contabilidad').textContent = (suma(lista, 'recibidas') + suma(lista, 'emitidas') + suma(lista, 'banco') - pendientes) + ' registros';
-            o('impuestos').innerHTML = lista.map(function (n) { return '<span>' + esc(n.impuesto) + ' ' + P.dineroOutbill(n, n.impuestoEst) + '</span>'; }).join('');
-            var listas = lista.filter(function (n) { return !pend[n.id]; }).length;
+            v('recibidas').textContent = n.recibidas;
+            v('emitidas').textContent = n.emitidas;
+            v('banco').textContent = (n.banco - pend[n.id]) + ' / ' + n.banco;
+            v('holded').textContent = es ? 'Importados' : '—';
+            o('contabilidad').textContent = es ? (n.recibidas + n.emitidas + n.banco - pend[n.id]) + ' asientos' : '—';
+            escena.querySelector('[data-sub="contabilidad"]').textContent = es ? 'Libro contable de la empresa' : 'Disponible para empresas españolas';
+            o('impuestos').textContent = n.impuesto + ' ' + P.dineroOutbill(n, n.impuestoEst);
             var gest = o('gestoria');
-            gest.textContent = listas === lista.length ? (lista.length === 1 ? 'Listo · ' + lista[0].documentos + ' documentos' : 'Todo listo') : listas + ' de ' + lista.length + ' listos';
-            gest.closest('li').classList.toggle('listo', listas === lista.length);
-
-            if (actual === 'todas') {
-                panel.innerHTML = '<p class="obh-resumen"><strong>' + e.negocios.length + ' empresas</strong> · ' + listas + (listas === 1 ? ' lista' : ' listas') + ' para la gestoría</p>' +
-                    '<div class="obh-negocios">' + e.negocios.map(function (n) { return P.tarjetaNegocio(n, pend[n.id]); }).join('') + '</div>';
-            } else {
-                var n = lista[0], est = P.estadoNegocio(n, pend[n.id]);
-                panel.innerHTML = '<div class="obh-detalle' + (est.ok ? ' ok' : '') + '">' +
-                    '<header><strong>' + esc(n.n) + '</strong><span>' + esc(n.pais) + ' · ' + esc(n.moneda) + ' · ' + esc(e.periodo.toLowerCase()) + '</span></header>' +
-                    '<div class="obh-cifras"><div><span>Ingresos</span><b>' + P.dineroOutbill(n, n.ingresos) + '</b></div><div><span>Gastos</span><b>' + P.dineroOutbill(n, n.gastos) + '</b></div><div class="res"><span>Resultado</span><b>' + P.dineroOutbill(n, n.ingresos - n.gastos) + '</b></div></div>' +
-                    '<p class="obh-estado">' + esc(est.txt) + '</p>' +
-                    (pend[n.id] ? '<button type="button" class="ob-boton principal" data-conciliar="' + esc(n.id) + '">Conciliar ' + (pend[n.id] === 1 ? 'el movimiento pendiente' : 'los ' + pend[n.id] + ' movimientos pendientes') + '</button>' :
-                        '<p class="obh-listo">✓ Contabilidad, ' + esc(n.impuesto) + ' estimado y documentación preparados para la gestoría.</p>') +
-                '</div>';
-            }
+            gest.textContent = pend[n.id] ? 'Pendiente' : 'Listo · ' + n.documentos + ' docs';
+            gest.closest('li').classList.toggle('listo', !pend[n.id]);
+            panel.innerHTML = P.detalleNegocio(n, pend[n.id], e.periodo);
+            var b = panel.querySelector('[data-conciliar]'); if (b) b.hidden = false;
         }
         escena.addEventListener('click', function (ev) {
             var t = ev.target.closest('[data-tab]');
             if (t) { actual = t.getAttribute('data-tab'); pintar(); medir('outbill-empresa', true); return; }
-            var tarjeta = ev.target.closest('[data-negocio]');
-            if (tarjeta) { actual = tarjeta.getAttribute('data-negocio'); pintar(); return; }
             var c = ev.target.closest('[data-conciliar]');
             if (c) {
                 c.disabled = true; c.textContent = 'Conciliando…';
                 setTimeout(function () { pend[c.getAttribute('data-conciliar')] = 0; pintar(); medir('demo-outbill', true); }, sinMovimiento ? 0 : 700);
             }
         });
-        escena.querySelectorAll('[data-negocio]').forEach(function () {});
         pintar();
     }
 
@@ -760,25 +737,24 @@
        ============================================================= */
     function expAutomotive(P, e) {
         var escena = document.getElementById('escena');
-        var e0 = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
-        var estado = { cobrado: 0, pendiente: 0, atencion: 0, hechas: 0, seguimiento: 0, avisos: 0 };
+        var estado = { cobrado: {}, pendiente: {}, atencion: 0, hechas: 0, seguimiento: 0, recordatorios: 0 };
         e.tareas.forEach(function (t) {
-            if (t.tipo !== 'aviso') estado.pendiente += t.importe;
+            if (t.tipo !== 'aviso') estado.pendiente[t.moneda] = (estado.pendiente[t.moneda] || 0) + t.importe;
             if (t.tipo !== 'cobro') estado.atencion++;
         });
+        var din = function (t) { return P.dineroUY(t.moneda, t.importe); };
         var kpi = function (k) { return escena.querySelector('[data-kpi="' + k + '"]'); };
         function pintar() {
-            kpi('pendiente').textContent = e0.format(estado.pendiente);
-            kpi('cobrado').textContent = e0.format(estado.cobrado);
+            kpi('pendiente').textContent = P.porMoneda(estado.pendiente);
+            kpi('cobrado').textContent = P.porMoneda(estado.cobrado);
             kpi('atencion').textContent = estado.atencion;
             kpi('hechas').textContent = estado.hechas;
             kpi('barra').style.width = (estado.hechas / e.tareas.length * 100) + '%';
             if (estado.hechas === e.tareas.length) {
-                var f = escena.querySelector('[data-final]');
-                f.hidden = false;
-                escena.querySelector('[data-final-txt]').textContent = 'Cobrado hoy: ' + e0.format(estado.cobrado) + '. ' +
+                escena.querySelector('[data-final]').hidden = false;
+                escena.querySelector('[data-final-txt]').textContent = 'Cobrado hoy: ' + P.porMoneda(estado.cobrado) + '. ' +
                     (estado.seguimiento ? estado.seguimiento + ' cuota en seguimiento, con la gestión registrada. ' : '') +
-                    (estado.avisos ? estado.avisos + ' aviso programado.' : '');
+                    (estado.recordatorios ? estado.recordatorios + ' recordatorio enviado antes del vencimiento.' : '');
             }
         }
         function elegir(id) {
@@ -797,18 +773,28 @@
             pintar();
             medir('demo-automotive', true);
         }
+        /* Mensaje preparado y registro de que se envió a mano (como en la aplicación) */
+        function mensaje(acc, texto, alRegistrar) {
+            acc.querySelector('[data-carta]').innerHTML =
+                '<div class="am-carta">' + esc(texto) + '</div>' +
+                '<p class="am-nota-envio">Se abre en WhatsApp o en el email para enviarlo. En la demo no se envía nada.</p>' +
+                '<button type="button" class="am-boton" data-reg>Registrar: lo envié por WhatsApp</button>';
+            acc.querySelector('[data-reg]').addEventListener('click', alRegistrar);
+        }
         e.tareas.forEach(function (t) {
             var li = escena.querySelector('[data-tarea="' + t.id + '"]'), acc = li.querySelector('[data-acciones]');
             li.querySelector('[data-elegir]').addEventListener('click', function () { if (!li.classList.contains('hecha')) elegir(t.id); });
             if (t.tipo === 'cobro') {
-                acc.innerHTML = '<p class="am-accion-txt">El cliente ha pagado la cuota ' + t.cuota + '.</p><button type="button" class="am-boton">Registrar cobro de ' + e0.format(t.importe) + '</button>';
+                acc.innerHTML = '<p class="am-accion-txt">El cliente ha pagado la cuota ' + t.cuota + '.</p><button type="button" class="am-boton">Registrar cobro de ' + din(t) + '</button>';
                 acc.querySelector('button').addEventListener('click', function () {
-                    estado.cobrado += t.importe; estado.pendiente -= t.importe;
-                    hecha(li, 'Cobro de ' + e0.format(t.importe) + ' registrado');
+                    estado.cobrado[t.moneda] = (estado.cobrado[t.moneda] || 0) + t.importe;
+                    estado.pendiente[t.moneda] -= t.importe;
+                    if (!estado.pendiente[t.moneda]) delete estado.pendiente[t.moneda];
+                    hecha(li, 'Cobro de ' + din(t) + ' registrado');
                 });
             } else if (t.tipo === 'retraso') {
                 acc.innerHTML = '<p class="am-accion-txt">La cuota ' + t.cuota + ' venció hace ' + t.dias + ' días y no consta como pagada.</p>' +
-                    '<div class="am-botones"><button type="button" class="am-boton sec" data-hist>Ver historial</button><button type="button" class="am-boton" data-prep>Preparar comunicación</button></div>' +
+                    '<div class="am-botones"><button type="button" class="am-boton sec" data-hist>Ver historial</button><button type="button" class="am-boton" data-prep>Preparar aviso de atraso</button></div>' +
                     '<ul class="am-historial" hidden>' + t.historial.map(function (h) { return '<li>' + esc(h) + '</li>'; }).join('') + '</ul><div data-carta></div>';
                 acc.querySelector('[data-hist]').addEventListener('click', function () {
                     var ul = acc.querySelector('.am-historial'); ul.hidden = !ul.hidden;
@@ -816,19 +802,19 @@
                 });
                 acc.querySelector('[data-prep]').addEventListener('click', function () {
                     this.remove();
-                    acc.querySelector('[data-carta]').innerHTML =
-                        '<div class="am-carta">Hola, ' + esc(t.cliente) + ':\n\nTe escribimos porque la cuota n.º ' + t.cuota + ' de la financiación de tu vehículo, por importe de ' + e0.format(t.importe) + ', venció el 5 de marzo y todavía no consta como pagada.\n\nSi ya la has abonado, puedes ignorar este mensaje. Si necesitas organizar el pago, estamos a tu disposición.\n\nUn saludo.</div>' +
-                        '<button type="button" class="am-boton" data-reg>Registrar gestión</button>';
-                    acc.querySelector('[data-reg]').addEventListener('click', function () {
+                    mensaje(acc, 'Hola, ' + t.cliente + ':\n\nLe escribimos porque la cuota n.º ' + t.cuota + ' de la financiación de su vehículo, por ' + din(t) + ', venció el ' + t.vencio + ' y todavía no figura como pagada.\n\nSi ya la abonó, puede ignorar este mensaje. Si necesita coordinar el pago, quedamos a las órdenes.\n\nSaludos.', function () {
                         estado.atencion--; estado.seguimiento++;
-                        hecha(li, 'Comunicación preparada y gestión registrada en el historial');
+                        hecha(li, 'Aviso de atraso enviado por WhatsApp y registrado en el historial');
                     });
                 });
             } else if (t.tipo === 'aviso') {
-                acc.innerHTML = '<p class="am-accion-txt">La cuota ' + t.cuota + ' (' + e0.format(t.importe) + ') vence el 18 de marzo.</p><button type="button" class="am-boton">Programar aviso para el 17 de marzo</button>';
-                acc.querySelector('button').addEventListener('click', function () {
-                    estado.atencion--; estado.avisos++;
-                    hecha(li, 'Aviso programado para el 17 de marzo');
+                acc.innerHTML = '<p class="am-accion-txt">La cuota ' + t.cuota + ' (' + din(t) + ') vence el ' + t.vence + '.</p><button type="button" class="am-boton" data-prep>Preparar recordatorio amable</button><div data-carta></div>';
+                acc.querySelector('[data-prep]').addEventListener('click', function () {
+                    this.remove();
+                    mensaje(acc, 'Hola, ' + t.cliente + ':\n\nLe recordamos que el ' + t.vence + ' vence la cuota n.º ' + t.cuota + ' de la financiación de su vehículo, por ' + din(t) + '.\n\nCualquier consulta, quedamos a las órdenes.\n\nSaludos.', function () {
+                        estado.atencion--; estado.recordatorios++;
+                        hecha(li, 'Recordatorio enviado por WhatsApp y registrado');
+                    });
                 });
             }
         });
@@ -938,7 +924,7 @@
         var e2 = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
         var corto = function (v) { return Math.abs(v) >= 1000 ? (Math.round(v / 1000) + ' k€') : e0.format(v); };
         var base = P.modeloTimon(e);
-        var estado = { reservas: e.reservas, modoDep: 'euros', estructura: e.estructura, horas: e.horasPersona, cliente: null, reparto: Math.round(base.repartible / 10000) * 10000 };
+        var estado = { reservas: e.reservas, modoDep: 'euros', estructura: e.estructura, horas: e.horasPersona, baja: 0, reparto: Math.round(base.repartible / 10000) * 10000 };
         var actual = null;
 
         centro.classList.add('interactivo');
@@ -961,11 +947,11 @@
                     estado.reservas = +r.value;
                     viz.querySelector('#tv-res-v').textContent = r.value + ' %';
                     var m = P.modeloTimon(e, { reservas: estado.reservas });
-                    var max = P.modeloTimon(e, { reservas: 0 }).socios[0].importe;
+                    var max = Math.max.apply(null, P.modeloTimon(e, { reservas: 0 }).socios.map(function (s) { return s.importe; }));
                     viz.querySelector('#tv-orbes').innerHTML = m.socios.map(function (s) {
-                        var t = 56 + 74 * Math.sqrt(s.importe / max);
-                        return '<div class="tm-orbe"><span style="width:' + t + 'px;height:' + t + 'px"><b>' + s.pct + '%</b></span><strong>' + e0.format(s.importe) + '</strong><em>' + s.n + '</em></div>';
-                    }).join('') + '<div class="tm-orbe res"><span style="width:56px;height:56px"><b>Res.</b></span><strong>' + e0.format(m.beneficio - m.repartible) + '</strong><em>Reservas</em></div>';
+                        var t = 56 + 40 * Math.sqrt(s.importe / max);
+                        return '<div class="tm-orbe"><span style="width:' + t + 'px;height:' + t + 'px"><b>' + esc(s.dep) + '</b></span><strong>' + e0.format(s.importe) + '</strong><em>' + esc(s.n) + '</em></div>';
+                    }).join('') + '<div class="tm-orbe res"><span style="width:56px;height:56px"><b>Res.</b></span><strong>' + e0.format(m.reservasImp) + '</strong><em>Reservas</em></div>';
                     var al = viz.querySelector('#tv-alerta');
                     al.hidden = m.repartible <= m.maxReparto;
                     al.innerHTML = 'Hay beneficio, pero la tesorería solo permite repartir hoy ' + e0.format(m.maxReparto) + '. <button type="button" data-ir="tesoreria">Ver tesorería →</button>';
@@ -986,12 +972,12 @@
                         var mejor = (estado.modoDep === 'euros' ? m.mejorEuros : m.mejorPct).n === d.n;
                         if (estado.modoDep === 'euros') {
                             return '<div class="tm-barra' + (mejor ? ' mejor' : '') + '"><span class="et">' + d.n + '</span>' +
-                                '<span class="pista"><i class="coste" style="width:' + (d.costes / maxIng * 100) + '%"></i><i class="margen" style="width:' + (d.margen / maxIng * 100) + '%"></i></span>' +
-                                '<span class="v">' + e0.format(d.margen) + '</span></div>';
+                                '<span class="pista"><i class="coste" style="width:' + (d.costes / maxIng * 100) + '%"></i><i class="margen" style="width:' + (Math.max(0, d.resultado) / maxIng * 100) + '%"></i></span>' +
+                                '<span class="v">' + e0.format(d.resultado) + '</span></div>';
                         }
                         return '<div class="tm-barra' + (mejor ? ' mejor' : '') + '"><span class="et">' + d.n + '</span>' +
-                            '<span class="pista"><i class="margen" style="width:' + (d.pct / 0.5 * 100) + '%"></i></span><span class="v">' + Math.round(d.pct * 100) + ' %</span></div>';
-                    }).join('') + '<p class="tm-leyenda"><i class="coste"></i> Costes directos <i class="margen"></i> Margen</p>';
+                            '<span class="pista"><i class="margen" style="width:' + (Math.max(0, d.pct) / 0.3 * 100) + '%"></i></span><span class="v">' + Math.round(d.pct * 100) + ' %</span></div>';
+                    }).join('') + '<p class="tm-leyenda"><i class="coste"></i> Costes (directos y comunes) <i class="margen"></i> Beneficio</p>';
                     ponLectura('departamentos', m);
                     return m;
                 }
@@ -1003,26 +989,17 @@
             },
 
             costes: function (viz) {
-                viz.innerHTML = rango('tv-est', 'Costes de estructura anuales', 180000, 320000, 10000, estado.estructura, e0.format) +
-                    '<svg class="tm-grafico" viewBox="0 0 520 220" id="tv-pm" role="img" aria-label="Facturación acumulada frente al punto muerto"></svg>';
+                viz.innerHTML = rango('tv-est', 'Costes de estructura anuales', 180000, 320000, 10000, estado.estructura, e0.format) + '<div class="tm-meta" id="tv-pm"></div>';
                 var r = viz.querySelector('#tv-est');
                 function pintar() {
                     estado.estructura = +r.value;
                     viz.querySelector('#tv-est-v').textContent = e0.format(estado.estructura);
                     var m = P.modeloTimon(e, { estructura: estado.estructura });
-                    var X = function (i) { return 40 + i * 38; }, Y = function (v) { return 190 - v / m.ingresos * 170; };
-                    var pts = [];
-                    for (var i = 0; i <= 12; i++) pts.push(X(i) + ',' + Y(m.ingresos / 12 * i));
-                    var yPM = Y(Math.min(m.puntoMuerto, m.ingresos));
-                    var mesX = X(Math.min(12, m.puntoMuerto / (m.ingresos / 12)));
-                    var letras = 'EFMAMJJASOND';
+                    var fact = m.facturado / m.ingresos * 100, pm = Math.min(1, m.puntoMuerto / m.ingresos) * 100;
                     viz.querySelector('#tv-pm').innerHTML =
-                        '<line x1="40" y1="190" x2="496" y2="190" class="eje"/>' +
-                        letras.split('').map(function (l, k) { return '<text x="' + X(k + 1) + '" y="208" class="mes' + (k + 1 === m.mesPM ? ' activo' : '') + '">' + l + '</text>'; }).join('') +
-                        '<polyline points="' + pts.join(' ') + '" class="linea"/>' +
-                        '<line x1="40" x2="496" y1="' + yPM + '" y2="' + yPM + '" class="umbral"/>' +
-                        '<text x="44" y="' + (yPM - 8) + '" class="nota">Punto muerto · ' + e0.format(m.puntoMuerto) + '</text>' +
-                        (m.mesPM <= 12 ? '<circle cx="' + mesX + '" cy="' + yPM + '" r="7" class="cruce"/>' : '');
+                        '<div class="tm-meta-pista"><i class="tm-meta-fact' + (m.cubierto ? ' ok' : '') + '" style="width:' + fact + '%"></i>' +
+                            '<span class="tm-meta-pm" style="left:' + pm + '%"><em>Punto muerto · ' + e0.format(m.puntoMuerto) + '</em></span></div>' +
+                        '<div class="tm-meta-pie"><span>Facturado a ' + esc(e.facturado.fecha) + ': <b>' + e0.format(m.facturado) + '</b></span><span>Facturación prevista del año: ' + e0.format(m.ingresos) + '</span></div>';
                     ponLectura('costes', m);
                     return m;
                 }
@@ -1048,34 +1025,33 @@
             },
 
             cliente: function (viz) {
-                viz.innerHTML = '<div class="tm-conmuta" role="group" aria-label="Cliente que se pierde"><button type="button" data-cli="">Ninguno</button>' +
-                    e.clientes.map(function (cl) { return '<button type="button" data-cli="' + esc(cl.n) + '">' + esc(cl.n) + ' · ' + e0.format(cl.ingresos) + '</button>'; }).join('') +
+                viz.innerHTML = '<div class="tm-conmuta" role="group" aria-label="Bajada de ingresos"><button type="button" data-baja="0">Sin cambios</button>' +
+                    e.bajas.map(function (b) { return '<button type="button" data-baja="' + b + '">−' + e0.format(b) + '</button>'; }).join('') +
                     '</div><div id="tv-cli"></div>';
                 function pintar() {
-                    viz.querySelectorAll('[data-cli]').forEach(function (b) { b.setAttribute('aria-pressed', (b.getAttribute('data-cli') || null) === estado.cliente ? 'true' : 'false'); });
-                    var m = P.modeloTimon(e, { clienteFuera: estado.cliente });
-                    var fila = function (et, a, b) {
-                        return '<tr><th scope="row">' + et + '</th><td>' + a + '</td><td' + (a !== b ? ' class="cambia"' : '') + '>' + b + '</td></tr>';
-                    };
-                    viz.querySelector('#tv-cli').innerHTML = '<table class="tm-tabla"><thead><tr><th></th><th>Hoy</th><th>' + (estado.cliente ? 'Sin ' + esc(estado.cliente) : 'Escenario') + '</th></tr></thead><tbody>' +
+                    viz.querySelectorAll('[data-baja]').forEach(function (b) { b.setAttribute('aria-pressed', +b.getAttribute('data-baja') === estado.baja ? 'true' : 'false'); });
+                    var m = P.modeloTimon(e, { baja: estado.baja });
+                    var pc = function (x) { return (x.beneficio / x.ingresos * 100).toFixed(1).replace('.', ',') + ' %'; };
+                    var fila = function (et, a, b) { return '<tr><th scope="row">' + et + '</th><td>' + a + '</td><td' + (a !== b ? ' class="cambia"' : '') + '>' + b + '</td></tr>'; };
+                    viz.querySelector('#tv-cli').innerHTML = '<table class="tm-tabla"><thead><tr><th></th><th>Hoy</th><th>' + (estado.baja ? 'Con −' + e0.format(estado.baja) : 'Escenario') + '</th></tr></thead><tbody>' +
                         fila('Ingresos', e0.format(base.ingresos), e0.format(m.ingresos)) +
                         fila('Beneficio', e0.format(base.beneficio), e0.format(m.beneficio)) +
-                        fila('Costes cubiertos en', P.nombreMes(base.mesPM), P.nombreMes(m.mesPM)) +
-                        fila('Para ' + e.socios[0].n, e0.format(base.socios[0].importe), e0.format(m.socios[0].importe)) +
+                        fila('Margen', pc(base), pc(m)) +
+                        fila('Repartible a socios', e0.format(base.repartible), e0.format(m.repartible)) +
                         '</tbody></table>';
                     ponLectura('cliente', m);
                     return m;
                 }
                 viz.addEventListener('click', function (ev) {
-                    var b = ev.target.closest('[data-cli]');
-                    if (b) { estado.cliente = b.getAttribute('data-cli') || null; mostrar(pintar()); usadaCentro(); }
+                    var b = ev.target.closest('[data-baja]');
+                    if (b) { estado.baja = +b.getAttribute('data-baja'); mostrar(pintar()); usadaCentro(); }
                 });
                 return pintar;
             },
 
             tesoreria: function (viz) {
                 viz.innerHTML = rango('tv-rep', 'Reparto de beneficios hoy', 0, 180000, 10000, estado.reparto, e0.format) +
-                    '<svg class="tm-grafico" viewBox="0 0 520 220" id="tv-tes" role="img" aria-label="Saldo de tesorería previsto en los próximos seis meses"></svg><p class="tm-estado" id="tv-tes-est"></p>';
+                    '<svg class="tm-grafico" viewBox="0 0 520 220" id="tv-tes" role="img" aria-label="Saldo de tesorería previsto en las próximas 13 semanas"></svg><p class="tm-estado" id="tv-tes-est"></p>';
                 var r = viz.querySelector('#tv-rep');
                 function pintar() {
                     estado.reparto = +r.value;
@@ -1089,7 +1065,7 @@
                         '<line x1="40" x2="510" y1="' + Y(m.colchon) + '" y2="' + Y(m.colchon) + '" class="umbral alerta"/>' +
                         '<text x="44" y="' + (Y(m.colchon) + 16) + '" class="nota">Colchón mínimo · ' + e0.format(m.colchon) + '</text>' +
                         '<polyline points="' + serie.map(function (v, i) { return X(i) + ',' + Y(v); }).join(' ') + '" class="linea"/>' +
-                        serie.map(function (v, i) { return '<circle cx="' + X(i) + '" cy="' + Y(v) + '" r="5" class="punto' + (v < m.colchon ? ' mal' : '') + '"/><text x="' + X(i) + '" y="210" class="mes">' + (i === 0 ? 'Hoy' : '+' + i) + '</text>'; }).join('');
+                        serie.map(function (v, i) { return '<circle cx="' + X(i) + '" cy="' + Y(v) + '" r="5" class="punto' + (v < m.colchon ? ' mal' : '') + '"/><text x="' + X(i) + '" y="210" class="mes">' + (i === 0 ? 'Hoy' : 'S' + (i * 2)) + '</text>'; }).join('');
                     var est = viz.querySelector('#tv-tes-est');
                     est.className = 'tm-estado ' + (ok ? 'bien' : 'mal');
                     est.textContent = ok ? 'La tesorería aguanta: el saldo no baja de ' + e0.format(minimo) + '.' :
