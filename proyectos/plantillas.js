@@ -346,8 +346,8 @@
         return m.meses ? 'Si el mes termina así, podréis aportar ' + eur0.format(m.puedes) + ' al ' + e.sueno.n.toLowerCase() + ' y llegaréis en ' + (m.meses === 1 ? '1 mes' : m.meses + ' meses') + '.'
             : 'Este mes no quedaría margen para el ' + e.sueno.n.toLowerCase() + ' sin tocar el colchón.';
     }
-    function escenaFliia(p) {
-        var e = p.escena, m = modeloFliia(e);
+    function escenaFliia(p, raiz, o) {
+        var e = p.escena, m = modeloFliia(e), conPortada = o && o.conPortada;
         var planetas = [
             { id: 'dia', n: 'Día a día', v: eur0.format(m.variables) + ' gastados',
               d: '<p>Este mes: ' + eur0.format(m.ingresos) + ' de ingresos, ' + eur0.format(e.fijos) + ' de gastos fijos y ' + eur0.format(m.variables) + ' en el día a día.</p><ul class="fl-movs" data-movs></ul>' },
@@ -361,11 +361,13 @@
               d: '<p class="fl-pregunta">' + esc(e.decision.pregunta) + '</p><button type="button" class="fl-boton" data-decidir hidden>Analizar la decisión</button><p class="fl-respuesta" data-respuesta></p>' }
         ];
         return '<section class="fl-escena" id="escena" aria-labelledby="fl-nombre">' +
-            '<div class="fl-fondo" aria-hidden="true"><i></i><i></i><i></i></div>' +
+            (conPortada ? '' : '<div class="fl-fondo" aria-hidden="true"><i></i><i></i><i></i></div>') +
+            (conPortada ?
+            '<header class="fl-cabecera"><h2 class="fl-lema aparece" id="fl-nombre">' + esc(e.lema) + '</h2></header>' :
             '<header class="fl-cabecera">' + rolHTML(p) +
                 '<h1 class="fl-nombre entra" id="fl-nombre" style="--d:.18s">' + esc(p.nombre) + '</h1>' +
                 '<p class="fl-lema entra" style="--d:.26s">' + esc(e.lema) + '</p>' +
-            '</header>' +
+            '</header>') +
             '<div class="fl-sistema entra" style="--d:.34s">' +
                 '<svg class="fl-orbitas" viewBox="0 0 800 800" aria-hidden="true"><circle cx="400" cy="400" r="230"/><circle cx="400" cy="400" r="330" class="fina"/><circle class="fl-onda" cx="400" cy="400" r="150"/></svg>' +
                 '<div class="fl-nucleo" role="status" aria-live="polite">' +
@@ -403,7 +405,7 @@
 
     /* ---------- OUTBILL: del documento suelto a la gestoría ---------- */
     function formatoOutbill(e, emp, v) { return (e.empresas[emp].moneda === 'GBP' ? gbp2 : eur2).format(v); }
-    function escenaOutbill(p) {
+    function cadenaOutbill(p) {
         var e = p.escena;
         var tarjeta = function (d) {
             return '<li class="ob-doc" data-doc="' + esc(d.id) + '" data-emp="' + d.empresa + '">' +
@@ -420,16 +422,15 @@
                 '<span><b data-n>' + docs.length + '</b> de ' + docs.length + ' documentos</span>' +
                 '<span>' + e.empresas[k].impuesto + ' soportado: <b data-imp>' + formatoOutbill(e, k, imp) + '</b></span></div>';
         }).join('');
-        return '<section class="ob-escena" id="escena" aria-labelledby="ob-nombre">' +
+        return '<section class="ob-escena ob-secundaria" id="documentos" aria-labelledby="ob-nombre">' +
             '<header class="ob-cabecera">' +
-                '<div>' + rolHTML(p) + '<h1 class="ob-nombre entra" id="ob-nombre" style="--d:.18s">' + esc(p.nombre) + '</h1>' +
-                '<p class="ob-lema entra" style="--d:.26s">' + esc(e.lema) + '</p></div>' +
-                '<div class="ob-contadores entra" style="--d:.34s" aria-live="polite">' +
+                '<div><p class="ob-et aparece">Experiencia · lectura de documentos</p><h2 class="ob-nombre aparece" id="ob-nombre">' + esc(e.lemaDocs) + '</h2></div>' +
+                '<div class="ob-contadores aparece" aria-live="polite">' +
                     '<div class="ob-contador grande"><span>Listos para la gestoría</span><strong><b data-listos>0</b> / ' + e.documentos.length + '</strong></div>' +
                     '<div class="ob-contador"><span>Datos tecleados a mano</span><strong>0</strong></div>' +
                 '</div>' +
             '</header>' +
-            '<div class="ob-cadena entra" style="--d:.42s">' +
+            '<div class="ob-cadena aparece">' +
             e.etapas.map(function (et, k) {
                 return '<section class="ob-etapa" data-etapa="' + k + '" aria-labelledby="ob-et-' + k + '">' +
                     '<h2 id="ob-et-' + k + '"><span>' + String(k + 1).padStart(2, '0') + '</span>' + esc(et) + '</h2>' +
@@ -449,15 +450,16 @@
     }
 
     /* ---------- AUTOMOTIVE FINANCE: tu día bajo control ---------- */
-    function escenaAutomotive(p) {
-        var e = p.escena;
+    function escenaAutomotive(p, raiz, o) {
+        var e = p.escena, conPortada = o && o.conPortada;
         var porCobrar = e.tareas.filter(function (t) { return t.tipo !== 'aviso'; }).reduce(function (s, t) { return s + t.importe; }, 0);
         var atencion = e.tareas.filter(function (t) { return t.tipo === 'retraso' || t.tipo === 'aviso'; }).length;
         var accion = { cobro: 'Registrar el cobro', retraso: 'Revisar historial y preparar la comunicación de seguimiento', aviso: 'Programar un aviso al cliente' };
         return '<section class="am-escena" id="escena" aria-labelledby="am-nombre">' +
             '<header class="am-cabecera">' +
+                (conPortada ? '<div><h2 class="am-nombre aparece" id="am-nombre">' + esc(e.lema) + '</h2></div>' :
                 '<div>' + rolHTML(p) + '<h1 class="am-nombre entra" id="am-nombre" style="--d:.18s">' + esc(p.nombre) + '</h1>' +
-                '<p class="am-lema entra" style="--d:.26s">' + esc(e.lema) + '</p></div>' +
+                '<p class="am-lema entra" style="--d:.26s">' + esc(e.lema) + '</p></div>') +
                 '<p class="am-fecha entra" style="--d:.3s">' + esc(e.fecha) + '<span>Jornada de un concesionario ficticio</span></p>' +
             '</header>' +
             '<div class="am-kpis entra" style="--d:.36s" aria-live="polite">' +
@@ -485,14 +487,16 @@
     }
 
     /* ---------- NÁUTICO: el valor de tu red ---------- */
-    function escenaNautico(p) {
-        var e = p.escena;
+    function escenaNautico(p, raiz, o) {
+        var e = p.escena, conPortada = o && o.conPortada;
         return '<section class="nt-escena" id="escena" aria-labelledby="nt-nombre">' +
             '<div class="nt-mapa" data-mapa aria-hidden="true"></div>' +
+            (conPortada ?
+            '<header class="nt-cabecera"><h2 class="nt-nombre nt-nombre-sec aparece" id="nt-nombre">' + esc(e.lema) + '</h2></header>' :
             '<header class="nt-cabecera">' + rolHTML(p) +
                 '<h1 class="nt-nombre entra" id="nt-nombre" style="--d:.18s">' + esc(p.nombre) + '</h1>' +
                 '<p class="nt-lema entra" style="--d:.26s">' + esc(e.lema) + '</p>' +
-            '</header>' +
+            '</header>') +
             '<div class="nt-contadores entra" style="--d:.32s" aria-live="polite">' +
                 '<div><strong data-c="contactos">0</strong><span>Contactos</span></div>' +
                 '<div><strong data-c="entidades">0</strong><span>Empresas y barcos</span></div>' +
@@ -520,6 +524,67 @@
         '</div></section>';
     }
 
+
+    /* ---------- OUTBILL: todas tus empresas, todas tus cuentas, un solo lugar ---------- */
+    var gbp0 = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 });
+    function dineroOutbill(n, v) { return (n.moneda === 'GBP' ? gbp0 : eur0).format(v); }
+    function estadoNegocio(n, pendientes) {
+        return pendientes > 0 ? { ok: false, txt: (pendientes === 1 ? 'Falta 1 movimiento' : 'Faltan ' + pendientes + ' movimientos') + ' por conciliar' } : { ok: true, txt: 'Lista para la gestoría' };
+    }
+    function tarjetaNegocio(n, pendientes) {
+        var est = estadoNegocio(n, pendientes);
+        return '<article class="obh-negocio' + (est.ok ? ' ok' : '') + '" data-negocio="' + esc(n.id) + '">' +
+            '<header><strong>' + esc(n.n) + '</strong><span>' + esc(n.pais) + ' · ' + esc(n.moneda) + '</span></header>' +
+            '<dl><div><dt>Ingresos</dt><dd>' + dineroOutbill(n, n.ingresos) + '</dd></div><div><dt>Gastos</dt><dd>' + dineroOutbill(n, n.gastos) + '</dd></div>' +
+            '<div><dt>Resultado</dt><dd>' + dineroOutbill(n, n.ingresos - n.gastos) + '</dd></div></dl>' +
+            '<p class="obh-estado">' + esc(est.txt) + '</p>' +
+        '</article>';
+    }
+    function escenaOutbill(p) {
+        var e = p.escena;
+        var entradas = [
+            { id: 'recibidas', t: 'Tickets y facturas', s: 'Lectura con IA' },
+            { id: 'emitidas', t: 'Facturas emitidas', s: 'Facturación' },
+            { id: 'banco', t: 'Movimientos bancarios', s: 'Conciliación bancaria' },
+            { id: 'holded', t: 'Datos de Holded', s: 'Importación' }
+        ];
+        var salidas = [
+            { id: 'contabilidad', t: 'Contabilidad', s: 'Registrada en cada empresa' },
+            { id: 'impuestos', t: 'Impuestos preparados', s: 'Estimación orientativa' },
+            { id: 'gestoria', t: 'Paquete para la gestoría', s: 'Datos y justificantes' }
+        ];
+        var total = function (k) { return e.negocios.reduce(function (t, n) { return t + n[k]; }, 0); };
+        var listas = e.negocios.filter(function (n) { return !n.pendientes; }).length;
+        return '<section class="obh-escena" id="escena" aria-labelledby="obh-titulo">' +
+            '<header class="obh-cabecera">' + rolHTML(p) +
+                '<h1 class="obh-titulo entra" id="obh-titulo" style="--d:.18s"><span class="obh-marca">' + esc(p.nombre) + '</span>' + esc(e.lema) + '</h1>' +
+                '<p class="obh-beneficio entra" style="--d:.28s">' + esc(e.beneficio) + '</p>' +
+            '</header>' +
+            '<div class="obh-tablero entra" style="--d:.38s">' +
+                '<section class="obh-col obh-entradas" aria-labelledby="obh-in"><h2 id="obh-in">Lo que entra</h2><ul>' +
+                entradas.map(function (x) {
+                    return '<li data-in="' + x.id + '"><span class="obh-ico" aria-hidden="true"></span><div><strong>' + esc(x.t) + '</strong><span>' + esc(x.s) + '</span></div>' +
+                        '<b data-v="' + x.id + '">' + (x.id === 'holded' ? 'Importados' : total(x.id)) + '</b></li>';
+                }).join('') + '</ul></section>' +
+                '<section class="obh-centro" aria-labelledby="obh-emp"><h2 id="obh-emp">' + esc(e.periodo) + ' · tus empresas</h2>' +
+                    '<div class="obh-tabs" role="tablist" aria-label="Empresas" data-tabs hidden>' +
+                        '<button type="button" role="tab" data-tab="todas" aria-selected="true">Todas</button>' +
+                        e.negocios.map(function (n) { return '<button type="button" role="tab" data-tab="' + esc(n.id) + '" aria-selected="false">' + esc(n.n) + '</button>'; }).join('') +
+                    '</div>' +
+                    '<div class="obh-panel" data-panel>' +
+                        '<p class="obh-resumen"><strong>' + e.negocios.length + ' empresas</strong> · ' + listas + ' listas para la gestoría</p>' +
+                        '<div class="obh-negocios">' + e.negocios.map(function (n) { return tarjetaNegocio(n, n.pendientes); }).join('') + '</div>' +
+                    '</div>' +
+                '</section>' +
+                '<section class="obh-col obh-salidas" aria-labelledby="obh-out"><h2 id="obh-out">Lo que obtienes</h2><ul>' +
+                salidas.map(function (x) {
+                    return '<li data-out="' + x.id + '"><div><strong>' + esc(x.t) + '</strong><span>' + esc(x.s) + '</span></div><b data-o="' + x.id + '"></b></li>';
+                }).join('') + '</ul></section>' +
+            '</div>' +
+            avisoSim('empresas y cifras ficticias. ' + p.aviso) +
+        '</section>' + cadenaOutbill(p);
+    }
+
     var experiencias = { fliia: escenaFliia, outbill: escenaOutbill, automotive: escenaAutomotive, nautico: escenaNautico };
 
     /* Contenido completo de un universo (todo lo que va dentro de <main>) */
@@ -539,8 +604,8 @@
         var html = '';
 
         var propia = p.experiencia && experiencias[p.experiencia];
-        if (propia) html += propia(p, raiz);
-        if (!p.centro && !propia) html += '<section class="u-hero" id="inicio">' +
+        var conPortada = !!(propia && p.portada);
+        if (conPortada || (!p.centro && !propia)) html += '<section class="u-hero" id="inicio">' +
             '<div class="u-escena" aria-hidden="true">' + (escenas[p.id] || '') + '</div>' +
             '<div class="u-hero-inner">' +
                 '<span class="u-rol entra" style="--d:.1s"' + (/^[A-Z][a-z]+ [A-Z]/.test(p.rolEtiqueta) ? ' lang="en"' : '') + '>' + esc(p.rolEtiqueta) + '</span>' +
@@ -551,8 +616,9 @@
                     '<span>Estado<strong>' + esc(p.estado) + '</strong></span>' +
                 '</div>' +
             '</div>' +
-            '<a href="' + (p.centro ? '#centro' : '#problema') + '" class="u-bajar" aria-label="Empezar">↓</a>' +
+            '<a href="' + (propia ? '#escena' : p.centro ? '#centro' : '#problema') + '" class="u-bajar" aria-label="Empezar">↓</a>' +
         '</section>';
+        if (propia) html += propia(p, raiz, { conPortada: conPortada });
 
         if (p.centro) html += centroTimon(p) + despuesTimon(p, raiz);
         else if (!propia) {
@@ -736,7 +802,8 @@
     }
 
     var api = { esc: esc, escenas: escenas, universo: universo, portada: portada, modeloTimon: modeloTimon, lecturaTimon: lecturaTimon, valorTimon: valorTimon, nombreMes: nombreMes,
-        modeloFliia: modeloFliia, frasesSueno: frasesSueno, formatoOutbill: formatoOutbill };
+        modeloFliia: modeloFliia, frasesSueno: frasesSueno, formatoOutbill: formatoOutbill,
+        dineroOutbill: dineroOutbill, estadoNegocio: estadoNegocio, tarjetaNegocio: tarjetaNegocio };
     raizGlobal.DFS_PLANTILLAS = api;
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

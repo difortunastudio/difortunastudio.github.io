@@ -1198,3 +1198,97 @@ body[data-proyecto="timon"] .u-cierre { padding-top: 4rem; }
     .nt-l { stroke-width: 2.4; }
     .am-kpi:last-child { grid-column: 1 / -1; }
 }
+
+/* =====================================================================
+   ESCENAS BAJO UNA PORTADA (Fliia, Automotive, Binako)
+   ===================================================================== */
+body[data-proyecto="fliia"] .u-hero + .fl-escena { min-height: 0; padding-top: 4rem; }
+.u-hero + .fl-escena .fl-lema { font-size: clamp(1.4rem, 2.6vw, 1.9rem); font-weight: 500; color: var(--texto-fuerte); }
+.u-hero + .am-escena { min-height: 0; padding-top: 4rem; }
+.u-hero + .am-escena .am-nombre { font-size: clamp(1.5rem, 2.8vw, 2.1rem); }
+.u-hero + .nt-escena { padding-top: 3rem; }
+.nt-nombre-sec { font-size: clamp(1.6rem, 3vw, 2.3rem); font-style: italic; }
+.u-hero + .nt-escena .nt-mapa { inset: 2rem 0 0; }
+
+/* =====================================================================
+   OUTBILL · el ecosistema: lo que entra, tus empresas, lo que obtienes
+   ===================================================================== */
+.obh-escena { max-width: 1380px; margin: 0 auto; min-height: 100vh; min-height: 100svh; padding: 5rem 2rem 1.6rem; display: flex; flex-direction: column; gap: 1.4rem; }
+.obh-cabecera { max-width: 900px; }
+.obh-titulo { margin-top: .8rem; font-weight: 700; font-size: clamp(2.1rem, 4.4vw, 3.6rem); letter-spacing: -.04em; line-height: 1.04; color: var(--texto-fuerte); }
+.obh-marca { display: block; font-size: .95rem; letter-spacing: .02em; font-weight: 700; color: var(--c-texto); margin-bottom: .5rem; }
+.obh-beneficio { margin-top: .9rem; font-size: 1.2rem; color: var(--tenue); }
+
+.obh-tablero { flex: 1; display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.5fr) minmax(0, .85fr); gap: 2.2rem; align-items: stretch; position: relative; }
+.obh-tablero h2 { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--tenue); font-weight: 600; margin-bottom: .8rem; }
+.obh-col ul { list-style: none; display: grid; gap: .6rem; }
+.obh-col li { position: relative; display: grid; grid-template-columns: auto 1fr auto; gap: .8rem; align-items: center; padding: .85rem 1rem; border-radius: 10px; background: var(--superficie); border: 1px solid var(--linea); }
+.obh-col li strong { display: block; font-size: .93rem; color: var(--texto-fuerte); }
+.obh-col li span { font-size: .76rem; color: var(--tenue); }
+.obh-col li b { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .95rem; color: var(--texto-fuerte); font-weight: 600; text-align: right; }
+.obh-ico { width: 10px; height: 10px; border-radius: 3px; background: var(--c); box-shadow: 0 0 0 4px var(--c-suave); }
+/* flujo hacia el centro y desde el centro */
+.obh-entradas li::after, .obh-salidas li::before { content: ""; position: absolute; top: 50%; width: 2.2rem; height: 2px; background: repeating-linear-gradient(90deg, var(--c) 0 6px, transparent 6px 10px); opacity: .55; background-size: 20px 2px; animation: flujo 1s linear infinite; }
+.obh-entradas li::after { right: -2.2rem; }
+.obh-salidas li::before { left: -2.2rem; }
+@keyframes flujo { to { background-position: 20px 0; } }
+.obh-salidas li { grid-template-columns: 1fr auto; }
+.obh-salidas li b { display: grid; gap: .1rem; font-size: .9rem; }
+.obh-salidas li[data-out="gestoria"] { background: var(--c); border-color: var(--c); }
+.obh-salidas li[data-out="gestoria"] strong, .obh-salidas li[data-out="gestoria"] b { color: #fff; }
+.obh-salidas li[data-out="gestoria"] span { color: rgba(255, 255, 255, .8); }
+.obh-salidas li.listo { box-shadow: 0 14px 34px -14px rgba(37, 99, 235, .7); }
+.obh-salidas li.listo b::before { content: "✓ "; }
+
+.obh-centro { padding: 1.2rem 1.3rem; border-radius: 16px; border: 2px solid var(--c); background: linear-gradient(180deg, #f7f9ff, #fff); box-shadow: 0 30px 70px -40px rgba(37, 99, 235, .6); display: flex; flex-direction: column; }
+.obh-tabs { display: flex; gap: .35rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.obh-tabs button { padding: .45rem .85rem; border-radius: 8px; border: 1px solid var(--linea); background: #fff; font-size: .84rem; cursor: pointer; color: var(--texto); }
+.obh-tabs button[aria-selected="true"] { background: var(--texto-fuerte); color: #fff; border-color: var(--texto-fuerte); }
+.obh-panel { flex: 1; }
+.obh-resumen { font-size: .95rem; color: var(--tenue); margin-bottom: .8rem; }
+.obh-resumen strong { color: var(--texto-fuerte); }
+.obh-negocios { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; }
+.obh-negocio { padding: 1rem; border-radius: 10px; background: #fff; border: 1px solid var(--linea); cursor: pointer; transition: transform .25s, border-color .25s; display: grid; gap: .7rem; align-content: start; }
+.obh-negocio:hover { transform: translateY(-3px); border-color: var(--c); }
+.obh-negocio header strong { display: block; font-size: .98rem; color: var(--texto-fuerte); }
+.obh-negocio header span { font-size: .74rem; color: var(--tenue); }
+.obh-negocio dl { display: grid; gap: .3rem; font-size: .84rem; }
+.obh-negocio dl div { display: flex; justify-content: space-between; }
+.obh-negocio dd { font-family: ui-monospace, "SF Mono", Menlo, monospace; color: var(--texto-fuerte); }
+.obh-negocio dl div:last-child { padding-top: .3rem; border-top: 1px dashed var(--linea); font-weight: 600; }
+.obh-estado { font-size: .8rem; font-weight: 600; color: #b45309; }
+.obh-negocio.ok .obh-estado, .obh-detalle.ok .obh-estado { color: #16a34a; }
+.obh-negocio.ok .obh-estado::before, .obh-detalle.ok .obh-estado::before { content: "✓ "; }
+.obh-detalle { display: grid; gap: 1rem; animation: entra-panel .4s ease-out; }
+.obh-detalle header strong { display: block; font-size: 1.4rem; color: var(--texto-fuerte); font-weight: 700; letter-spacing: -.02em; }
+.obh-detalle header span { font-size: .82rem; color: var(--tenue); }
+.obh-cifras { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; }
+.obh-cifras div { padding: .9rem 1rem; border-radius: 10px; background: #fff; border: 1px solid var(--linea); }
+.obh-cifras span { display: block; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--tenue); }
+.obh-cifras b { font-size: 1.6rem; font-weight: 700; color: var(--texto-fuerte); font-variant-numeric: tabular-nums; }
+.obh-cifras .res { background: var(--c-suave); border-color: var(--c); }
+.obh-listo { color: #16a34a; font-weight: 600; }
+.obh-detalle .ob-boton { justify-self: start; }
+
+/* La cadena de documentos, ahora secundaria */
+.ob-secundaria { min-height: 0; padding-top: 4rem; }
+.ob-et { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--c-texto); font-weight: 600; }
+.ob-secundaria .ob-nombre { font-size: clamp(1.5rem, 2.8vw, 2.1rem); font-weight: 700; }
+.ob-secundaria .ob-etapa { min-height: 300px; }
+
+@media (max-width: 1100px) {
+    .obh-tablero { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; }
+    .obh-entradas { order: 1; } .obh-centro { order: 2; } .obh-salidas { order: 3; }
+    .obh-entradas li::after, .obh-salidas li::before { display: none; }
+    .obh-col ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+    .obh-escena { padding: 4.6rem 1.2rem 1.2rem; }
+    .obh-negocios, .obh-cifras { grid-template-columns: minmax(0, 1fr); }
+    .obh-col ul { grid-template-columns: minmax(0, 1fr); }
+    .obh-tabs { flex-wrap: nowrap; overflow-x: auto; }
+    .obh-tabs button { flex: 0 0 auto; }
+}
+@media (prefers-reduced-motion: reduce) { .obh-entradas li::after, .obh-salidas li::before { animation: none; } }
+html { scroll-padding-top: 4.2rem; }
+.u-hero + .nt-escena { padding-top: 4.4rem; }

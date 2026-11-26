@@ -69,6 +69,7 @@ window.PROYECTOS = [
         demo: null,
         capturas: {},
         experiencia: "fliia",
+        portada: true,      /* portada original (V1) y, debajo, la experiencia (V2) */
         /* Escena: una familia FICTICIA. Las cifras se calculan a partir de aquí. */
         escena: {
             lema: "Claridad para hoy. Posibilidades para mañana.",
@@ -191,45 +192,59 @@ window.PROYECTOS = [
         pagina: "proyectos/outbill.html",
         nombre: "Outbill",
         rolEtiqueta: "Producto propio",
-        claim: "Gestión empresarial sin fronteras",
-        sectores: ["Accounting", "Fintech", "Multiempresa"],
-        sector: "Gestión administrativa y contable",
+        claim: "Todas tus empresas. Todas tus cuentas. Un solo lugar.",
+        sectores: ["Gestión administrativa", "Fiscal y contable", "Multiempresa"],
+        sector: "Gestión administrativa, fiscal y contable",
         estado: "Uso privado",
         origen: "Desarrollado inicialmente para gestionar actividades empresariales en España y Reino Unido.",
-        aviso: "Las estimaciones fiscales son orientativas. Outbill no sustituye el asesoramiento de una gestoría ni cuenta con una certificación fiscal.",
+        aviso: "Las estimaciones fiscales son orientativas. Outbill no sustituye el asesoramiento de una gestoría ni garantiza el cumplimiento fiscal.",
         tema: { color: "#2563eb", fondo: "#ffffff" },
 
-        problemaCorto: "Varias empresas significan duplicar herramientas, tareas, documentación y procesos fiscales.",
-        solucionCorta: "Una plataforma multiempresa que centraliza la gestión administrativa y prepara la información para la gestoría.",
-        problema: "Gestionar varias empresas implica duplicar herramientas, tareas administrativas, documentación y procesos fiscales, y adaptarse a contextos distintos en cada una.",
-        solucion: "Una plataforma multiempresa que centraliza la gestión administrativa y facilita la preparación de información para la gestoría.",
+        problemaCorto: "Varias empresas o actividades significan duplicar herramientas, tareas, documentación y procesos fiscales.",
+        solucionCorta: "Una plataforma de gestión administrativa, fiscal y contable para pequeñas empresas y autónomos, con varias empresas en un solo lugar.",
+        problema: "Gestionar varias empresas o actividades implica duplicar herramientas, tareas administrativas, documentación y procesos fiscales, y adaptarse a contextos distintos en cada país.",
+        solucion: "Una plataforma de gestión administrativa, fiscal y contable para pequeñas empresas y autónomos, con capacidad multiempresa y adaptación a España y Reino Unido.",
         diseno: [
             { titulo: "Una sola plataforma, varias empresas", texto: "Cada empresa conserva su contexto, pero la gestión se hace desde un mismo lugar." },
-            { titulo: "Adaptarse al contexto de cada negocio", texto: "Los procesos administrativos se ajustan a cada empresa y a su contexto fiscal." },
-            { titulo: "Preparar, no sustituir", texto: "La gestoría sigue siendo clave. Outbill ordena la información y los justificantes para que llegue preparada." }
+            { titulo: "Adaptarse al contexto de cada negocio", texto: "Los procesos administrativos se ajustan a cada empresa y a su país." },
+            { titulo: "Preparar, no sustituir", texto: "La gestoría sigue siendo clave. Outbill ordena la información y la prepara para ella." }
         ],
         funcionalidades: [
-            { titulo: "Resumen económico", texto: "La situación de cada empresa de un vistazo.", captura: "resumen" },
+            { titulo: "Lectura de tickets y facturas con IA", texto: "Los documentos se leen y se registran sin teclear sus datos.", captura: "tickets" },
             { titulo: "Facturación", texto: "Emisión y control de facturas.", captura: "facturacion" },
-            { titulo: "Tickets y documentos", texto: "Digitalización de tickets y documentos.", captura: "tickets" },
-            { titulo: "Movimientos bancarios", texto: "Control de los movimientos del banco.", captura: "banco" },
-            { titulo: "Estimaciones fiscales", texto: "Una estimación orientativa de las obligaciones fiscales.", captura: "fiscal" },
-            { titulo: "Documentación para la gestoría", texto: "Exportación de datos y justificantes, preparados para la gestoría.", captura: "gestoria" }
+            { titulo: "Conciliación bancaria", texto: "Los movimientos del banco, cuadrados con lo registrado.", captura: "banco" },
+            { titulo: "Preparación de impuestos", texto: "Una estimación orientativa de los impuestos del periodo.", captura: "fiscal" },
+            { titulo: "Contabilidad", texto: "La contabilidad de cada empresa, en el mismo lugar.", captura: "contabilidad" },
+            { titulo: "Documentación para la gestoría", texto: "Datos y justificantes preparados para la gestoría.", captura: "gestoria" },
+            { titulo: "Gestión multiempresa", texto: "Varias empresas y actividades, cada una con su contexto.", captura: "resumen" },
+            { titulo: "Importación desde Holded", texto: "Importación de datos de Holded.", captura: "holded" }
         ],
         valor: [
-            "Menos herramientas y menos tareas duplicadas.",
-            "Información ordenada antes de llegar a la gestoría.",
-            "Una gestión que se adapta a cada empresa."
+            "Menos trabajo administrativo.",
+            "Más tiempo para dedicarlo al negocio.",
+            "Todas las empresas, en un solo lugar."
         ],
         demo: null,
         capturas: {},
         experiencia: "outbill",
         escena: {
-            lema: "Del documento suelto a la carpeta de la gestoría, sin teclear.",
+            lema: "Todas tus empresas. Todas tus cuentas. Un solo lugar.",
+            beneficio: "Menos trabajo administrativo. Más tiempo para tu negocio.",
+            lemaDocs: "Así llega un ticket a la carpeta de la gestoría.",
+            /* Ecosistema: tres negocios FICTICIOS de una misma persona */
+            negocios: [
+                { id: "es", n: "Estudio Ejemplo SL", pais: "España", moneda: "EUR", impuesto: "IVA",
+                  ingresos: 48200, gastos: 21350, emitidas: 18, recibidas: 64, banco: 142, pendientes: 3, impuestoEst: 3120, documentos: 82 },
+                { id: "uk", n: "Example Studio Ltd", pais: "Reino Unido", moneda: "GBP", impuesto: "VAT",
+                  ingresos: 22400, gastos: 9800, emitidas: 7, recibidas: 23, banco: 58, pendientes: 0, impuestoEst: 1640, documentos: 30 },
+                { id: "aut", n: "Actividad como autónoma", pais: "España", moneda: "EUR", impuesto: "IVA",
+                  ingresos: 9600, gastos: 2100, emitidas: 6, recibidas: 15, banco: 41, pendientes: 1, impuestoEst: 1050, documentos: 21 }
+            ],
+            periodo: "Primer trimestre",
             etapas: ["Documentos sueltos", "Captura", "Organización", "Revisión", "Gestoría"],
             empresas: {
-                A: { n: "Empresa A · España", moneda: "EUR", impuesto: "IVA" },
-                B: { n: "Empresa B · Reino Unido", moneda: "GBP", impuesto: "VAT" }
+                A: { n: "Estudio Ejemplo SL · España", moneda: "EUR", impuesto: "IVA" },
+                B: { n: "Example Studio Ltd · Reino Unido", moneda: "GBP", impuesto: "VAT" }
             },
             documentos: [
                 { id: "d1", tipo: "Ticket", emisor: "Papelería Ejemplo", empresa: "A", total: 50.00, impuesto: 8.68, cat: "Material de oficina" },
@@ -281,6 +296,7 @@ window.PROYECTOS = [
         demo: null,
         capturas: {},
         experiencia: "automotive",
+        portada: true,      /* portada original (V1) y, debajo, la experiencia (V2) */
         escena: {
             lema: "Cada cuota, cada vencimiento y cada cliente, bajo control.",
             fecha: "Martes, 15 de marzo",
@@ -333,6 +349,7 @@ window.PROYECTOS = [
         demo: null,
         capturas: {},
         experiencia: "nautico",
+        portada: true,      /* portada original (V1) y, debajo, la experiencia (V2) */
         escena: {
             lema: "Cada tarjeta es una puerta. La red es la oportunidad.",
             evento: "Salón náutico (demo)",

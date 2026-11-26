@@ -615,7 +615,66 @@
        OUTBILL · la pila de documentos se convierte en orden
        ============================================================= */
     function expOutbill(P, e) {
+        expOutbillHub(P, e);
+        expOutbillDocs(P, e);
+    }
+
+    /* Ecosistema: elegir empresa y resolver lo pendiente */
+    function expOutbillHub(P, e) {
         var escena = document.getElementById('escena');
+        escena.querySelector('[data-tabs]').hidden = false;
+        var pend = {}, actual = 'todas';
+        e.negocios.forEach(function (n) { pend[n.id] = n.pendientes; });
+        var panel = escena.querySelector('[data-panel]');
+        var v = function (k) { return escena.querySelector('[data-v="' + k + '"]'); };
+        var o = function (k) { return escena.querySelector('[data-o="' + k + '"]'); };
+        function suma(lista, k) { return lista.reduce(function (t, n) { return t + n[k]; }, 0); }
+        function pintar() {
+            var lista = actual === 'todas' ? e.negocios : e.negocios.filter(function (n) { return n.id === actual; });
+            escena.querySelectorAll('[data-tab]').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === actual ? 'true' : 'false'); });
+            v('recibidas').textContent = suma(lista, 'recibidas');
+            v('emitidas').textContent = suma(lista, 'emitidas');
+            var pendientes = lista.reduce(function (t, n) { return t + pend[n.id]; }, 0);
+            v('banco').textContent = (suma(lista, 'banco') - pendientes) + ' / ' + suma(lista, 'banco');
+            v('holded').textContent = 'Importados';
+            o('contabilidad').textContent = (suma(lista, 'recibidas') + suma(lista, 'emitidas') + suma(lista, 'banco') - pendientes) + ' registros';
+            o('impuestos').innerHTML = lista.map(function (n) { return '<span>' + esc(n.impuesto) + ' ' + P.dineroOutbill(n, n.impuestoEst) + '</span>'; }).join('');
+            var listas = lista.filter(function (n) { return !pend[n.id]; }).length;
+            var gest = o('gestoria');
+            gest.textContent = listas === lista.length ? (lista.length === 1 ? 'Listo · ' + lista[0].documentos + ' documentos' : 'Todo listo') : listas + ' de ' + lista.length + ' listos';
+            gest.closest('li').classList.toggle('listo', listas === lista.length);
+
+            if (actual === 'todas') {
+                panel.innerHTML = '<p class="obh-resumen"><strong>' + e.negocios.length + ' empresas</strong> · ' + listas + (listas === 1 ? ' lista' : ' listas') + ' para la gestoría</p>' +
+                    '<div class="obh-negocios">' + e.negocios.map(function (n) { return P.tarjetaNegocio(n, pend[n.id]); }).join('') + '</div>';
+            } else {
+                var n = lista[0], est = P.estadoNegocio(n, pend[n.id]);
+                panel.innerHTML = '<div class="obh-detalle' + (est.ok ? ' ok' : '') + '">' +
+                    '<header><strong>' + esc(n.n) + '</strong><span>' + esc(n.pais) + ' · ' + esc(n.moneda) + ' · ' + esc(e.periodo.toLowerCase()) + '</span></header>' +
+                    '<div class="obh-cifras"><div><span>Ingresos</span><b>' + P.dineroOutbill(n, n.ingresos) + '</b></div><div><span>Gastos</span><b>' + P.dineroOutbill(n, n.gastos) + '</b></div><div class="res"><span>Resultado</span><b>' + P.dineroOutbill(n, n.ingresos - n.gastos) + '</b></div></div>' +
+                    '<p class="obh-estado">' + esc(est.txt) + '</p>' +
+                    (pend[n.id] ? '<button type="button" class="ob-boton principal" data-conciliar="' + esc(n.id) + '">Conciliar ' + (pend[n.id] === 1 ? 'el movimiento pendiente' : 'los ' + pend[n.id] + ' movimientos pendientes') + '</button>' :
+                        '<p class="obh-listo">✓ Contabilidad, ' + esc(n.impuesto) + ' estimado y documentación preparados para la gestoría.</p>') +
+                '</div>';
+            }
+        }
+        escena.addEventListener('click', function (ev) {
+            var t = ev.target.closest('[data-tab]');
+            if (t) { actual = t.getAttribute('data-tab'); pintar(); medir('outbill-empresa', true); return; }
+            var tarjeta = ev.target.closest('[data-negocio]');
+            if (tarjeta) { actual = tarjeta.getAttribute('data-negocio'); pintar(); return; }
+            var c = ev.target.closest('[data-conciliar]');
+            if (c) {
+                c.disabled = true; c.textContent = 'Conciliando…';
+                setTimeout(function () { pend[c.getAttribute('data-conciliar')] = 0; pintar(); medir('demo-outbill', true); }, sinMovimiento ? 0 : 700);
+            }
+        });
+        escena.querySelectorAll('[data-negocio]').forEach(function () {});
+        pintar();
+    }
+
+    function expOutbillDocs(P, e) {
+        var escena = document.getElementById('documentos');
         mostrarOcultos(escena);
         var pilas = Array.prototype.map.call(escena.querySelectorAll('.ob-etapa'), function (et) { return et.querySelector('.ob-pila'); });
         var listos = escena.querySelector('[data-listos]'), msg = escena.querySelector('[data-msg]');
@@ -655,7 +714,7 @@
                             setTimeout(function () {
                                 li.remove(); d.listo = true; hechos++; enCurso--; carpetas();
                                 if (hechos === e.documentos.length) {
-                                    msg.textContent = 'Todo listo: la documentación de las dos empresas está ordenada y preparada para la gestoría, sin teclear un solo dato.';
+                                    msg.textContent = 'Todo listo: los documentos de las dos empresas están ordenados y preparados para la gestoría, sin teclear sus datos.';
                                     escena.classList.add('completo');
                                 }
                                 if (fin) fin();
