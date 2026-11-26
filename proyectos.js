@@ -315,11 +315,11 @@ window.PROYECTOS = [
         id: "nautico",
         pagina: "proyectos/nautico.html",
         nombre: window.NOMBRE_NAUTICO,
-        rolEtiqueta: "Validación sectorial",
+        rolEtiqueta: "Producto propio",
         claim: "Inteligencia relacional para la industria náutica",
         sectores: ["Yachting", "Networking", "AI"],
         sector: "Yachting e inteligencia relacional",
-        estado: "Desarrollo y validación sectorial",
+        estado: "Beta privada · Acceso por invitación",
         origen: "Diseñado a partir de necesidades reales de profesionales de la industria internacional de los superyates.",
         tema: { color: "#2dd4bf", fondo: "#04212a" },
 
