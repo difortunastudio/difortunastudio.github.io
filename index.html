@@ -939,6 +939,24 @@
         .proyecto:hover::after { opacity: 1; }
         .proyecto.destacado { grid-column: 1 / -1; flex-direction: row; }
 
+        /* Cada tarjeta lleva el acento de su universo */
+        .proyecto, .caso { --acento: var(--verde-brillo); }
+        .proyecto .estado::before, .caso .estado::before { background: var(--acento); box-shadow: 0 0 8px var(--acento); }
+        .proyecto .insignia { color: var(--acento); filter: brightness(1.35) saturate(.85); }
+        .proyecto:hover { border-color: color-mix(in srgb, var(--acento) 55%, transparent); }
+
+        /* Cortina de transición hacia los universos */
+        .cortina {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            pointer-events: none;
+            background: var(--cortina, #061310);
+            clip-path: circle(0% at var(--cx, 50%) var(--cy, 50%));
+        }
+        .cortina.cubre { clip-path: circle(150% at var(--cx, 50%) var(--cy, 50%)); }
+        .cortina.anima { transition: clip-path 0.6s cubic-bezier(0.7, 0, 0.3, 1); }
+
         /* Composición tipográfica (o captura real cuando la haya) */
         .proyecto-visual {
             position: relative;
@@ -948,7 +966,7 @@
             background:
                 linear-gradient(rgba(134, 239, 172, 0.06) 1px, transparent 1px) 0 0 / 28px 28px,
                 linear-gradient(90deg, rgba(134, 239, 172, 0.06) 1px, transparent 1px) 0 0 / 28px 28px,
-                radial-gradient(80% 90% at 85% 10%, rgba(134, 239, 172, 0.16), transparent 70%);
+                radial-gradient(80% 90% at 85% 10%, color-mix(in srgb, var(--acento) 30%, transparent), transparent 70%);
         }
         .destacado .proyecto-visual { flex: 0 0 44%; min-height: 380px; border-bottom: 0; border-right: 1px solid var(--linea); }
         .proyecto-visual img { width: 100%; height: 100%; object-fit: cover; display: block; position: absolute; inset: 0; }
@@ -970,17 +988,17 @@
             line-height: 1;
             white-space: nowrap;
             color: transparent;
-            -webkit-text-stroke: 1px rgba(134, 239, 172, 0.42);
+            -webkit-text-stroke: 1px color-mix(in srgb, var(--acento) 60%, transparent);
             transition: -webkit-text-stroke-color 0.45s, transform 0.8s var(--curva);
         }
         .destacado .visual-nombre {
             font-size: clamp(5rem, 11vw, 9rem);
-            color: rgba(134, 239, 172, 0.08);
-            -webkit-text-stroke-color: rgba(134, 239, 172, 0.6);
+            color: color-mix(in srgb, var(--acento) 10%, transparent);
+            -webkit-text-stroke-color: color-mix(in srgb, var(--acento) 80%, transparent);
             text-shadow: 0 0 60px rgba(74, 222, 128, 0.25);
         }
         .visual-nombre.largo { font-size: clamp(2.4rem, 4.6vw, 3.4rem); }
-        .proyecto:hover .visual-nombre { -webkit-text-stroke-color: rgba(134, 239, 172, 0.75); transform: translateX(6px); }
+        .proyecto:hover .visual-nombre { -webkit-text-stroke-color: var(--acento); transform: translateX(6px); }
         .visual-sectores {
             position: absolute;
             top: 1rem; right: 1.2rem;
@@ -1006,8 +1024,8 @@
             top: -4px; left: 50%;
             width: 7px; height: 7px;
             border-radius: 50%;
-            background: var(--verde-brillo);
-            box-shadow: 0 0 12px var(--verde-brillo);
+            background: var(--acento);
+            box-shadow: 0 0 12px var(--acento);
         }
         .destacado .visual-orbita { width: 200px; height: 200px; right: 14%; top: 18%; animation: girar 40s linear infinite; }
         @keyframes girar { to { transform: rotate(360deg); } }
@@ -1075,6 +1093,7 @@
             cursor: pointer;
             transition: background 0.3s, border-color 0.3s;
         }
+        a.abrir-ficha { text-decoration: none; position: static; }
         .abrir-ficha:hover { background: rgba(134, 239, 172, 0.12); border-color: rgba(134, 239, 172, 0.55); }
         /* Toda la tarjeta abre la ficha */
         .abrir-ficha::before { content: ""; position: absolute; inset: 0; z-index: 0; }
@@ -1087,82 +1106,6 @@
             border-bottom: 1px solid var(--linea-fuerte);
         }
         .enlace-externo:hover { color: var(--verde-brillo); border-bottom-color: var(--verde-brillo); }
-
-        /* ===== FICHA DE PROYECTO (panel) ===== */
-        .ficha {
-            margin: 0 0 0 auto;
-            width: min(600px, 100%);
-            max-width: 100%;
-            height: 100%;
-            max-height: 100%;
-            border: 0;
-            border-left: 1px solid var(--linea-fuerte);
-            background: linear-gradient(170deg, #0b231b 0%, #061310 60%);
-            color: var(--texto);
-            padding: 0;
-            overflow-y: auto;
-            overscroll-behavior: contain;
-        }
-        .ficha::backdrop { background: rgba(3, 10, 8, 0.66); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
-        .ficha[open] { animation: entrar-panel 0.5s var(--curva); }
-        @keyframes entrar-panel { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
-        .ficha-inner { padding: 2.2rem 2.4rem 3rem; }
-        .ficha-cerrar {
-            position: sticky;
-            top: 0;
-            float: right;
-            margin: -0.6rem -0.8rem 0 0;
-            width: 38px; height: 38px;
-            border-radius: 50%;
-            border: 1px solid var(--linea-fuerte);
-            background: rgba(6, 19, 16, 0.8);
-            cursor: pointer;
-            font-size: 1rem;
-            color: var(--texto-fuerte);
-        }
-        .ficha-cerrar:hover { background: rgba(134, 239, 172, 0.12); }
-        .ficha .estado { margin-top: 0.8rem; }
-        .ficha h2 { font-size: 2.4rem; font-weight: 300; letter-spacing: -0.03em; color: var(--texto-fuerte); line-height: 1.1; }
-        .ficha .proyecto-claim { font-size: 1.15rem; }
-        .ficha-visual {
-            margin-top: 1.8rem;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid var(--linea);
-            display: grid;
-            gap: 1px;
-            background: var(--linea);
-        }
-        .ficha-visual img { width: 100%; display: block; }
-        .ficha h3 {
-            margin-top: 2.1rem;
-            font-size: 0.62rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.24em;
-            color: var(--verde-texto);
-        }
-        .ficha p { margin-top: 0.6rem; line-height: 1.75; }
-        .ficha ul { margin-top: 0.8rem; list-style: none; display: grid; gap: 0.55rem; }
-        .ficha li { position: relative; padding-left: 1.3rem; line-height: 1.5; }
-        .ficha li::before {
-            content: "";
-            position: absolute;
-            left: 0; top: 0.6em;
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            border: 1px solid var(--verde-brillo);
-        }
-        .ficha .bloque-vision {
-            margin-top: 2.1rem;
-            padding: 1.2rem 1.3rem;
-            border-radius: 14px;
-            border: 1px dashed var(--linea-fuerte);
-            background: rgba(134, 239, 172, 0.04);
-        }
-        .ficha .bloque-vision h3 { margin-top: 0; }
-        .ficha .origen { margin-top: 2rem; font-size: 0.88rem; color: var(--texto-tenue); font-style: italic; }
-        .ficha-acciones { margin-top: 2.4rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
 
         /* ===== 06 · COLABORACIÓN ===== */
         .modos {
@@ -1197,6 +1140,7 @@
         .modo p { margin-top: 0.9rem; font-size: 0.93rem; line-height: 1.65; }
         .modo .boton { margin-top: auto; align-self: flex-start; font-size: 0.85rem; padding: 0.75rem 1.3rem; }
         .modo p:last-of-type { margin-bottom: 1.8rem; }
+        .sr-sub { margin-top: 1.4rem; max-width: 40em; font-size: 1.04rem; font-weight: 400; line-height: 1.8; color: var(--texto); }
 
         .proceso { margin-top: 5rem; }
         .proceso-titulo { font-size: 1.35rem; font-weight: 300; color: var(--texto-fuerte); }
@@ -1220,6 +1164,7 @@
         .proceso .n { font-size: 0.64rem; color: var(--texto-tenue); letter-spacing: 0.1em; }
         .proceso h4 { margin-top: 0.2rem; font-size: 1.02rem; font-weight: 500; color: var(--texto-fuerte); }
         .proceso p { margin-top: 0.4rem; font-size: 0.9rem; line-height: 1.6; }
+        .proceso p strong { display: block; font-weight: 500; color: var(--verde-texto); }
         .proceso .proceso-nota { margin-top: 2.2rem; font-size: 0.86rem; color: var(--texto-tenue); max-width: 46em; }
 
         /* ===== 07 · CONTACTO ===== */
@@ -1486,7 +1431,7 @@
             .foco { display: none; }
             .js .reveal { opacity: 1; transform: none; transition: none; }
             .venn-circulo circle, .venn-circulo text, .venn-centro { transition: none; }
-            .ficha[open] { animation: none; }
+            .cortina { display: none; }
         }
     </style>
 </head>
@@ -1549,8 +1494,8 @@
                 </p>
 
                 <div class="hero-ctas reveal" style="--d: 0.8s">
-                    <a href="#contacto" class="boton" data-evento="cta-hero-contacto">Cuéntame qué necesitas resolver <span class="flecha">↗</span></a>
-                    <a href="#proyectos" class="boton-texto" data-evento="cta-hero-proyectos">Explorar mis proyectos ↓</a>
+                    <a href="#proyectos" class="boton" data-evento="cta-hero-proyectos">Explora mis proyectos <span class="flecha">↓</span></a>
+                    <a href="#contacto" class="boton-texto" data-evento="cta-hero-contacto">Trabajemos juntos ↗</a>
                 </div>
             </div>
 
@@ -1627,6 +1572,7 @@
             <h2 class="metodo-titulo reveal" id="metodo-titulo">
                 Observo <span class="sep">→</span> Detecto <span class="sep">→</span> Entiendo <span class="sep">→</span> Diseño <span class="sep">→</span> Construyo <span class="sep">→</span> Resuelvo.
             </h2>
+            <p class="sec-intro reveal">No parto de una tecnología buscando dónde aplicarla. Parto de una necesidad real y construyo la solución adecuada.</p>
 
             <div class="metodo" id="metodo">
                 <div class="metodo-linea" aria-hidden="true"><div class="metodo-relleno"></div></div>
@@ -1699,29 +1645,29 @@
             <div class="sec-cabecera reveal"><span class="num">06</span>Formas de colaboración</div>
             <h2 class="sec-titulo reveal" id="colaborar-titulo" lang="en">Different ways to <em>build together.</em></h2>
 
+            <h3 class="sr-sub reveal">No vendo horas de desarrollo: ofrezco capacidad de análisis, diseño y construcción de soluciones.</h3>
             <div class="modos">
                 <article class="modo reveal">
                     <svg class="modo-glifo" viewBox="0 0 64 64" aria-hidden="true">
-                        <rect x="6" y="6" width="52" height="52" rx="10" />
-                        <path class="lleno" d="M18 18h28v12a6 6 0 0 1-6 6h-4v10H18z" />
+                        <circle cx="28" cy="28" r="16" />
+                        <path d="M40 40l14 14" />
+                        <path class="lleno" d="M20 28h16M28 20v16" />
                     </svg>
-                    <span class="modo-codigo">01 · Custom Solutions</span>
-                    <h3>Soluciones tecnológicas a medida</h3>
-                    <p>Para empresas que necesitan resolver problemas que las herramientas existentes no consiguen solucionar.</p>
-                    <p>Desde el diagnóstico de necesidades hasta el diseño y construcción de una solución funcional.</p>
-                    <a href="#contacto" class="boton" data-necesidad="Resolver un problema de mi empresa" data-evento="colaboracion-custom">Tengo un problema que resolver <span class="flecha">↗</span></a>
+                    <span class="modo-codigo">01 · Consultoría</span>
+                    <h3>Consultoría y diseño de soluciones</h3>
+                    <p>Analizar procesos, identificar problemas y diseñar soluciones tecnológicas adaptadas al negocio.</p>
+                    <a href="#contacto" class="boton" data-tipo="consultoria" data-evento="colaboracion-consultoria">Tengo un problema que resolver <span class="flecha">↗</span></a>
                 </article>
 
                 <article class="modo reveal" style="--d: 0.12s">
                     <svg class="modo-glifo" viewBox="0 0 64 64" aria-hidden="true">
-                        <circle cx="32" cy="32" r="26" stroke-dasharray="2 4" />
-                        <circle cx="32" cy="32" r="16" />
-                        <circle class="lleno" cx="32" cy="32" r="7" />
+                        <rect x="6" y="6" width="52" height="52" rx="10" />
+                        <path class="lleno" d="M18 18h28v12a6 6 0 0 1-6 6h-4v10H18z" />
                     </svg>
-                    <span class="modo-codigo">02 · Own Products</span>
-                    <h3>Productos tecnológicos propios</h3>
-                    <p>Desarrollo de productos escalables que nacen de necesidades reales y pueden aportar valor a múltiples usuarios o empresas.</p>
-                    <a href="#proyectos" class="boton" data-evento="colaboracion-productos">Explorar productos <span class="flecha">↓</span></a>
+                    <span class="modo-codigo">02 · Desarrollo a medida</span>
+                    <h3>Desarrollo de productos a medida</h3>
+                    <p>Construir herramientas digitales, automatizaciones, aplicaciones y sistemas de gestión específicos.</p>
+                    <a href="#contacto" class="boton" data-tipo="desarrollo" data-evento="colaboracion-desarrollo">Quiero construir una solución <span class="flecha">↗</span></a>
                 </article>
 
                 <article class="modo reveal" style="--d: 0.24s">
@@ -1730,22 +1676,22 @@
                         <circle cx="40" cy="32" r="17" />
                         <path class="lleno" d="M32 17.4a17 17 0 0 1 0 29.2 17 17 0 0 1 0-29.2z" />
                     </svg>
-                    <span class="modo-codigo">03 · Strategic Partnerships</span>
-                    <h3>Construyamos algo juntos</h3>
-                    <p>Colaboraciones con profesionales que conocen profundamente un sector, han identificado una oportunidad y necesitan capacidad de diseño y construcción tecnológica.</p>
-                    <a href="#contacto" class="boton" data-necesidad="Explorar una colaboración" data-evento="colaboracion-partnership">Tengo una oportunidad de negocio <span class="flecha">↗</span></a>
+                    <span class="modo-codigo">03 · Colaboraciones</span>
+                    <h3>Colaboraciones estratégicas</h3>
+                    <p>Colaborar con profesionales y empresas que conocen profundamente un sector y han identificado una oportunidad tecnológica.</p>
+                    <a href="#contacto" class="boton" data-tipo="colaboracion" data-evento="colaboracion-estrategica">Tengo una oportunidad de negocio <span class="flecha">↗</span></a>
                 </article>
             </div>
 
             <div class="proceso">
                 <h3 class="proceso-titulo reveal">Cómo trabajamos juntos</h3>
                 <ol>
-                    <li class="reveal"><span class="n">01</span><h4>Discovery</h4><p>Primera conversación para entender tu situación, necesidades y objetivos.</p></li>
-                    <li class="reveal" style="--d: 0.08s"><span class="n">02</span><h4>Solution Design</h4><p>Análisis del problema y definición de una propuesta de solución, alcance y presupuesto.</p></li>
-                    <li class="reveal" style="--d: 0.16s"><span class="n">03</span><h4>Build</h4><p>Diseño y construcción del producto o herramienta.</p></li>
-                    <li class="reveal" style="--d: 0.24s"><span class="n">04</span><h4>Evolution</h4><p>Puesta en marcha, validación y evolución según las necesidades reales.</p></li>
+                    <li class="reveal"><span class="n">01</span><h4>Discovery</h4><p><strong>Entender el negocio.</strong> Primera conversación para entender tu situación, necesidades y objetivos.</p></li>
+                    <li class="reveal" style="--d: 0.08s"><span class="n">02</span><h4>Solution Design</h4><p><strong>Diseñar la solución.</strong> Análisis del problema y definición de una propuesta de solución, alcance y presupuesto.</p></li>
+                    <li class="reveal" style="--d: 0.16s"><span class="n">03</span><h4>Build</h4><p><strong>Construir y validar.</strong> Diseño, construcción y validación del producto o herramienta.</p></li>
+                    <li class="reveal" style="--d: 0.24s"><span class="n">04</span><h4>Evolution</h4><p><strong>Mejorar y evolucionar.</strong> Puesta en marcha, validación y evolución según las necesidades reales.</p></li>
                 </ol>
-                <p class="proceso-nota reveal">Cada proyecto se valora según su alcance, complejidad y necesidades.</p>
+                <p class="proceso-nota reveal">No se empieza a desarrollar sin comprender antes el problema. Cada proyecto se valora según su alcance, complejidad y necesidades.</p>
             </div>
         </section>
 
@@ -1754,8 +1700,8 @@
             <div class="contacto-grid">
                 <div>
                     <div class="sec-cabecera reveal"><span class="num">07</span>Contacto · Discovery</div>
-                    <h2 class="sec-titulo reveal" id="contacto-titulo">Cuéntame qué necesitas <em>resolver.</em></h2>
-                    <p class="sec-intro reveal">No necesitas saber qué tecnología necesitas ni tener una solución definida. Cuéntame cómo funciona tu negocio, qué problema has detectado o qué oportunidad quieres explorar.</p>
+                    <h2 class="sec-titulo reveal" id="contacto-titulo">¿Qué necesitas <em>resolver?</em></h2>
+                    <p class="sec-intro reveal">Cuéntame cómo funciona tu negocio, qué procesos te quitan tiempo o qué necesidad todavía no has conseguido resolver. No hace falta que sepas qué tecnología necesitas.</p>
 
                     <div class="contacto-directo reveal">
                         <a href="mailto:hola@difortunastudio.com" data-evento="click-email"><span class="i">✉</span>hola@difortunastudio.com</a>
@@ -1788,7 +1734,7 @@
                         </div>
                         <div class="fila">
                             <div class="campo">
-                                <label for="f-empresa">Empresa o proyecto <span class="opcional">(opcional)</span></label>
+                                <label for="f-empresa">Empresa <span class="opcional">(opcional)</span></label>
                                 <input type="text" id="f-empresa" name="empresa" autocomplete="organization" maxlength="160" />
                             </div>
                             <div class="campo">
@@ -1798,20 +1744,19 @@
                         </div>
 
                         <fieldset class="campo" aria-describedby="e-necesidad">
-                            <legend>¿Qué necesitas?</legend>
+                            <legend>Tipo de colaboración</legend>
                             <div class="chips">
-                                <label class="chip"><input type="radio" name="necesidad" value="Resolver un problema de mi empresa" required /><span>Resolver un problema de mi empresa</span></label>
-                                <label class="chip"><input type="radio" name="necesidad" value="Automatizar un proceso" /><span>Automatizar un proceso</span></label>
-                                <label class="chip"><input type="radio" name="necesidad" value="Construir un producto tecnológico" /><span>Construir un producto tecnológico</span></label>
-                                <label class="chip"><input type="radio" name="necesidad" value="Explorar una colaboración" /><span>Explorar una colaboración</span></label>
-                                <label class="chip"><input type="radio" name="necesidad" value="Conocer alguno de tus productos" /><span>Conocer alguno de tus productos</span></label>
-                                <label class="chip"><input type="radio" name="necesidad" value="Otra necesidad" /><span>Otra necesidad</span></label>
+                                <label class="chip"><input type="radio" name="necesidad" value="Consultoría y diseño de soluciones" data-tipo="consultoria" required /><span>Consultoría y diseño de soluciones</span></label>
+                                <label class="chip"><input type="radio" name="necesidad" value="Desarrollo de un producto a medida" data-tipo="desarrollo" /><span>Desarrollo de un producto a medida</span></label>
+                                <label class="chip"><input type="radio" name="necesidad" value="Colaboración estratégica" data-tipo="colaboracion" /><span>Colaboración estratégica</span></label>
+                                <label class="chip"><input type="radio" name="necesidad" value="Conocer alguno de tus productos" data-tipo="productos" /><span>Conocer alguno de tus productos</span></label>
+                                <label class="chip"><input type="radio" name="necesidad" value="Otra necesidad" data-tipo="otra" /><span>Otra necesidad</span></label>
                             </div>
                             <span class="error-campo" id="e-necesidad"></span>
                         </fieldset>
 
                         <div class="campo">
-                            <label for="f-mensaje">Cuéntame tu situación</label>
+                            <label for="f-mensaje">Descripción de la necesidad</label>
                             <textarea id="f-mensaje" name="mensaje" required minlength="20" maxlength="4000" aria-describedby="e-mensaje"
                                 placeholder="¿Qué problema tienes actualmente? ¿Cómo lo estás resolviendo? ¿Qué te gustaría mejorar?"></textarea>
                             <span class="error-campo" id="e-mensaje"></span>
@@ -1874,10 +1819,6 @@
 
     </main>
 
-    <!-- Ficha ampliada de proyecto -->
-    <dialog class="ficha" id="ficha" aria-labelledby="ficha-titulo">
-        <div class="ficha-inner" id="ficha-contenido"></div>
-    </dialog>
 
     <script src="proyectos.js"></script>
     <script>
@@ -1958,9 +1899,19 @@
             var cajaCaso = document.getElementById('caso-destacado');
             var seccionProyectos = document.getElementById('proyectos');
 
+            function primeraCaptura(p) {
+                var c = p.capturas || {};
+                for (var k = 0; k < (p.funcionalidades || []).length; k++) {
+                    var f = p.funcionalidades[k];
+                    if (f.captura && c[f.captura]) return c[f.captura];
+                }
+                return null;
+            }
+
             function visualHTML(p, i) {
-                if (p.capturas && p.capturas.length) {
-                    return '<div class="proyecto-visual"><img src="' + escapar(p.capturas[0].src) + '" alt="' + escapar(p.capturas[0].alt || '') + '" loading="lazy" /></div>';
+                var cap = primeraCaptura(p);
+                if (cap) {
+                    return '<div class="proyecto-visual"><img src="' + escapar(cap.src) + '" alt="' + escapar(cap.alt || '') + '" loading="lazy" /></div>';
                 }
                 return '<div class="proyecto-visual" aria-hidden="true">' +
                     '<span class="visual-num">' + String(i + 1).padStart(2, '0') + ' / ' + String(proyectos.length).padStart(2, '0') + '</span>' +
@@ -1970,21 +1921,20 @@
                 '</div>';
             }
 
+            function enlaceUniverso(p, clase) {
+                return '<a class="' + clase + '" href="' + escapar(p.pagina) + '" data-entrar="' + escapar(p.id) + '">Entrar en el universo ' + escapar(p.nombre) + ' <span aria-hidden="true">→</span></a>';
+            }
+
             /* Featured Case Study: narrativa antes / después */
             function casoHTML(p) {
                 var c = p.caso || {};
-                var capturas = (p.capturas || []).map(function (f) {
-                    return '<figure><img src="' + escapar(f.src) + '" alt="' + escapar(f.alt || '') + '" loading="lazy" />' +
-                        (f.titulo ? '<figcaption>' + escapar(f.titulo) + '</figcaption>' : '') + '</figure>';
-                }).join('');
-                return '<article class="caso reveal" aria-labelledby="caso-' + escapar(p.id) + '">' +
+                return '<article class="caso reveal" style="--acento:' + escapar(p.tema.color) + '" aria-labelledby="caso-' + escapar(p.id) + '">' +
                     '<span class="caso-fondo" aria-hidden="true">' + escapar(p.nombre) + '</span>' +
-                    '<span class="caso-etiqueta" lang="en">Featured Case Study</span>' +
+                    '<span class="caso-etiqueta" lang="en">' + escapar(p.rolEtiqueta) + '</span>' +
                     '<div class="proyecto-top"><h3 class="caso-nombre" id="caso-' + escapar(p.id) + '">' + escapar(p.nombre) + '</h3><span class="estado">' + escapar(p.estado) + '</span></div>' +
                     '<p class="proyecto-claim">' + escapar(p.claim) + '</p>' +
                     '<p class="proyecto-tags">' + p.sectores.map(escapar).join(' · ') + '</p>' +
                     (c.intro ? '<p class="caso-intro">' + escapar(c.intro) + '</p>' : '') +
-                    (capturas ? '<div class="caso-capturas">' + capturas + '</div>' : '') +
                     '<div class="caso-tabla">' +
                         '<div class="caso-encabezados" aria-hidden="true"><span>Antes · La pregunta</span><span>Con ' + escapar(p.nombre) + ' · La respuesta</span></div>' +
                         '<ol class="caso-pares">' + (c.pares || []).map(function (par, k) {
@@ -2000,8 +1950,8 @@
                     '<div class="caso-cta">' +
                         '<p class="caso-pregunta">¿Qué proceso de tu empresa podríamos transformar?</p>' +
                         '<div class="caso-acciones">' +
-                            '<a href="#contacto" class="boton" data-necesidad="Resolver un problema de mi empresa" data-evento="cta-caso-' + escapar(p.id) + '">Hablemos de tu proceso <span class="flecha">↗</span></a>' +
-                            '<button type="button" class="boton-texto" data-proyecto="' + escapar(p.id) + '">Ver ficha completa →</button>' +
+                            '<a href="#contacto" class="boton" data-tipo="consultoria" data-evento="cta-caso-' + escapar(p.id) + '">Hablemos de tu proceso <span class="flecha">↗</span></a>' +
+                            enlaceUniverso(p, 'boton-texto') +
                         '</div>' +
                     '</div>' +
                 '</article>';
@@ -2013,10 +1963,10 @@
 
             rejilla.innerHTML = resto.map(function (p, i) {
                 var insignia = p.rol === 'insignia';
-                return '<article class="proyecto reveal' + (insignia ? ' destacado' : '') + '" style="--d:' + (i * 0.08) + 's">' +
+                return '<article class="proyecto reveal' + (insignia ? ' destacado' : '') + '" style="--d:' + (i * 0.08) + 's;--acento:' + escapar(p.tema.color) + '">' +
                     visualHTML(p, proyectos.indexOf(p)) +
                     '<div class="proyecto-cuerpo">' +
-                        (insignia ? '<span class="insignia" lang="en">Flagship Product</span>' : '') +
+                        '<span class="insignia"' + (insignia ? ' lang="en"' : '') + '>' + escapar(p.rolEtiqueta) + '</span>' +
                         '<div class="proyecto-top"><h3 class="proyecto-nombre">' + escapar(p.nombre) + '</h3><span class="estado">' + escapar(p.estado) + '</span></div>' +
                         '<p class="proyecto-claim">' + escapar(p.claim) + '</p>' +
                         '<p class="proyecto-tags">' + p.sectores.map(escapar).join(' · ') + '</p>' +
@@ -2025,70 +1975,52 @@
                             '<div><dt>Solución</dt><dd>' + escapar(p.solucionCorta) + '</dd></div>' +
                         '</dl>' +
                         '<div class="proyecto-acciones">' +
-                            '<button type="button" class="abrir-ficha" data-proyecto="' + escapar(p.id) + '">Ver ficha completa <span aria-hidden="true">→</span></button>' +
+                            enlaceUniverso(p, 'abrir-ficha') +
                             (p.url ? '<a class="enlace-externo" href="' + escapar(p.url) + '" target="_blank" rel="noopener" data-evento="web-' + escapar(p.id) + '">' + escapar(p.url.replace(/^https?:\/\//, '')) + ' ↗</a>' : '') +
                         '</div>' +
                     '</div>' +
                 '</article>';
             }).join('');
 
-            /* --- Ficha ampliada --- */
-            var ficha = document.getElementById('ficha');
-            var fichaContenido = document.getElementById('ficha-contenido');
+            /* --- Transición inmersiva hacia cada universo --- */
+            var cortina = document.createElement('div');
+            cortina.className = 'cortina';
+            document.body.appendChild(cortina);
 
-            function lista(items) {
-                return '<ul>' + items.map(function (t) { return '<li>' + escapar(t) + '</li>'; }).join('') + '</ul>';
-            }
-
-            function abrirFicha(id) {
-                var p = proyectos.filter(function (x) { return x.id === id; })[0];
-                if (!p) return;
-                var capturas = (p.capturas || []).map(function (c) {
-                    return '<img src="' + escapar(c.src) + '" alt="' + escapar(c.alt || '') + '" loading="lazy" />';
-                }).join('');
-
-                fichaContenido.innerHTML =
-                    '<button type="button" class="ficha-cerrar" aria-label="Cerrar ficha">✕</button>' +
-                    '<p class="proyecto-tags">' + p.sectores.map(escapar).join(' · ') + '</p>' +
-                    '<h2 id="ficha-titulo">' + escapar(p.nombre) + '</h2>' +
-                    '<p class="proyecto-claim">' + escapar(p.claim) + '</p>' +
-                    '<span class="estado">' + escapar(p.estado) + '</span>' +
-                    (capturas ? '<div class="ficha-visual">' + capturas + '</div>' : '') +
-                    '<h3>El problema</h3><p>' + escapar(p.problema) + '</p>' +
-                    '<h3>La solución</h3><p>' + escapar(p.solucion) + '</p>' +
-                    '<h3>' + escapar(p.tituloCapacidades || 'Capacidades') + '</h3>' + lista(p.capacidades) +
-                    (p.ejemplo ? '<h3>Ejemplo de uso</h3><p>' + escapar(p.ejemplo) + '</p>' : '') +
-                    (p.vision ? '<div class="bloque-vision"><h3>Visión de futuro</h3><p>' + escapar(p.vision) + '</p></div>' : '') +
-                    (p.origen ? '<p class="origen">' + escapar(p.origen) + '</p>' : '') +
-                    '<div class="ficha-acciones">' +
-                        '<a href="#contacto" class="boton" data-cerrar-ficha data-necesidad="Conocer alguno de tus productos" data-evento="ficha-contacto-' + escapar(p.id) + '">Quiero saber más <span class="flecha">↗</span></a>' +
-                        (p.url ? '<a class="enlace-externo" href="' + escapar(p.url) + '" target="_blank" rel="noopener" data-evento="web-' + escapar(p.id) + '">Visitar ' + escapar(p.url.replace(/^https?:\/\//, '')) + ' ↗</a>' : '') +
-                    '</div>';
-
-                if (typeof ficha.showModal === 'function') {
-                    ficha.showModal();
-                } else {
-                    ficha.setAttribute('open', '');
-                }
-                document.documentElement.style.overflow = 'hidden';
-                ficha.scrollTop = 0;
-                medir('ficha-' + p.id);
-            }
-
-            function cerrarFicha() {
-                if (ficha.open) ficha.close();
+            function colorProyecto(id) {
+                var d = proyectos.filter(function (x) { return x.id === id; })[0];
+                return d ? d.tema.color : '#061310';
             }
 
             seccionProyectos.addEventListener('click', function (e) {
-                var b = e.target.closest('button[data-proyecto]');
-                if (b) abrirFicha(b.getAttribute('data-proyecto'));
+                var a = e.target.closest('a[data-entrar]');
+                if (!a) return;
+                var id = a.getAttribute('data-entrar');
+                medir('proyecto-' + id);
+                if (sinMovimiento || e.metaKey || e.ctrlKey || e.shiftKey) return;
+                e.preventDefault();
+                try { sessionStorage.setItem('dfs-transicion', id); } catch (err) {}
+                cortina.style.setProperty('--cortina', colorProyecto(id));
+                cortina.style.setProperty('--cx', e.clientX + 'px');
+                cortina.style.setProperty('--cy', e.clientY + 'px');
+                cortina.classList.remove('anima', 'cubre');
+                void cortina.offsetWidth;
+                cortina.classList.add('anima', 'cubre');
+                setTimeout(function () { location.href = a.href; }, 560);
             });
-            ficha.addEventListener('click', function (e) {
-                if (e.target === ficha || e.target.closest('.ficha-cerrar')) cerrarFicha();
-                else if (e.target.closest('[data-cerrar-ficha]')) cerrarFicha();
-            });
-            ficha.addEventListener('close', function () {
-                document.documentElement.style.overflow = '';
+
+            /* Al volver de un universo, la cortina verde se abre */
+            var vuelta = null;
+            try { vuelta = sessionStorage.getItem('dfs-transicion'); sessionStorage.removeItem('dfs-transicion'); } catch (err) {}
+            if (vuelta === 'portfolio' && !sinMovimiento) {
+                cortina.style.setProperty('--cortina', '#061310');
+                cortina.classList.add('cubre');
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () { cortina.classList.add('anima'); cortina.classList.remove('cubre'); });
+                });
+            }
+            window.addEventListener('pageshow', function (e) {
+                if (e.persisted) cortina.classList.remove('anima', 'cubre');
             });
 
             /* =============================================================
@@ -2279,16 +2211,19 @@
             document.addEventListener('click', function (e) {
                 var cta = e.target.closest('a[href="#contacto"]');
                 if (!cta) return;
-                var necesidad = cta.getAttribute('data-necesidad');
-                if (necesidad) {
-                    var radio = form.querySelector('input[name="necesidad"][value="' + necesidad + '"]');
-                    if (radio) radio.checked = true;
-                }
+                marcarTipo(cta.getAttribute('data-tipo'));
                 var lista = marcadas();
                 if (lista.length && !campoMensaje.value.trim()) {
                     campoMensaje.value = 'Me identifico con estas situaciones:\n- ' + lista.join('\n- ') + '\n\n';
                 }
             });
+
+            function marcarTipo(tipo) {
+                if (!tipo) return;
+                var radio = form.querySelector('input[name="necesidad"][data-tipo="' + tipo + '"]');
+                if (radio) radio.checked = true;
+            }
+            try { marcarTipo(new URLSearchParams(location.search).get('tipo')); } catch (err) {}
 
             form.addEventListener('focusin', function () { medir('formulario-inicio', true); });
 
@@ -2296,7 +2231,7 @@
                 nombre: { valueMissing: 'Dime cómo te llamas.' },
                 email: { valueMissing: 'Necesito un email para responderte.', typeMismatch: 'Este email no parece correcto.' },
                 mensaje: { valueMissing: 'Cuéntame brevemente tu situación.', tooShort: 'Cuéntame un poco más (al menos 20 caracteres).' },
-                necesidad: { valueMissing: 'Elige la opción que más se acerque.' },
+                necesidad: { valueMissing: 'Elige el tipo de colaboración que más se acerque.' },
                 acepto: { valueMissing: 'Necesito tu conformidad para poder responderte.' }
             };
 
@@ -2358,7 +2293,7 @@
                     'Email: ' + sol.email + '\n' +
                     'Empresa o proyecto: ' + (sol.empresa || '—') + '\n' +
                     'Sector: ' + (sol.sector || '—') + '\n' +
-                    'Qué necesito: ' + sol.necesidad + '\n\n' +
+                    'Tipo de colaboración: ' + sol.necesidad + '\n\n' +
                     sol.mensaje + '\n';
             }
 
