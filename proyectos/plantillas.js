@@ -730,90 +730,36 @@
        PORTADA: caso de estudio destacado y tarjetas del portfolio
        ============================================================= */
     function portada(proyectos) {
-        function primeraCaptura(p) {
-            var c = p.capturas || {};
-            for (var k = 0; k < (p.funcionalidades || []).length; k++) {
-                var f = p.funcionalidades[k];
-                if (f.captura && c[f.captura]) return c[f.captura];
-            }
-            return null;
+        /* Tarjeta con la identidad de su universo: su color, su fondo y su motivo gráfico */
+        function enlaceUniverso(p) {
+            return '<a class="mini-entrar" href="' + esc(p.pagina) + '" data-entrar="' + esc(p.id) + '">Entrar en el universo ' + esc(p.nombre) + ' <span aria-hidden="true">→</span></a>';
         }
-
-        function visualHTML(p, i) {
-            var cap = primeraCaptura(p);
-            if (cap) {
-                return '<div class="proyecto-visual"><img src="' + esc(cap.src) + '" alt="' + esc(cap.alt || '') + '" loading="lazy" /></div>';
-            }
-            return '<div class="proyecto-visual" aria-hidden="true">' +
-                '<span class="visual-num">' + String(i + 1).padStart(2, '0') + ' / ' + String(proyectos.length).padStart(2, '0') + '</span>' +
-                '<span class="visual-sectores">' + p.sectores.map(esc).join('<br>') + '</span>' +
-                '<span class="visual-orbita"></span>' +
-                '<span class="visual-nombre' + (p.nombre.length > 10 ? ' largo' : '') + '">' + esc(p.nombre) + '</span>' +
-            '</div>';
-        }
-
-        function enlaceUniverso(p, clase) {
-            return '<a class="' + clase + '" href="' + esc(p.pagina) + '" data-entrar="' + esc(p.id) + '">Entrar en el universo ' + esc(p.nombre) + ' <span aria-hidden="true">→</span></a>';
-        }
-
-        /* Featured Case Study: narrativa antes / después */
-        function casoHTML(p) {
-            var c = p.caso || {};
-            return '<article class="caso reveal" style="--acento:' + esc(p.tema.color) + '" aria-labelledby="caso-' + esc(p.id) + '">' +
-                '<span class="caso-fondo" aria-hidden="true">' + esc(p.nombre) + '</span>' +
-                '<span class="caso-etiqueta" lang="en">' + esc(p.rolEtiqueta) + '</span>' +
-                '<div class="proyecto-top"><h3 class="caso-nombre" id="caso-' + esc(p.id) + '">' + esc(p.nombre) + '</h3><span class="estado">' + esc(p.estado) + '</span></div>' +
-                '<p class="proyecto-claim">' + esc(p.claim) + '</p>' +
-                '<p class="proyecto-tags">' + p.sectores.map(esc).join(' · ') + '</p>' +
-                (c.intro ? '<p class="caso-intro">' + esc(c.intro) + '</p>' : '') +
-                '<div class="caso-tabla">' +
-                    '<div class="caso-encabezados" aria-hidden="true"><span>Antes · La pregunta</span><span>Con ' + esc(p.nombre) + ' · La respuesta</span></div>' +
-                    '<ol class="caso-pares">' + (c.pares || []).map(function (par, k) {
-                        return '<li class="caso-par reveal" style="--d:' + (k * 0.09) + 's">' +
-                            '<p class="antes"><span class="et">Antes</span>' + esc(par.antes) + '</p>' +
-                            '<span class="paso-flecha" aria-hidden="true"></span>' +
-                            '<p class="despues"><span class="et">Con ' + esc(p.nombre) + '</span>' + esc(par.despues) + '</p>' +
-                        '</li>';
-                    }).join('') + '</ol>' +
-                '</div>' +
-                (c.cierre ? '<p class="caso-cierre">' + esc(c.cierre) + '</p>' : '') +
-                (p.origen ? '<p class="origen">' + esc(p.origen) + '</p>' : '') +
-                '<div class="caso-cta">' +
-                    '<p class="caso-pregunta">¿Qué proceso de tu empresa podríamos transformar?</p>' +
-                    '<div class="caso-acciones">' +
-                        '<a href="#contacto" class="boton" data-tipo="consultoria" data-evento="cta-caso-' + esc(p.id) + '">Hablemos de tu proceso <span class="flecha">↗</span></a>' +
-                        enlaceUniverso(p, 'boton-texto') +
-                    '</div>' +
-                '</div>' +
-            '</article>';
-        }
-
-        function tarjetaHTML(p, i) {
-            var insignia = p.rol === 'insignia';
-            return '<article class="proyecto reveal' + (insignia ? ' destacado' : '') + '" style="--d:' + (i * 0.08) + 's;--acento:' + esc(p.tema.color) + '">' +
-                visualHTML(p, proyectos.indexOf(p)) +
-                '<div class="proyecto-cuerpo">' +
-                    '<span class="insignia"' + (insignia ? ' lang="en"' : '') + '>' + esc(p.rolEtiqueta) + '</span>' +
-                    '<div class="proyecto-top"><h3 class="proyecto-nombre">' + esc(p.nombre) + '</h3><span class="estado">' + esc(p.estado) + '</span></div>' +
-                    '<p class="proyecto-claim">' + esc(p.claim) + '</p>' +
-                    '<p class="proyecto-tags">' + p.sectores.map(esc).join(' · ') + '</p>' +
-                    '<dl class="proyecto-ps">' +
-                        '<div><dt>Problema</dt><dd>' + esc(p.problemaCorto) + '</dd></div>' +
-                        '<div><dt>Solución</dt><dd>' + esc(p.solucionCorta) + '</dd></div>' +
-                    '</dl>' +
-                    '<div class="proyecto-acciones">' +
-                        enlaceUniverso(p, 'abrir-ficha') +
+        function tarjeta(p, i, extra) {
+            var grande = p.rol === 'caso' || p.rol === 'insignia';
+            var claro = /^#f|^#ff/i.test(p.tema.fondo);
+            return '<article class="mini reveal' + (grande ? ' grande' : '') + (claro ? ' claro' : '') + '" data-proyecto="' + esc(p.id) + '" style="--d:' + (i * 0.07) + 's;--acento:' + esc(p.tema.color) + ';--fondo-p:' + esc(p.tema.fondo) + '">' +
+                '<div class="mini-visual" aria-hidden="true">' + (escenas[p.id] || '') + '</div>' +
+                '<div class="mini-cuerpo">' +
+                    '<span class="mini-rol"' + (/^[A-Z][a-z]+ [A-Z]/.test(p.rolEtiqueta) ? ' lang="en"' : '') + '>' + esc(p.rolEtiqueta) + '</span>' +
+                    '<div class="mini-top"><h3>' + esc(p.nombre) + '</h3><span class="estado">' + esc(p.estado) + '</span></div>' +
+                    '<p class="mini-claim">' + esc(p.claim) + '</p>' +
+                    (extra || '<p class="mini-texto">' + esc(p.solucionCorta) + '</p>') +
+                    '<div class="mini-acciones">' + enlaceUniverso(p) +
                         (p.url ? '<a class="enlace-externo" href="' + esc(p.url) + '" target="_blank" rel="noopener" data-evento="web-' + esc(p.id) + '">' + esc(p.url.replace(/^https?:\/\//, '')) + ' ↗</a>' : '') +
+                        (p.rol === 'caso' ? '<a class="enlace-externo" href="#contacto" data-evento="cta-caso-' + esc(p.id) + '">¿Qué proceso de tu empresa podríamos transformar? ↗</a>' : '') +
                     '</div>' +
                 '</div>' +
             '</article>';
         }
-
+        function respuestasCaso(p) {
+            var r = (p.caso && p.caso.pares || []).map(function (x) { return x.despues.replace(/\.$/, ''); });
+            return '<ul class="mini-tags">' + r.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
+        }
         var casos = proyectos.filter(function (p) { return p.rol === 'caso'; });
         var resto = proyectos.filter(function (p) { return p.rol !== 'caso'; });
         return {
-            caso: casos.map(casoHTML).join(''),
-            tarjetas: resto.map(function (p, i) { return tarjetaHTML(p, i); }).join('')
+            caso: casos.map(function (p, i) { return tarjeta(p, i, respuestasCaso(p)); }).join(''),
+            tarjetas: resto.map(function (p, i) { return tarjeta(p, i + 1); }).join('')
         };
     }
 

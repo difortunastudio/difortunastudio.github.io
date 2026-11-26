@@ -1432,6 +1432,160 @@
             .venn-circulo circle, .venn-circulo text, .venn-centro { transition: none; }
             .cortina { display: none; }
         }
+
+        /* =====================================================================
+           V4 · PORTADA COMPACTA Y JERARQUÍA DE VALOR
+           ===================================================================== */
+        .hero-compacto { min-height: 0; padding: 8.5rem 2rem 4.5rem; }
+        .hero-compacto .hero-inner { max-width: 940px; }
+        .hero-compacto .marca { margin-bottom: 1.4rem; }
+        .hero-nombre {
+            font-size: clamp(1.5rem, 3vw, 2.1rem);
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            color: var(--texto-fuerte);
+            text-shadow: 0 0 24px rgba(134, 239, 172, 0.3);
+        }
+        .hero-nombre span { color: var(--verde-brillo); }
+        .hero-compacto .rol { margin-top: .7rem; font-size: .72rem; }
+        .hero-compacto .rol .lugar { color: var(--texto-tenue); }
+        .hero-compacto .rol .sep-rol { color: var(--verde-brillo); margin: 0 .3em; }
+        .propuesta {
+            margin-top: 2rem;
+            font-size: clamp(2.5rem, 6.6vw, 5rem);
+            font-weight: 300;
+            letter-spacing: -0.04em;
+            line-height: 1.02;
+            color: var(--texto-fuerte);
+            text-shadow: 0 0 30px rgba(134, 239, 172, 0.28), 0 0 90px rgba(74, 222, 128, 0.16);
+        }
+        .propuesta span { display: block; color: var(--verde-brillo); }
+        .hero-compacto .desc { margin-top: 1.5rem; max-width: 40em; }
+        .hero-compacto .hero-ctas { margin-top: 1.8rem; }
+
+        .seccion.compacta { padding-top: 4.5rem; padding-bottom: 0; }
+        .seccion.compacta .sec-cabecera { margin-bottom: 1rem; }
+        .sec-fila { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1rem 3rem; align-items: end; }
+        .sec-fila .sec-intro { margin-top: 0; }
+
+        /* Qué puedo resolver: situaciones en dos columnas */
+        .compacta .resolver-grid { grid-template-columns: .9fr 1.1fr; gap: 3rem; align-items: center; }
+        .compacta .resolver-texto { position: static; }
+        .compacta .resolver-texto .boton { margin-top: 1.4rem; }
+        .compacta .situaciones { grid-template-columns: 1fr 1fr; gap: .55rem; }
+        .compacta .situaciones li.ancha { grid-column: 1 / -1; }
+        .compacta .situacion { padding: .85rem 1rem; font-size: .92rem; height: 100%; }
+
+        /* Proyectos: mosaico con la identidad de cada universo */
+        .mosaico { margin-top: 1.8rem; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1.1rem; }
+        .mini {
+            grid-column: span 2;
+            display: flex; flex-direction: column;
+            border-radius: 18px; overflow: hidden;
+            border: 1px solid color-mix(in srgb, var(--acento) 35%, transparent);
+            background: linear-gradient(170deg, color-mix(in srgb, var(--acento) 12%, rgba(6, 19, 16, .85)), rgba(6, 19, 16, .9) 70%);
+            transition: transform .4s var(--curva), border-color .4s, box-shadow .4s;
+        }
+        .mini:hover { transform: translateY(-4px); border-color: var(--acento); box-shadow: 0 24px 50px -28px var(--acento); }
+        .mini.grande { grid-column: span 3; flex-direction: row; }
+        .mini-visual { position: relative; height: 130px; overflow: hidden; background: var(--fondo-p); flex: 0 0 auto; }
+        .mini.grande .mini-visual { height: auto; flex: 0 0 38%; }
+        .mini-visual svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+        .mini-visual svg * { animation-play-state: paused; }
+        .mini:hover .mini-visual svg * { animation-play-state: running; }
+        .mini-nombre-visual {
+            position: absolute; left: .9rem; bottom: .55rem;
+            font-size: 1.5rem; font-weight: 300; letter-spacing: -.03em;
+            color: #fff; text-shadow: 0 2px 14px rgba(0, 0, 0, .45);
+        }
+        .mini.claro .mini-nombre-visual { color: #14122a; text-shadow: 0 2px 14px rgba(255, 255, 255, .6); }
+        .mini[data-proyecto="nautico"] .mini-nombre-visual { font-family: ui-serif, Georgia, serif; }
+        .mini-cuerpo { padding: 1.1rem 1.2rem 1.2rem; display: flex; flex-direction: column; gap: .35rem; flex: 1; }
+        .mini.grande .mini-cuerpo { padding: 1.4rem 1.5rem; }
+        .mini-rol { font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: color-mix(in srgb, var(--acento) 55%, #fff); }
+        .mini-top { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+        .mini-top h3 { font-size: 1.35rem; font-weight: 400; color: var(--texto-fuerte); letter-spacing: -.01em; }
+        .mini.grande .mini-top h3 { font-size: 1.7rem; }
+        .mini .estado::before { background: var(--acento); box-shadow: 0 0 8px var(--acento); }
+        .mini-claim { font-size: .98rem; color: color-mix(in srgb, var(--acento) 45%, #fff); }
+        .mini-texto { font-size: .88rem; line-height: 1.55; color: var(--texto); }
+        .mini-tags { list-style: none; display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .2rem; }
+        .mini-tags li { font-size: .74rem; padding: .22rem .6rem; border-radius: 20px; border: 1px solid color-mix(in srgb, var(--acento) 40%, transparent); color: var(--texto-fuerte); }
+        .mini-acciones { margin-top: auto; padding-top: .8rem; display: flex; flex-wrap: wrap; gap: .5rem 1.1rem; align-items: center; }
+        .mini-entrar {
+            display: inline-flex; align-items: center; gap: .4rem;
+            padding: .5rem .95rem; border-radius: 30px;
+            background: var(--acento); color: #fff; text-decoration: none;
+            font-size: .82rem; font-weight: 500;
+        }
+        .mini[data-proyecto="nautico"] .mini-entrar, .mini[data-proyecto="fliia"] .mini-entrar { color: #10131a; }
+        .mini-entrar::before { content: ""; position: absolute; inset: 0; z-index: 0; }
+        .mini { position: relative; }
+        .mini .enlace-externo { position: relative; z-index: 1; font-size: .8rem; }
+
+        /* Perfil compacto */
+        .compacta .perfil-grid { grid-template-columns: 1.05fr .95fr; gap: 3rem; }
+        .compacta .perfil-texto p { margin-top: 1rem; }
+        .compacta .hitos { margin-top: 1.4rem; }
+        .compacta .venn svg { max-width: 360px; }
+        .compacta .venn-titulo { margin-bottom: .6rem; font-size: 1rem; }
+        .compacta .venn-leyenda { margin-top: 1rem; gap: .45rem; }
+        .compacta .venn-leyenda button { padding: .6rem .8rem; }
+        .compacta .venn-leyenda span { font-size: .8rem; }
+
+        /* Cómo trabajo: metodología + proceso */
+        .compacta .metodo-titulo { font-size: clamp(1.4rem, 2.8vw, 2rem); }
+        .compacta .metodo { margin-top: 2.2rem; }
+        .paso-num i { font-style: normal; color: var(--verde-texto); }
+        .compacta .paso h3 { font-size: .88rem; }
+        .compacta .paso p { font-size: .85rem; }
+        .compacta .sr-sub { margin-top: 2.6rem; font-size: .98rem; }
+        .compacta .modos { margin-top: 1.2rem; gap: 1rem; }
+        .compacta .modo { padding: 1.3rem 1.3rem 1.3rem; }
+        .compacta .modo-glifo { width: 40px; height: 40px; margin-bottom: .9rem; }
+        .compacta .modo h3 { font-size: 1.1rem; }
+        .compacta .modo p { font-size: .88rem; margin-top: .5rem; }
+        .compacta .modo p:last-of-type { margin-bottom: 1.1rem; }
+
+        /* Contacto directo */
+        .contacto-simple { text-align: center; }
+        .contacto-simple .sec-cabecera { justify-content: center; }
+        .contacto-simple .sec-cabecera::after { display: none; }
+        .contacto-simple .sec-titulo, .contacto-simple .sec-intro { margin-left: auto; margin-right: auto; }
+        .contacto-acciones { margin-top: 1.6rem; display: flex; gap: .8rem 1.4rem; justify-content: center; align-items: center; flex-wrap: wrap; }
+        .boton.grande { font-size: 1.05rem; padding: 1rem 1.9rem; }
+        .contacto-simple .aviso-sensible { max-width: 34em; margin: 1.4rem auto 0; }
+
+        .cierre { padding: 5rem 2rem 3.5rem; }
+        .cierre p:first-of-type { margin-top: 1.6rem; }
+
+        @media (max-width: 980px) {
+            .sec-fila, .compacta .resolver-grid, .compacta .perfil-grid { grid-template-columns: 1fr; gap: 1.6rem; }
+            .mini, .mini.grande { grid-column: 1 / -1; }
+            .mini.grande { flex-direction: column; }
+            .mini.grande .mini-visual { height: 150px; flex: 0 0 auto; }
+        }
+        @media (max-width: 560px) {
+            .hero-compacto { padding: 6.5rem 1.3rem 3.5rem; }
+            .compacta .situaciones { grid-template-columns: 1fr; }
+            .seccion.compacta { padding-top: 3.5rem; }
+        }
+        /* V4 · ajustes de altura */
+        .mini.grande { flex-direction: column; }
+        .mini.grande .mini-visual { height: 150px; flex: 0 0 auto; }
+        .mini-visual { height: 110px; }
+        .mini.grande .mini-cuerpo { padding: 1.1rem 1.3rem 1.2rem; }
+        .colabora-cab { margin-top: 2.4rem; display: flex; align-items: baseline; gap: .4rem 1.4rem; flex-wrap: wrap; }
+        .colabora-cab h3 { font-size: 1.15rem; font-weight: 400; color: var(--texto-fuerte); }
+        .colabora-cab p { font-size: .9rem; color: var(--texto-tenue); }
+        .compacta .perfil-texto .sec-titulo { font-size: clamp(1.8rem, 3.6vw, 2.6rem); }
+        .hero-compacto { padding-top: 7.5rem; padding-bottom: 3.5rem; }
+        .cierre { padding-top: 4rem; }
+        .seccion.compacta { padding-top: 3.6rem; }
+        .mini-visual { height: 92px; }
+        .mini.grande .mini-visual { height: 120px; }
+        .cierre { padding: 3.4rem 2rem 2.6rem; }
+        .footer { padding-bottom: 2.6rem; }
     </style>
 </head>
 <body>
@@ -1458,11 +1612,10 @@
             <button class="nav-menu" type="button" aria-expanded="false" aria-controls="nav-enlaces">Menú</button>
             <nav aria-label="Secciones">
                 <ul class="nav-enlaces" id="nav-enlaces">
-                    <li><a href="#perfil"><span class="n">02</span>Perfil</a></li>
-                    <li><a href="#metodologia"><span class="n">03</span>Metodología</a></li>
-                    <li><a href="#resolver"><span class="n">04</span>Qué resuelvo</a></li>
-                    <li><a href="#proyectos"><span class="n">05</span>Proyectos</a></li>
-                    <li><a href="#colaborar"><span class="n">06</span>Colaborar</a></li>
+                    <li><a href="#resolver"><span class="n">02</span>Qué resuelvo</a></li>
+                    <li><a href="#proyectos"><span class="n">03</span>Proyectos</a></li>
+                    <li><a href="#perfil"><span class="n">04</span>Perfil</a></li>
+                    <li><a href="#metodologia"><span class="n">05</span>Cómo trabajo</a></li>
                 </ul>
             </nav>
             <a href="#contacto" class="nav-cta" data-evento="cta-nav-contacto">Hablemos ↗</a>
@@ -1471,43 +1624,64 @@
 
     <main class="contenido" id="principal">
 
-        <!-- ===== 01 · HERO ===== -->
-        <section class="hero" id="inicio">
+        <!-- ===== 01 · PORTADA: la propuesta de valor manda ===== -->
+        <section class="hero hero-compacto" id="inicio">
             <div class="hero-inner">
                 <div class="marca reveal" style="--d: 0.05s">Difortuna Studio</div>
-
-                <h1 class="reveal" style="--d: 0.18s">
-                    Fiorella Gallo
-                    <span class="apellido">Di Fortuna</span>
-                </h1>
-
-                <p class="rol reveal" style="--d: 0.32s">AI Product Builder &amp; Founder</p>
-                <p class="subtitulo reveal" style="--d: 0.4s">Barcelona · Uruguay</p>
-
-                <div class="separador reveal" style="--d: 0.5s"></div>
-
-                <p class="claim reveal" style="--d: 0.58s" lang="en">Real problems. Intelligent solutions.</p>
-
-                <p class="desc reveal" style="--d: 0.68s">
-                    Transformo necesidades reales en productos tecnológicos. Combino mi experiencia en finanzas y gestión empresarial con el diseño de producto y la inteligencia artificial para construir soluciones que se adaptan a las personas y empresas.
+                <p class="hero-nombre reveal" style="--d: 0.15s">Fiorella Gallo <span>Di Fortuna</span></p>
+                <p class="rol reveal" style="--d: 0.25s">AI Product Builder &amp; Founder <span class="sep-rol">·</span> <span class="lugar">Barcelona · Uruguay</span></p>
+                <h1 class="propuesta reveal" style="--d: 0.35s">Tecnología que se adapta a tu negocio. <span>No al revés.</span></h1>
+                <p class="desc reveal" style="--d: 0.48s">
+                    Transformo necesidades reales en productos tecnológicos. Combino mi experiencia en finanzas y gestión empresarial con el diseño de producto y la inteligencia artificial.
                 </p>
-
-                <div class="hero-ctas reveal" style="--d: 0.8s">
-                    <a href="#proyectos" class="boton" data-evento="cta-hero-proyectos">Explora mis proyectos <span class="flecha">↓</span></a>
-                    <a href="#contacto" class="boton-texto" data-evento="cta-hero-contacto">Trabajemos juntos ↗</a>
+                <div class="hero-ctas reveal" style="--d: 0.6s">
+                    <a href="#contacto" class="boton" data-evento="cta-hero-contacto">Trabajemos juntos <span class="flecha">↗</span></a>
+                    <a href="#proyectos" class="boton-texto" data-evento="cta-hero-proyectos">Explora mis proyectos ↓</a>
                 </div>
             </div>
-
-            <a href="#perfil" class="bajar" aria-label="Ir a mi perfil">↓</a>
         </section>
 
-        <!-- ===== 02 · PERFIL ===== -->
-        <section class="seccion" id="perfil" aria-labelledby="perfil-titulo">
+        <!-- ===== 02 · QUÉ PUEDO RESOLVER ===== -->
+        <section class="seccion compacta" id="resolver" aria-labelledby="resolver-titulo">
+            <div class="resolver-grid">
+                <div class="resolver-texto">
+                    <div class="sec-cabecera reveal"><span class="num">02</span>Qué puedo resolver</div>
+                    <h2 class="sec-titulo reveal" id="resolver-titulo">¿Te suena alguna de <em>estas situaciones?</em></h2>
+                    <p class="sec-intro reveal">Muchas empresas adaptan sus procesos a las limitaciones de las herramientas que utilizan. Mi trabajo consiste en entender esos procesos y construir soluciones que respondan a sus necesidades reales.</p>
+                    <a href="mailto:hola@difortunastudio.com" class="boton reveal" id="cta-resolver" data-evento="cta-resolver">Hablemos de tu negocio <span class="flecha">↗</span></a>
+                    <p class="resolver-contador" id="resolver-contador" aria-live="polite"></p>
+                </div>
+                <ul class="situaciones">
+                    <li class="reveal"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">Gestionas procesos complejos mediante hojas de cálculo.</span></button></li>
+                    <li class="reveal" style="--d: 0.04s"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">Pagas por herramientas que no se adaptan a tu negocio.</span></button></li>
+                    <li class="reveal" style="--d: 0.08s"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">Tu equipo pierde tiempo en tareas repetitivas.</span></button></li>
+                    <li class="reveal" style="--d: 0.12s"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">Necesitas conectar información de diferentes sistemas.</span></button></li>
+                    <li class="reveal" style="--d: 0.16s"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">No tienes visibilidad suficiente sobre tus datos económicos.</span></button></li>
+                    <li class="reveal" style="--d: 0.2s"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">Necesitas automatizar procesos internos.</span></button></li>
+                    <li class="reveal ancha" style="--d: 0.24s"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">Has detectado una oportunidad de negocio, pero no sabes cómo convertirla en un producto tecnológico.</span></button></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ===== 03 · PROYECTOS: la evidencia ===== -->
+        <section class="seccion compacta" id="proyectos" aria-labelledby="proyectos-titulo">
+            <div class="sec-fila">
+                <div>
+                    <div class="sec-cabecera reveal"><span class="num">03</span>Proyectos</div>
+                    <h2 class="sec-titulo reveal" id="proyectos-titulo" lang="en">Real problems. <em>Real products.</em></h2>
+                </div>
+                <p class="sec-intro reveal">Cada producto nace de una necesidad real. Son la prueba de lo que puedo construir para tu empresa.</p>
+            </div>
+            <!-- Las tarjetas las escribe generar.mjs a partir de proyectos.js. No editar a mano. -->
+            <div class="mosaico" id="proyectos-grid"><!-- generado:caso --><article class="mini reveal grande" data-proyecto="timon" style="--d:0s;--acento:#4f8cff;--fondo-p:#040a1c"><div class="mini-visual" aria-hidden="true"><svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="tm-s" cx="42%" cy="38%" r="60%"><stop offset="0" stop-color="#cfe0ff"/><stop offset=".35" stop-color="#4f8cff"/><stop offset="1" stop-color="#0a1a4a"/></radialGradient><radialGradient id="tm-h" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#4f8cff" stop-opacity=".45"/><stop offset="1" stop-color="#4f8cff" stop-opacity="0"/></radialGradient></defs><g fill="#9cc0ff" opacity=".5"><circle cx="120" cy="90" r="1.2"/><circle cx="300" cy="640" r="1"/><circle cx="520" cy="140" r="1.4"/><circle cx="1100" cy="700" r="1.1"/><circle cx="700" cy="720" r="1"/><circle cx="1150" cy="120" r="1.3"/><circle cx="60" cy="480" r="1"/><circle cx="420" cy="380" r="1"/></g><circle cx="860" cy="400" r="300" fill="url(#tm-h)" class="respira"/><g fill="none" stroke="#4f8cff"><ellipse cx="860" cy="400" rx="330" ry="95" stroke-opacity=".35" transform="rotate(-18 860 400)"/><ellipse cx="860" cy="400" rx="260" ry="70" stroke-opacity=".28" transform="rotate(24 860 400)"/><ellipse cx="860" cy="400" rx="380" ry="130" stroke-opacity=".16" transform="rotate(62 860 400)"/></g><g stroke="#8fb6ff" stroke-opacity=".25"><line x1="860" y1="400" x2="560" y2="470"/><line x1="860" y1="400" x2="1150" y2="300"/><line x1="860" y1="400" x2="980" y2="660"/></g><circle cx="860" cy="400" r="110" fill="url(#tm-s)"/><g class="giro" style="--t:30s"><circle cx="860" cy="400" r="200" fill="none"/><circle cx="1060" cy="400" r="6" fill="#cfe0ff"/></g><g class="giro inverso" style="--t:55s"><circle cx="860" cy="400" r="290" fill="none"/><circle cx="860" cy="110" r="5" fill="#8fb6ff"/><circle cx="570" cy="400" r="4" fill="#4f8cff"/></g></svg></div><div class="mini-cuerpo"><span class="mini-rol" lang="en">Featured Case Study</span><div class="mini-top"><h3>TIMÓN</h3><span class="estado">Solución interna</span></div><p class="mini-claim">Inteligencia financiera empresarial</p><ul class="mini-tags"><li>Rentabilidad por departamento</li><li>Cálculo y reparto de remuneraciones entre socios</li><li>Punto muerto y coste por hora</li><li>Tesorería y previsiones</li><li>Simulador de escenarios</li><li>Equilibrio entre socios</li></ul><div class="mini-acciones"><a class="mini-entrar" href="proyectos/timon.html" data-entrar="timon">Entrar en el universo TIMÓN <span aria-hidden="true">→</span></a><a class="enlace-externo" href="#contacto" data-evento="cta-caso-timon">¿Qué proceso de tu empresa podríamos transformar? ↗</a></div></div></article><!-- /generado:caso --><!-- generado:tarjetas --><article class="mini reveal grande claro" data-proyecto="fliia" style="--d:0.07s;--acento:#8b7cf6;--fondo-p:#f5f2fd"><div class="mini-visual" aria-hidden="true"><svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="fl-a" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#c4b5fd" stop-opacity=".75"/><stop offset="1" stop-color="#c4b5fd" stop-opacity="0"/></radialGradient><radialGradient id="fl-b" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#ddd3ff"/><stop offset="1" stop-color="#a99bf8"/></radialGradient></defs><circle cx="1000" cy="160" r="300" fill="url(#fl-a)" class="respira"/><circle cx="640" cy="760" r="260" fill="url(#fl-a)" opacity=".7" class="respira" style="animation-delay:-3s"/><g fill="none" stroke="#8b7cf6"><circle cx="880" cy="400" r="150" stroke-opacity=".28"/><circle cx="880" cy="400" r="235" stroke-opacity=".2" stroke-dasharray="2 7"/><circle cx="880" cy="400" r="320" stroke-opacity=".14"/></g><circle cx="880" cy="400" r="88" fill="url(#fl-b)" class="respira"/><g class="giro" style="--t:40s"><circle cx="880" cy="400" r="150" fill="none" stroke="none"/><circle cx="1030" cy="400" r="9" fill="#8b7cf6"/></g><g class="giro inverso" style="--t:70s"><circle cx="880" cy="400" r="235" fill="none" stroke="none"/><circle cx="880" cy="165" r="12" fill="#b9acfb"/><circle cx="1115" cy="400" r="6" fill="#8b7cf6"/></g><g class="giro" style="--t:110s"><circle cx="880" cy="400" r="320" fill="none" stroke="none"/><circle cx="560" cy="400" r="8" fill="#a99bf8"/></g></svg></div><div class="mini-cuerpo"><span class="mini-rol" lang="en">Flagship Product</span><div class="mini-top"><h3>Fliia</h3><span class="estado">Beta</span></div><p class="mini-claim">Inteligencia económica familiar</p><p class="mini-texto">Un espacio que conecta el día a día, el patrimonio, las previsiones, los objetivos y la economía compartida.</p><div class="mini-acciones"><a class="mini-entrar" href="proyectos/fliia.html" data-entrar="fliia">Entrar en el universo Fliia <span aria-hidden="true">→</span></a><a class="enlace-externo" href="https://fliia.es" target="_blank" rel="noopener" data-evento="web-fliia">fliia.es ↗</a></div></div></article><article class="mini reveal claro" data-proyecto="outbill" style="--d:0.14s;--acento:#2563eb;--fondo-p:#ffffff"><div class="mini-visual" aria-hidden="true"><svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice"><defs><pattern id="ob-g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#2563eb" stroke-opacity=".07"/></pattern><linearGradient id="ob-f" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><rect width="1200" height="800" fill="url(#ob-g)"/><rect width="1200" height="800" fill="url(#ob-f)"/><g transform="translate(760 150) rotate(-6)"><rect width="240" height="320" rx="6" fill="#fff" stroke="#2563eb" stroke-opacity=".25"/></g><g transform="translate(800 170) rotate(3)"><rect width="240" height="320" rx="6" fill="#fff" stroke="#2563eb" stroke-opacity=".3"/></g><g transform="translate(840 190)"><rect width="240" height="340" rx="6" fill="#fff" stroke="#2563eb" stroke-opacity=".55"/><g fill="#2563eb" fill-opacity=".14"><rect x="24" y="30" width="120" height="10" rx="3"/><rect x="24" y="60" width="190" height="6" rx="3"/><rect x="24" y="78" width="160" height="6" rx="3"/><rect x="24" y="96" width="175" height="6" rx="3"/><rect x="24" y="140" width="190" height="1"/></g><g fill="#2563eb" fill-opacity=".35"><rect x="24" y="160" width="80" height="6" rx="3"/><rect x="150" y="160" width="64" height="6" rx="3"/><rect x="24" y="180" width="70" height="6" rx="3"/><rect x="150" y="180" width="64" height="6" rx="3"/><rect x="24" y="214" width="96" height="10" rx="3"/><rect x="134" y="214" width="80" height="10" rx="3"/></g><rect class="barrido" x="0" y="0" width="240" height="40" fill="#2563eb" fill-opacity=".12"/></g><g stroke="#2563eb" stroke-opacity=".5" fill="none"><path d="M560 620h180l40-40h160"/><circle cx="560" cy="620" r="4" fill="#2563eb"/><circle cx="940" cy="580" r="4" fill="#2563eb"/></g></svg></div><div class="mini-cuerpo"><span class="mini-rol">Producto propio</span><div class="mini-top"><h3>Outbill</h3><span class="estado">Uso privado</span></div><p class="mini-claim">Todas tus empresas. Todas tus cuentas. Un solo lugar.</p><p class="mini-texto">Una plataforma de gestión administrativa, fiscal y contable para pequeñas empresas y autónomos, con varias empresas en un solo lugar.</p><div class="mini-acciones"><a class="mini-entrar" href="proyectos/outbill.html" data-entrar="outbill">Entrar en el universo Outbill <span aria-hidden="true">→</span></a></div></div></article><article class="mini reveal claro" data-proyecto="automotive" style="--d:0.21000000000000002s;--acento:#0f766e;--fondo-p:#f4f6f6"><div class="mini-visual" aria-hidden="true"><svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="#0f766e"><circle cx="880" cy="360" r="210" stroke-opacity=".14"/><g class="giro" style="--t:90s"><circle cx="880" cy="360" r="170" stroke-opacity=".5" stroke-width="10" stroke-dasharray="40 14"/></g><circle cx="880" cy="360" r="120" stroke-opacity=".2"/><circle cx="880" cy="360" r="40" stroke-opacity=".45"/></g><circle cx="880" cy="360" r="8" fill="#0f766e"/><line x1="480" y1="660" x2="1200" y2="660" stroke="#0f766e" stroke-opacity=".35"/><g fill="#0f766e"><circle cx="540" cy="660" r="6"/><circle cx="620" cy="660" r="6"/><circle cx="700" cy="660" r="6"/><circle cx="780" cy="660" r="6"/></g><g fill="#f3f5f5" stroke="#0f766e"><circle cx="860" cy="660" r="6"/><circle cx="940" cy="660" r="6"/><circle cx="1020" cy="660" r="6"/><circle cx="1100" cy="660" r="6"/></g><circle cx="860" cy="660" r="13" fill="none" stroke="#0f766e" class="respira"/></svg></div><div class="mini-cuerpo"><span class="mini-rol">Solución a medida</span><div class="mini-top"><h3>Automotive Finance</h3><span class="estado">Solución a medida</span></div><p class="mini-claim">Gestión inteligente de financiación de vehículos</p><p class="mini-texto">Una herramienta adaptada a la operativa real de un negocio de compraventa de vehículos con financiación.</p><div class="mini-acciones"><a class="mini-entrar" href="proyectos/automotive.html" data-entrar="automotive">Entrar en el universo Automotive Finance <span aria-hidden="true">→</span></a></div></div></article><article class="mini reveal" data-proyecto="nautico" style="--d:0.28s;--acento:#2dd4bf;--fondo-p:#04212a"><div class="mini-visual" aria-hidden="true"><svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="#2dd4bf" class="ola"><path d="M-50 600C150 560 300 650 520 600S900 540 1250 610" stroke-opacity=".18"/><path d="M-50 640C170 600 320 690 540 640S920 580 1250 650" stroke-opacity=".13"/><path d="M-50 680C190 640 340 730 560 680S940 620 1250 690" stroke-opacity=".09"/></g><g fill="none" stroke="#2dd4bf" stroke-opacity=".22"><path d="M760 180c90-40 220-20 260 70s-30 190-150 200-210-40-220-130 30-110 110-140z"/><path d="M790 220c70-25 160-10 190 55s-25 140-110 148-155-30-162-95 22-82 82-108z"/></g><g transform="translate(900 340)"><g class="giro" style="--t:120s"><circle r="120" fill="none" stroke="#2dd4bf" stroke-opacity=".3"/><path d="M0-120V120M-120 0H120" stroke="#2dd4bf" stroke-opacity=".25"/><path d="M0-95L10 0 0 95-10 0z" fill="#2dd4bf" fill-opacity=".35"/></g><text y="-132" text-anchor="middle" fill="#5eead4" font-family="ui-serif, Georgia, serif" font-size="16">N</text></g><g stroke="#2dd4bf" stroke-opacity=".35"><line x1="560" y1="250" x2="700" y2="160"/><line x1="560" y1="250" x2="640" y2="420"/><line x1="640" y1="420" x2="780" y2="500"/></g><g fill="#04212a" stroke="#2dd4bf"><circle cx="560" cy="250" r="6"/><circle cx="700" cy="160" r="5"/><circle cx="640" cy="420" r="6"/><circle cx="780" cy="500" r="5"/></g></svg></div><div class="mini-cuerpo"><span class="mini-rol">Validación sectorial</span><div class="mini-top"><h3>Binako</h3><span class="estado">Desarrollo y validación sectorial</span></div><p class="mini-claim">Inteligencia relacional para la industria náutica</p><p class="mini-texto">Una herramienta que conecta personas, empresas, embarcaciones, astilleros y eventos profesionales.</p><div class="mini-acciones"><a class="mini-entrar" href="proyectos/nautico.html" data-entrar="nautico">Entrar en el universo Binako <span aria-hidden="true">→</span></a></div></div></article><!-- /generado:tarjetas --></div>
+        </section>
+
+        <!-- ===== 04 · PERFIL ===== -->
+        <section class="seccion compacta" id="perfil" aria-labelledby="perfil-titulo">
             <div class="perfil-grid">
                 <div class="perfil-texto">
-                    <div class="sec-cabecera reveal"><span class="num">02</span>Mi perfil</div>
+                    <div class="sec-cabecera reveal"><span class="num">04</span>Mi perfil</div>
                     <h2 class="sec-titulo reveal" id="perfil-titulo">Antes de construir tecnología, <em>aprendí a construir empresa.</em></h2>
-
                     <dl class="hitos reveal" id="hitos">
                         <div class="hito">
                             <dt>Cofundación de Herokid Studio</dt>
@@ -1522,9 +1696,7 @@
                             <dd><span data-anios-trayectoria>16</span>+ <span class="unidad">años</span></dd>
                         </div>
                     </dl>
-
-                    <p class="reveal">Mi trayectoria profesional nace en el mundo de las finanzas y la gestión empresarial. En 2010 cofundé Herokid Studio. Trabajar directamente con negocios, equipos y personas me ha permitido desarrollar una capacidad para identificar problemas, comprender procesos y encontrar soluciones.</p>
-                    <p class="reveal">La inteligencia artificial me permite convertir ese conocimiento en productos tecnológicos funcionales.</p>
+                    <p class="reveal">Mi trayectoria nace en las finanzas y la gestión empresarial: en 2010 cofundé Herokid Studio. Trabajar con negocios, equipos y personas me enseñó a identificar problemas y comprender procesos. La inteligencia artificial me permite convertir ese conocimiento en productos funcionales.</p>
                     <p class="remate reveal">Mi especialidad no es únicamente construir tecnología, sino <em>comprender qué merece la pena construir.</em></p>
                 </div>
 
@@ -1565,82 +1737,42 @@
             </div>
         </section>
 
-        <!-- ===== 03 · METODOLOGÍA ===== -->
-        <section class="seccion" id="metodologia" aria-labelledby="metodo-titulo">
-            <div class="sec-cabecera reveal"><span class="num">03</span>Mi metodología</div>
-            <h2 class="metodo-titulo reveal" id="metodo-titulo">
-                Observo <span class="sep">→</span> Detecto <span class="sep">→</span> Entiendo <span class="sep">→</span> Diseño <span class="sep">→</span> Construyo <span class="sep">→</span> Resuelvo.
-            </h2>
-            <p class="sec-intro reveal">No parto de una tecnología buscando dónde aplicarla. Parto de una necesidad real y construyo la solución adecuada.</p>
+        <!-- ===== 05 · CÓMO TRABAJO: metodología y proceso en una sola pieza ===== -->
+        <section class="seccion compacta" id="metodologia" aria-labelledby="metodo-titulo">
+            <div class="sec-fila">
+                <div>
+                    <div class="sec-cabecera reveal"><span class="num">05</span>Cómo trabajo</div>
+                    <h2 class="metodo-titulo reveal" id="metodo-titulo">
+                        Observo <span class="sep">→</span> Detecto <span class="sep">→</span> Entiendo <span class="sep">→</span> Diseño <span class="sep">→</span> Construyo <span class="sep">→</span> Resuelvo.
+                    </h2>
+                </div>
+                <p class="sec-intro reveal">No parto de una tecnología buscando dónde aplicarla. Parto de una necesidad real y no empiezo a construir sin comprender antes el problema.</p>
+            </div>
 
             <div class="metodo" id="metodo">
                 <div class="metodo-linea" aria-hidden="true"><div class="metodo-relleno"></div></div>
-
                 <div class="metodo-grupo">
                     <div class="metodo-cabecera" lang="en"><em>Understanding</em> first</div>
                     <ol>
-                        <li class="paso"><span class="paso-punto"></span><span class="paso-num">01</span><h3>Observo</h3><p>Comprendo el contexto y cómo funciona el negocio.</p></li>
-                        <li class="paso"><span class="paso-punto"></span><span class="paso-num">02</span><h3>Detecto</h3><p>Identifico problemas, necesidades y oportunidades.</p></li>
-                        <li class="paso"><span class="paso-punto"></span><span class="paso-num">03</span><h3>Entiendo</h3><p>Analizo procesos, personas y objetivos.</p></li>
+                        <li class="paso"><span class="paso-punto"></span><span class="paso-num">01 · <i lang="en">Discovery</i></span><h3>Observo</h3><p>Comprendo el contexto y cómo funciona el negocio.</p></li>
+                        <li class="paso"><span class="paso-punto"></span><span class="paso-num">02 · <i lang="en">Discovery</i></span><h3>Detecto</h3><p>Identifico problemas, necesidades y oportunidades.</p></li>
+                        <li class="paso"><span class="paso-punto"></span><span class="paso-num">03 · <i lang="en">Discovery</i></span><h3>Entiendo</h3><p>Analizo procesos, personas y objetivos.</p></li>
                     </ol>
                 </div>
-
                 <div class="metodo-grupo">
                     <div class="metodo-cabecera" lang="en"><em>Building</em> second</div>
                     <ol start="4">
-                        <li class="paso"><span class="paso-punto"></span><span class="paso-num">04</span><h3>Diseño</h3><p>Defino la solución y la experiencia.</p></li>
-                        <li class="paso"><span class="paso-punto"></span><span class="paso-num">05</span><h3>Construyo</h3><p>Transformo la solución en un producto funcional.</p></li>
-                        <li class="paso paso-final"><span class="paso-punto"></span><span class="paso-num">06</span><h3>Resuelvo</h3><p>Genero valor y mejoro el proceso original.</p></li>
+                        <li class="paso"><span class="paso-punto"></span><span class="paso-num">04 · <i lang="en">Solution Design</i></span><h3>Diseño</h3><p>Defino la solución, su alcance y su presupuesto.</p></li>
+                        <li class="paso"><span class="paso-punto"></span><span class="paso-num">05 · <i lang="en">Build</i></span><h3>Construyo</h3><p>Construyo y valido el producto o la herramienta.</p></li>
+                        <li class="paso paso-final"><span class="paso-punto"></span><span class="paso-num">06 · <i lang="en">Evolution</i></span><h3>Resuelvo</h3><p>Pongo en marcha y mejoro según las necesidades reales.</p></li>
                     </ol>
                 </div>
             </div>
 
-            <p class="metodo-cierre reveal" lang="en">Understanding first. Building second.</p>
-        </section>
-
-        <!-- ===== 04 · QUÉ PUEDO RESOLVER ===== -->
-        <section class="seccion" id="resolver" aria-labelledby="resolver-titulo">
-            <div class="resolver-grid">
-                <div class="resolver-texto">
-                    <div class="sec-cabecera reveal"><span class="num">04</span>Qué puedo resolver</div>
-                    <h2 class="sec-titulo reveal" id="resolver-titulo">¿Y si el software se adaptara a tu negocio <em>y no al revés?</em></h2>
-                    <p class="sec-intro reveal">Muchas empresas adaptan sus procesos a las limitaciones de las herramientas que utilizan. Mi trabajo consiste en entender esos procesos y construir soluciones que respondan a sus necesidades reales.</p>
-                    <a href="#contacto" class="boton reveal" id="cta-resolver" data-evento="cta-resolver">Hablemos de tu negocio <span class="flecha">↗</span></a>
-                    <p class="resolver-contador" id="resolver-contador" aria-live="polite"></p>
-                </div>
-
-                <div>
-                    <p class="situaciones-pregunta reveal">¿Te reconoces en alguna? Marca las que te suenen.</p>
-                    <ul class="situaciones">
-                        <li class="reveal"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">Gestionas procesos complejos mediante hojas de cálculo.</span></button></li>
-                        <li class="reveal" style="--d: 0.05s"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">Pagas por herramientas que no se adaptan a tu negocio.</span></button></li>
-                        <li class="reveal" style="--d: 0.1s"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">Tu equipo pierde tiempo en tareas repetitivas.</span></button></li>
-                        <li class="reveal" style="--d: 0.15s"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">Necesitas conectar información de diferentes sistemas.</span></button></li>
-                        <li class="reveal" style="--d: 0.2s"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">No tienes visibilidad suficiente sobre tus datos económicos.</span></button></li>
-                        <li class="reveal" style="--d: 0.25s"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">Necesitas automatizar procesos internos.</span></button></li>
-                        <li class="reveal" style="--d: 0.3s"><button type="button" class="situacion" aria-pressed="false"><span class="marca-check"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2 4 7.5 8.5 2.5" fill="none" stroke="#061310" stroke-width="1.6"/></svg></span><span class="t">Has detectado una oportunidad de negocio, pero no sabes cómo convertirla en un producto tecnológico.</span></button></li>
-                    </ul>
-                </div>
+            <div class="colabora-cab reveal">
+                <h3>Formas de colaborar</h3>
+                <p>No vendo horas de desarrollo: ofrezco capacidad de análisis, diseño y construcción. Cada proyecto se valora según su alcance.</p>
             </div>
-        </section>
-
-        <!-- ===== 05 · PROYECTOS ===== -->
-        <section class="seccion" id="proyectos" aria-labelledby="proyectos-titulo">
-            <div class="sec-cabecera reveal"><span class="num">05</span>Proyectos</div>
-            <h2 class="sec-titulo reveal" id="proyectos-titulo" lang="en">Real problems. <em>Real products.</em></h2>
-            <p class="sec-intro reveal">Cada producto nace de una necesidad real.</p>
-
-                        <!-- El caso de estudio y las tarjetas los escribe generar.mjs a partir de proyectos.js. No editar a mano. -->
-            <div id="caso-destacado"><!-- generado:caso --><article class="caso reveal" style="--acento:#4f8cff" aria-labelledby="caso-timon"><span class="caso-fondo" aria-hidden="true">TIMÓN</span><span class="caso-etiqueta" lang="en">Featured Case Study</span><div class="proyecto-top"><h3 class="caso-nombre" id="caso-timon">TIMÓN</h3><span class="estado">Solución interna</span></div><p class="proyecto-claim">Inteligencia financiera empresarial</p><p class="proyecto-tags">Fintech · B2B · Business Intelligence</p><p class="caso-intro">Una empresa con varios socios y departamentos tenía su contabilidad al día, pero las preguntas que importaban para gestionarla no tenían una respuesta directa en el sistema contable.</p><div class="caso-tabla"><div class="caso-encabezados" aria-hidden="true"><span>Antes · La pregunta</span><span>Con TIMÓN · La respuesta</span></div><ol class="caso-pares"><li class="caso-par reveal" style="--d:0s"><p class="antes"><span class="et">Antes</span>¿Qué rentabilidad aporta cada departamento?</p><span class="paso-flecha" aria-hidden="true"></span><p class="despues"><span class="et">Con TIMÓN</span>Rentabilidad por departamento.</p></li><li class="caso-par reveal" style="--d:0.09s"><p class="antes"><span class="et">Antes</span>¿Cuánto corresponde a cada socio?</p><span class="paso-flecha" aria-hidden="true"></span><p class="despues"><span class="et">Con TIMÓN</span>Cálculo y reparto de remuneraciones entre socios.</p></li><li class="caso-par reveal" style="--d:0.18s"><p class="antes"><span class="et">Antes</span>¿Cuánto tenemos que facturar para cubrir costes?</p><span class="paso-flecha" aria-hidden="true"></span><p class="despues"><span class="et">Con TIMÓN</span>Punto muerto y coste por hora.</p></li><li class="caso-par reveal" style="--d:0.27s"><p class="antes"><span class="et">Antes</span>¿Con qué tesorería contamos y qué viene?</p><span class="paso-flecha" aria-hidden="true"></span><p class="despues"><span class="et">Con TIMÓN</span>Tesorería y previsiones.</p></li><li class="caso-par reveal" style="--d:0.36s"><p class="antes"><span class="et">Antes</span>¿Qué pasa si bajan los ingresos?</p><span class="paso-flecha" aria-hidden="true"></span><p class="despues"><span class="et">Con TIMÓN</span>Simulador de escenarios.</p></li><li class="caso-par reveal" style="--d:0.44999999999999996s"><p class="antes"><span class="et">Antes</span>¿Cuánto ha aportado cada socio?</p><span class="paso-flecha" aria-hidden="true"></span><p class="despues"><span class="et">Con TIMÓN</span>Equilibrio entre socios.</p></li></ol></div><p class="caso-cierre">TIMÓN no sustituye a la contabilidad: se apoya en ella y la convierte en información útil para gestionar y decidir.</p><p class="origen">Desarrollado para un estudio creativo con varios socios y departamentos. Los datos de la empresa se mantienen confidenciales.</p><div class="caso-cta"><p class="caso-pregunta">¿Qué proceso de tu empresa podríamos transformar?</p><div class="caso-acciones"><a href="#contacto" class="boton" data-tipo="consultoria" data-evento="cta-caso-timon">Hablemos de tu proceso <span class="flecha">↗</span></a><a class="boton-texto" href="proyectos/timon.html" data-entrar="timon">Entrar en el universo TIMÓN <span aria-hidden="true">→</span></a></div></div></article><!-- /generado:caso --></div>
-            <div class="proyectos-grid" id="proyectos-grid"><!-- generado:tarjetas --><article class="proyecto reveal destacado" style="--d:0s;--acento:#8b7cf6"><div class="proyecto-visual" aria-hidden="true"><span class="visual-num">01 / 05</span><span class="visual-sectores">Fintech<br>B2C<br>AI<br>SaaS</span><span class="visual-orbita"></span><span class="visual-nombre">Fliia</span></div><div class="proyecto-cuerpo"><span class="insignia" lang="en">Flagship Product</span><div class="proyecto-top"><h3 class="proyecto-nombre">Fliia</h3><span class="estado">Beta</span></div><p class="proyecto-claim">Inteligencia económica familiar</p><p class="proyecto-tags">Fintech · B2C · AI · SaaS</p><dl class="proyecto-ps"><div><dt>Problema</dt><dd>La economía familiar está repartida entre cuentas, aplicaciones, hojas de cálculo y conversaciones.</dd></div><div><dt>Solución</dt><dd>Un espacio que conecta el día a día, el patrimonio, las previsiones, los objetivos y la economía compartida.</dd></div></dl><div class="proyecto-acciones"><a class="abrir-ficha" href="proyectos/fliia.html" data-entrar="fliia">Entrar en el universo Fliia <span aria-hidden="true">→</span></a><a class="enlace-externo" href="https://fliia.es" target="_blank" rel="noopener" data-evento="web-fliia">fliia.es ↗</a></div></div></article><article class="proyecto reveal" style="--d:0.08s;--acento:#2563eb"><div class="proyecto-visual" aria-hidden="true"><span class="visual-num">03 / 05</span><span class="visual-sectores">Gestión administrativa<br>Fiscal y contable<br>Multiempresa</span><span class="visual-orbita"></span><span class="visual-nombre">Outbill</span></div><div class="proyecto-cuerpo"><span class="insignia">Producto propio</span><div class="proyecto-top"><h3 class="proyecto-nombre">Outbill</h3><span class="estado">Uso privado</span></div><p class="proyecto-claim">Todas tus empresas. Todas tus cuentas. Un solo lugar.</p><p class="proyecto-tags">Gestión administrativa · Fiscal y contable · Multiempresa</p><dl class="proyecto-ps"><div><dt>Problema</dt><dd>Varias empresas o actividades significan duplicar herramientas, tareas, documentación y procesos fiscales.</dd></div><div><dt>Solución</dt><dd>Una plataforma de gestión administrativa, fiscal y contable para pequeñas empresas y autónomos, con varias empresas en un solo lugar.</dd></div></dl><div class="proyecto-acciones"><a class="abrir-ficha" href="proyectos/outbill.html" data-entrar="outbill">Entrar en el universo Outbill <span aria-hidden="true">→</span></a></div></div></article><article class="proyecto reveal" style="--d:0.16s;--acento:#0f766e"><div class="proyecto-visual" aria-hidden="true"><span class="visual-num">04 / 05</span><span class="visual-sectores">Automotive<br>Fintech<br>B2B</span><span class="visual-orbita"></span><span class="visual-nombre largo">Automotive Finance</span></div><div class="proyecto-cuerpo"><span class="insignia">Solución a medida</span><div class="proyecto-top"><h3 class="proyecto-nombre">Automotive Finance</h3><span class="estado">Solución a medida</span></div><p class="proyecto-claim">Gestión inteligente de financiación de vehículos</p><p class="proyecto-tags">Automotive · Fintech · B2B</p><dl class="proyecto-ps"><div><dt>Problema</dt><dd>Ventas financiadas, vencimientos, cobros pendientes y clientes difíciles de seguir.</dd></div><div><dt>Solución</dt><dd>Una herramienta adaptada a la operativa real de un negocio de compraventa de vehículos con financiación.</dd></div></dl><div class="proyecto-acciones"><a class="abrir-ficha" href="proyectos/automotive.html" data-entrar="automotive">Entrar en el universo Automotive Finance <span aria-hidden="true">→</span></a></div></div></article><article class="proyecto reveal" style="--d:0.24s;--acento:#2dd4bf"><div class="proyecto-visual" aria-hidden="true"><span class="visual-num">05 / 05</span><span class="visual-sectores">Yachting<br>Networking<br>AI</span><span class="visual-orbita"></span><span class="visual-nombre">Binako</span></div><div class="proyecto-cuerpo"><span class="insignia">Validación sectorial</span><div class="proyecto-top"><h3 class="proyecto-nombre">Binako</h3><span class="estado">Desarrollo y validación sectorial</span></div><p class="proyecto-claim">Inteligencia relacional para la industria náutica</p><p class="proyecto-tags">Yachting · Networking · AI</p><dl class="proyecto-ps"><div><dt>Problema</dt><dd>Contactos de ferias internacionales cuyo contexto y oportunidades se pierden.</dd></div><div><dt>Solución</dt><dd>Una herramienta que conecta personas, empresas, embarcaciones, astilleros y eventos profesionales.</dd></div></dl><div class="proyecto-acciones"><a class="abrir-ficha" href="proyectos/nautico.html" data-entrar="nautico">Entrar en el universo Binako <span aria-hidden="true">→</span></a></div></div></article><!-- /generado:tarjetas --></div>
-        </section>
-
-        <!-- ===== 06 · FORMAS DE COLABORACIÓN ===== -->
-        <section class="seccion" id="colaborar" aria-labelledby="colaborar-titulo">
-            <div class="sec-cabecera reveal"><span class="num">06</span>Formas de colaboración</div>
-            <h2 class="sec-titulo reveal" id="colaborar-titulo" lang="en">Different ways to <em>build together.</em></h2>
-
-            <h3 class="sr-sub reveal">No vendo horas de desarrollo: ofrezco capacidad de análisis, diseño y construcción de soluciones.</h3>
             <div class="modos">
                 <article class="modo reveal">
                     <svg class="modo-glifo" viewBox="0 0 64 64" aria-hidden="true">
@@ -1677,140 +1809,24 @@
                     <a href="#contacto" class="boton" data-tipo="colaboracion" data-evento="colaboracion-estrategica">Tengo una oportunidad de negocio <span class="flecha">↗</span></a>
                 </article>
             </div>
-
-            <div class="proceso">
-                <h3 class="proceso-titulo reveal">Cómo trabajamos juntos</h3>
-                <ol>
-                    <li class="reveal"><span class="n">01</span><h4>Discovery</h4><p><strong>Entender el negocio.</strong> Primera conversación para entender tu situación, necesidades y objetivos.</p></li>
-                    <li class="reveal" style="--d: 0.08s"><span class="n">02</span><h4>Solution Design</h4><p><strong>Diseñar la solución.</strong> Análisis del problema y definición de una propuesta de solución, alcance y presupuesto.</p></li>
-                    <li class="reveal" style="--d: 0.16s"><span class="n">03</span><h4>Build</h4><p><strong>Construir y validar.</strong> Diseño, construcción y validación del producto o herramienta.</p></li>
-                    <li class="reveal" style="--d: 0.24s"><span class="n">04</span><h4>Evolution</h4><p><strong>Mejorar y evolucionar.</strong> Puesta en marcha, validación y evolución según las necesidades reales.</p></li>
-                </ol>
-                <p class="proceso-nota reveal">No se empieza a desarrollar sin comprender antes el problema. Cada proyecto se valora según su alcance, complejidad y necesidades.</p>
-            </div>
         </section>
 
-        <!-- ===== 07 · CONTACTO / DISCOVERY ===== -->
-        <section class="seccion" id="contacto" aria-labelledby="contacto-titulo">
-            <div class="contacto-grid">
-                <div>
-                    <div class="sec-cabecera reveal"><span class="num">07</span>Contacto · Discovery</div>
-                    <h2 class="sec-titulo reveal" id="contacto-titulo">¿Qué necesitas <em>resolver?</em></h2>
-                    <p class="sec-intro reveal">Cuéntame cómo funciona tu negocio, qué procesos te quitan tiempo o qué necesidad todavía no has conseguido resolver. No hace falta que sepas qué tecnología necesitas.</p>
-
-                    <div class="contacto-directo reveal">
-                        <a href="mailto:hola@difortunastudio.com" data-evento="click-email"><span class="i">✉</span>hola@difortunastudio.com</a>
-                        <a href="https://www.linkedin.com/in/fiorellagallodifortuna/" target="_blank" rel="noopener" data-evento="click-linkedin"><span class="i">in</span>LinkedIn</a>
-                    </div>
-
-                    <p class="aviso-sensible reveal">Por seguridad, no incluyas en tu primer mensaje contraseñas, datos financieros confidenciales ni documentación sensible. Si hace falta, lo vemos juntos más adelante por un canal adecuado.</p>
-                </div>
-
-                <!--
-                    FORMULARIO
-                    Sin proveedor externo por ahora: prepara un email (ver ENVIO en el script).
-                    Futuro "Discovery Assistant": podrá sustituir o complementar este
-                    formulario generando el mismo objeto `solicitud` (ver construirSolicitud),
-                    de modo que el envío y el correo de llegada no cambien.
-                -->
-                <div class="formulario reveal" id="formulario-caja">
-                    <form id="formulario" novalidate>
-                        <div class="fila">
-                            <div class="campo">
-                                <label for="f-nombre">Nombre</label>
-                                <input type="text" id="f-nombre" name="nombre" autocomplete="name" required maxlength="120" aria-describedby="e-nombre" />
-                                <span class="error-campo" id="e-nombre"></span>
-                            </div>
-                            <div class="campo">
-                                <label for="f-email">Email</label>
-                                <input type="email" id="f-email" name="email" autocomplete="email" required maxlength="160" aria-describedby="e-email" />
-                                <span class="error-campo" id="e-email"></span>
-                            </div>
-                        </div>
-                        <div class="fila">
-                            <div class="campo">
-                                <label for="f-empresa">Empresa <span class="opcional">(opcional)</span></label>
-                                <input type="text" id="f-empresa" name="empresa" autocomplete="organization" maxlength="160" />
-                            </div>
-                            <div class="campo">
-                                <label for="f-sector">Sector <span class="opcional">(opcional)</span></label>
-                                <input type="text" id="f-sector" name="sector" maxlength="120" />
-                            </div>
-                        </div>
-
-                        <fieldset class="campo" aria-describedby="e-necesidad">
-                            <legend>Tipo de colaboración</legend>
-                            <div class="chips">
-                                <label class="chip"><input type="radio" name="necesidad" value="Consultoría y diseño de soluciones" data-tipo="consultoria" required /><span>Consultoría y diseño de soluciones</span></label>
-                                <label class="chip"><input type="radio" name="necesidad" value="Desarrollo de un producto a medida" data-tipo="desarrollo" /><span>Desarrollo de un producto a medida</span></label>
-                                <label class="chip"><input type="radio" name="necesidad" value="Colaboración estratégica" data-tipo="colaboracion" /><span>Colaboración estratégica</span></label>
-                                <label class="chip"><input type="radio" name="necesidad" value="Conocer alguno de tus productos" data-tipo="productos" /><span>Conocer alguno de tus productos</span></label>
-                                <label class="chip"><input type="radio" name="necesidad" value="Otra necesidad" data-tipo="otra" /><span>Otra necesidad</span></label>
-                            </div>
-                            <span class="error-campo" id="e-necesidad"></span>
-                        </fieldset>
-
-                        <div class="campo">
-                            <label for="f-mensaje">Descripción de la necesidad</label>
-                            <textarea id="f-mensaje" name="mensaje" required minlength="20" maxlength="4000" aria-describedby="e-mensaje"
-                                placeholder="¿Qué problema tienes actualmente? ¿Cómo lo estás resolviendo? ¿Qué te gustaría mejorar?"></textarea>
-                            <span class="error-campo" id="e-mensaje"></span>
-                        </div>
-
-                        <!-- Trampa antispam: invisible para personas, los bots la rellenan -->
-                        <div class="trampa" aria-hidden="true">
-                            <label for="f-botcheck">No rellenar</label>
-                            <input type="checkbox" id="f-botcheck" name="botcheck" tabindex="-1" autocomplete="off" />
-                        </div>
-
-                        <p class="privacidad-basica">
-                            <strong>Información básica sobre privacidad.</strong>
-                            Responsable: Fiorella Elizabeth Gallo (Difortuna Studio).
-                            Finalidad: responder a tu solicitud y, si procede, preparar una propuesta.
-                            Legitimación: tu consentimiento y la aplicación de medidas precontractuales a petición tuya.
-                            Destinatarios: este formulario no envía datos a ningún servicio externo; prepara un correo que envías tú desde tu propio programa. No se ceden datos a terceros.
-                            Derechos: acceso, rectificación, supresión y demás, escribiendo a hola@difortunastudio.com.
-                            Más información en la <a href="aviso-legal.html#privacidad">política de privacidad</a>.
-                        </p>
-
-                        <label class="acepto">
-                            <input type="checkbox" id="f-acepto" name="acepto" required aria-describedby="e-acepto" />
-                            <span>He leído la información sobre privacidad y acepto que se traten mis datos para responder a mi solicitud.</span>
-                        </label>
-                        <span class="error-campo" id="e-acepto"></span>
-
-                        <div class="enviar-fila">
-                            <button type="submit" class="boton" id="f-enviar">Exploremos la solución <span class="flecha">↗</span></button>
-                            <p class="estado-envio" id="estado-envio" role="status" aria-live="polite"></p>
-                        </div>
-                        <p class="nota-envio">Al pulsar, se abrirá tu programa de correo con el mensaje preparado para que lo envíes.</p>
-                    </form>
-
-                    <!-- Mientras se cierran los aspectos legales, el formulario queda en pausa (ENVIO.modo = 'pausa') -->
-                    <div class="confirmacion" id="formulario-pausa" hidden>
-                        <div class="ok" aria-hidden="true">✉</div>
-                        <h3>Escríbeme directamente.</h3>
-                        <p>El formulario estará disponible muy pronto. Mientras tanto, cuéntame qué necesitas resolver por email o por LinkedIn.</p>
-                        <div class="hero-ctas">
-                            <a href="mailto:hola@difortunastudio.com" class="boton" data-evento="click-email">hola@difortunastudio.com <span class="flecha">↗</span></a>
-                            <a href="https://www.linkedin.com/in/fiorellagallodifortuna/" target="_blank" rel="noopener" class="boton-texto" data-evento="click-linkedin">LinkedIn ↗</a>
-                        </div>
-                    </div>
-
-                    <div class="confirmacion" id="confirmacion" hidden tabindex="-1">
-                        <div class="ok" aria-hidden="true">✓</div>
-                        <h3 id="confirmacion-titulo">Gracias, ya tengo tu mensaje.</h3>
-                        <p id="confirmacion-texto">Lo leeré con calma y te escribiré al email que me has indicado para seguir la conversación.</p>
-                    </div>
-                </div>
+        <!-- ===== 06 · CONTACTO ===== -->
+        <section class="seccion compacta contacto-simple" id="contacto" aria-labelledby="contacto-titulo">
+            <div class="sec-cabecera reveal"><span class="num">06</span>Contacto</div>
+            <h2 class="sec-titulo reveal" id="contacto-titulo">¿Qué necesitas <em>resolver?</em></h2>
+            <p class="sec-intro reveal">Cuéntame cómo funciona tu negocio, qué procesos te quitan tiempo o qué necesidad todavía no has conseguido resolver. No hace falta que sepas qué tecnología necesitas.</p>
+            <div class="contacto-acciones reveal">
+                <a href="mailto:hola@difortunastudio.com" class="boton grande" data-evento="click-email">hola@difortunastudio.com <span class="flecha">↗</span></a>
+                <a href="https://www.linkedin.com/in/fiorellagallodifortuna/" target="_blank" rel="noopener" class="boton-texto" data-evento="click-linkedin">LinkedIn ↗</a>
             </div>
+            <p class="aviso-sensible reveal">Por seguridad, no incluyas en tu primer mensaje contraseñas, datos financieros confidenciales ni documentación sensible.</p>
         </section>
 
         <!-- ===== CIERRE ===== -->
         <section class="cierre" aria-labelledby="cierre-titulo">
             <h2 class="reveal" id="cierre-titulo" lang="en">Understanding first. <span>Building second.</span></h2>
-            <p class="reveal">Creo en una tecnología que nace de las necesidades reales, no de las tendencias.</p>
-            <p class="reveal">La inteligencia artificial está transformando nuestra capacidad para construir productos, pero comprender qué merece la pena construir sigue siendo fundamental.</p>
+            <p class="reveal">Creo en una tecnología que nace de las necesidades reales, no de las tendencias. La inteligencia artificial está transformando nuestra capacidad para construir productos, pero comprender qué merece la pena construir sigue siendo fundamental.</p>
         </section>
 
         <footer class="footer reveal">
@@ -1829,22 +1845,6 @@
     <script src="proyectos.js"></script>
     <script>
         (function () {
-            /* =============================================================
-               CONFIGURACIÓN DEL FORMULARIO
-               modo 'correo': no hay proveedor externo. Al enviar, se abre el
-                              programa de correo de la persona con el mensaje
-                              ya preparado para hola@difortunastudio.com.
-               modo 'api':    envío directo a un proveedor (pendiente de elegir
-                              uno europeo con DPA). Rellenar url y clave.
-               ============================================================= */
-            var ENVIO = {
-                modo: 'pausa',   /* 'pausa' | 'correo' | 'api' */
-                destino: 'hola@difortunastudio.com',
-                asunto: 'Nueva solicitud desde difortunastudio.com',
-                url: '',
-                clave: ''
-            };
-
             var sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             var enLocal = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 
@@ -2010,7 +2010,7 @@
             });
 
             if ('IntersectionObserver' in window) {
-                var seccionesNav = ['perfil', 'metodologia', 'resolver', 'proyectos', 'colaborar', 'contacto']
+                var seccionesNav = ['resolver', 'proyectos', 'perfil', 'metodologia', 'contacto']
                     .map(function (id) { return document.getElementById(id); });
                 var obsNav = new IntersectionObserver(function (entradas) {
                     entradas.forEach(function (e) {
@@ -2115,179 +2115,15 @@
                     var n = marcadas().length;
                     contador.textContent = n === 0 ? '' :
                         (n === 1 ? 'Has marcado 1 situación. ' : 'Has marcado ' + n + ' situaciones. ') +
-                        'Se añadirán a tu mensaje.';
+                        'Se añadirán a tu email.';
                 });
             });
 
-            /* =============================================================
-               FORMULARIO
-               ============================================================= */
-            var form = document.getElementById('formulario');
-            var campoMensaje = document.getElementById('f-mensaje');
-            var estado = document.getElementById('estado-envio');
-            var botonEnviar = document.getElementById('f-enviar');
-            var confirmacion = document.getElementById('confirmacion');
-            if (ENVIO.modo === 'pausa') {
-                form.hidden = true;
-                document.getElementById('formulario-pausa').hidden = false;
-            }
-            var cargadoEn = Date.now();
-
-            /* Al ir al formulario desde un CTA, preseleccionar la necesidad y
-               volcar las situaciones marcadas (solo si el mensaje está vacío). */
-            document.addEventListener('click', function (e) {
-                var cta = e.target.closest('a[href="#contacto"]');
-                if (!cta) return;
-                marcarTipo(cta.getAttribute('data-tipo'));
+            /* El botón «Hablemos de tu negocio» prepara un email con las situaciones marcadas */
+            document.getElementById('cta-resolver').addEventListener('click', function () {
                 var lista = marcadas();
-                if (lista.length && !campoMensaje.value.trim()) {
-                    campoMensaje.value = 'Me identifico con estas situaciones:\n- ' + lista.join('\n- ') + '\n\n';
-                }
-            });
-
-            function marcarTipo(tipo) {
-                if (!tipo) return;
-                var radio = form.querySelector('input[name="necesidad"][data-tipo="' + tipo + '"]');
-                if (radio) radio.checked = true;
-            }
-            try { marcarTipo(new URLSearchParams(location.search).get('tipo')); } catch (err) {}
-
-            form.addEventListener('focusin', function () { medir('formulario-inicio', true); });
-
-            var mensajes = {
-                nombre: { valueMissing: 'Dime cómo te llamas.' },
-                email: { valueMissing: 'Necesito un email para responderte.', typeMismatch: 'Este email no parece correcto.' },
-                mensaje: { valueMissing: 'Cuéntame brevemente tu situación.', tooShort: 'Cuéntame un poco más (al menos 20 caracteres).' },
-                necesidad: { valueMissing: 'Elige el tipo de colaboración que más se acerque.' },
-                acepto: { valueMissing: 'Necesito tu conformidad para poder responderte.' }
-            };
-
-            function validarCampo(input) {
-                var nombre = input.name;
-                var error = document.getElementById('e-' + nombre);
-                if (!error) return true;
-                var v = input.validity;
-                var texto = '';
-                if (!v.valid) {
-                    var m = mensajes[nombre] || {};
-                    if (v.valueMissing) texto = m.valueMissing;
-                    else if (v.typeMismatch) texto = m.typeMismatch;
-                    else if (v.tooShort) texto = m.tooShort;
-                    else texto = 'Revisa este campo.';
-                }
-                /* el textarea con texto precargado cuenta como corto si solo tiene la lista */
-                error.textContent = texto || '';
-                if (input.type !== 'radio') input.setAttribute('aria-invalid', texto ? 'true' : 'false');
-                return !texto;
-            }
-
-            ['f-nombre', 'f-email', 'f-mensaje', 'f-acepto'].forEach(function (id) {
-                var el = document.getElementById(id);
-                el.addEventListener('blur', function () { if (el.value || el.type === 'checkbox') validarCampo(el); });
-                el.addEventListener('input', function () { if (el.getAttribute('aria-invalid') === 'true') validarCampo(el); });
-                el.addEventListener('change', function () { if (el.type === 'checkbox') validarCampo(el); });
-            });
-            form.querySelectorAll('input[name="necesidad"]').forEach(function (r) {
-                r.addEventListener('change', function () { document.getElementById('e-necesidad').textContent = ''; });
-            });
-
-            function construirSolicitud() {
-                var d = new FormData(form);
-                return {
-                    nombre: (d.get('nombre') || '').trim(),
-                    email: (d.get('email') || '').trim(),
-                    empresa: (d.get('empresa') || '').trim(),
-                    sector: (d.get('sector') || '').trim(),
-                    necesidad: d.get('necesidad') || '',
-                    mensaje: (d.get('mensaje') || '').trim()
-                };
-            }
-
-            function mostrarEstado(texto, esError) {
-                estado.innerHTML = texto;
-                estado.classList.toggle('error', !!esError);
-            }
-
-            function terminarConExito(evento) {
-                form.hidden = true;
-                confirmacion.hidden = false;
-                confirmacion.focus();
-                if (evento) medir(evento);
-            }
-
-            function textoCorreo(sol) {
-                return 'Nombre: ' + sol.nombre + '\n' +
-                    'Email: ' + sol.email + '\n' +
-                    'Empresa o proyecto: ' + (sol.empresa || '—') + '\n' +
-                    'Sector: ' + (sol.sector || '—') + '\n' +
-                    'Tipo de colaboración: ' + sol.necesidad + '\n\n' +
-                    sol.mensaje + '\n';
-            }
-
-            var errorGenerico = 'No he podido enviar el mensaje. Inténtalo de nuevo o escríbeme a <a href="mailto:hola@difortunastudio.com">hola@difortunastudio.com</a>.';
-
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                var campos = ['f-nombre', 'f-email', 'f-mensaje', 'f-acepto'].map(function (id) { return document.getElementById(id); });
-                var radio = form.querySelector('input[name="necesidad"]');
-                var validos = campos.map(validarCampo);
-                validos.push(validarCampo(radio));
-                var primeroMal = null;
-                if (!validos[4]) primeroMal = radio;
-                for (var i = campos.length - 1; i >= 0; i--) if (!validos[i]) primeroMal = campos[i];
-                if (primeroMal) {
-                    mostrarEstado('Revisa los campos marcados.', true);
-                    primeroMal.focus();
-                    return;
-                }
-
-                /* Antispam: casilla trampa marcada o envío imposiblemente rápido */
-                if (document.getElementById('f-botcheck').checked || Date.now() - cargadoEn < 2500) {
-                    terminarConExito();
-                    return;
-                }
-
-                var solicitud = construirSolicitud();
-
-                /* Modo correo: se prepara el email en el programa de la persona */
-                if (ENVIO.modo === 'correo' || !ENVIO.url) {
-                    window.location.href = 'mailto:' + ENVIO.destino +
-                        '?subject=' + encodeURIComponent(ENVIO.asunto + ' · ' + solicitud.necesidad) +
-                        '&body=' + encodeURIComponent(textoCorreo(solicitud));
-                    document.getElementById('confirmacion-titulo').textContent = 'Tu mensaje está preparado.';
-                    document.getElementById('confirmacion-texto').innerHTML =
-                        'Se ha abierto tu programa de correo con todo listo: solo tienes que pulsar enviar. ' +
-                        'Si no se ha abierto, escríbeme directamente a <a href="mailto:' + ENVIO.destino + '">' + ENVIO.destino + '</a>.';
-                    terminarConExito('formulario-correo-preparado');
-                    return;
-                }
-
-                botonEnviar.disabled = true;
-                mostrarEstado('Enviando…');
-
-                /* Modo api: adaptar el cuerpo al proveedor que se elija */
-                fetch(ENVIO.url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify({
-                        clave: ENVIO.clave,
-                        asunto: ENVIO.asunto + ' · ' + solicitud.necesidad,
-                        solicitud: solicitud
-                    })
-                }).then(function (r) {
-                    return r.json().catch(function () { return {}; }).then(function (datos) {
-                        if (r.ok && datos.success !== false) {
-                            terminarConExito('formulario-enviado');
-                        } else {
-                            botonEnviar.disabled = false;
-                            mostrarEstado(r.status === 429 ? 'Se han enviado demasiados mensajes seguidos. Prueba de nuevo en unos minutos.' : errorGenerico, true);
-                        }
-                    });
-                }).catch(function () {
-                    botonEnviar.disabled = false;
-                    mostrarEstado(errorGenerico, true);
-                });
+                this.href = 'mailto:hola@difortunastudio.com?subject=' + encodeURIComponent('Quiero hablar de mi negocio') +
+                    (lista.length ? '&body=' + encodeURIComponent('Hola, Fiorella:\n\nMe identifico con estas situaciones:\n- ' + lista.join('\n- ') + '\n\n') : '');
             });
 
             /* =============================================================
