@@ -5,6 +5,9 @@
    (tarjetas y caso de estudio) y las páginas de cada universo
    (proyectos/*.html) leen esta lista.
 
+   ⚠️ Después de editar este archivo, ejecuta:  node generar.mjs
+      (escribe el contenido en el HTML de la portada y de los universos).
+
    ⚠️ Capturas: solo imágenes ANONIMIZADAS en img/proyectos/<id>/.
       Las originales con datos reales van en _privado/ (ignorada por git).
    ===================================================================== */
