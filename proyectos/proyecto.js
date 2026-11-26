@@ -173,10 +173,11 @@
         '<h2 class="u-titulo aparece">Lo que hace ' + esc(p.nombre) + '.</h2>' +
         '<div class="u-funciones">' + p.funcionalidades.map(function (f, k) {
             var cap = f.captura && p.capturas && p.capturas[f.captura];
-            return '<article class="u-funcion aparece' + (cap ? ' con-captura' : '') + '" style="--d:' + ((k % 3) * 0.08) + 's">' +
+            return '<article class="u-funcion aparece' + (cap ? ' con-captura' : '') + (f.ejemplos && !cap ? ' ancha' : '') + '" style="--d:' + ((k % 3) * 0.08) + 's">' +
                 (cap ? '<figure><img src="' + raiz + esc(cap.src) + '" alt="' + esc(cap.alt || f.titulo) + '" loading="lazy" /></figure>' : '') +
                 '<div class="u-funcion-texto">' + (cap ? '' : '<span class="marca" aria-hidden="true"></span>') +
-                '<h3>' + esc(f.titulo) + '</h3>' + (f.texto ? '<p>' + esc(f.texto) + '</p>' : '') + '</div>' +
+                '<h3>' + esc(f.titulo) + '</h3>' + (f.texto ? '<p>' + esc(f.texto) + '</p>' : '') +
+                (f.ejemplos ? '<ul class="u-ejemplos">' + f.ejemplos.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>' : '') + '</div>' +
             '</article>';
         }).join('') + '</div>' +
     '</section>';
