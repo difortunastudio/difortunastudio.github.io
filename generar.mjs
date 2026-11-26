@@ -120,8 +120,6 @@ ${P.universo(p, proyectos)}
     </main>
     <script src="../proyectos.js"></script>
 ${p.centro || p.experiencia ? '    <script src="plantillas.js"></script>\n' : ''}    <script src="proyecto.js"></script>
-    <!-- Contador de visitas sin cookies -->
-    <script data-goatcounter="https://fiorellagallo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
 `;
