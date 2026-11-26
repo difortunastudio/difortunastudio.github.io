@@ -66,8 +66,25 @@ window.PROYECTOS = [
             "Una economía familiar que se gestiona en compañía."
         ],
         vision: "Evolucionar hacia un sistema económico adaptativo, capaz de ofrecer experiencias personalizadas según las necesidades de cada persona y familia.",
-        demo: "fliia",
-        capturas: {}   /* p. ej. { dashboard: { src: "img/proyectos/fliia/dashboard.webp", alt: "…" } } */
+        demo: null,
+        capturas: {},
+        experiencia: "fliia",
+        /* Escena: una familia FICTICIA. Las cifras se calculan a partir de aquí. */
+        escena: {
+            lema: "Claridad para hoy. Posibilidades para mañana.",
+            ingresos: 3200,
+            fijos: 1650,                 /* alquiler, suministros, colegio… */
+            variables: 640,              /* lo gastado ya este mes */
+            colchon: 300,                /* lo que la familia quiere dejar sin tocar */
+            sueno: { n: "Viaje en familia", objetivo: 3000, ahorrado: 1800 },
+            patrimonio: [["Cuentas", 12400], ["Inversión", 21200], ["Plan de pensiones", 15000]],
+            kipus: [
+                { n: "Casa de la playa", personas: 3, tuParte: 120 },
+                { n: "Cuidado de mamá", personas: 2, tuParte: 260 }
+            ],
+            decision: { pregunta: "¿Podemos permitirnos un sofá de 900 €?", importe: 900 },
+            ejemplos: ["Gasté 23,50 € en el súper", "45 € de cena con amigos", "Me han ingresado 300 € de un trabajo extra"]
+        }   /* p. ej. { dashboard: { src: "img/proyectos/fliia/dashboard.webp", alt: "…" } } */
     },
 
     /* ------------------------------------------------------------- */
@@ -204,8 +221,25 @@ window.PROYECTOS = [
             "Información ordenada antes de llegar a la gestoría.",
             "Una gestión que se adapta a cada empresa."
         ],
-        demo: "outbill",
-        capturas: {}
+        demo: null,
+        capturas: {},
+        experiencia: "outbill",
+        escena: {
+            lema: "Del documento suelto a la carpeta de la gestoría, sin teclear.",
+            etapas: ["Documentos sueltos", "Captura", "Organización", "Revisión", "Gestoría"],
+            empresas: {
+                A: { n: "Empresa A · España", moneda: "EUR", impuesto: "IVA" },
+                B: { n: "Empresa B · Reino Unido", moneda: "GBP", impuesto: "VAT" }
+            },
+            documentos: [
+                { id: "d1", tipo: "Ticket", emisor: "Papelería Ejemplo", empresa: "A", total: 50.00, impuesto: 8.68, cat: "Material de oficina" },
+                { id: "d2", tipo: "Factura", emisor: "Hosting Demo", empresa: "A", total: 121.00, impuesto: 21.00, cat: "Software" },
+                { id: "d3", tipo: "Ticket", emisor: "Example Stationery", empresa: "B", total: 48.00, impuesto: 8.00, cat: "Office supplies" },
+                { id: "d4", tipo: "Ticket", emisor: "Taxi Muestra", empresa: "A", total: 22.00, impuesto: 2.00, cat: "Desplazamientos", revisar: "Fecha poco legible" },
+                { id: "d5", tipo: "Factura", emisor: "Cloud Tools Ltd", empresa: "B", total: 24.00, impuesto: 4.00, cat: "Software" },
+                { id: "d6", tipo: "Factura", emisor: "Mensajería Demo", empresa: "A", total: 36.30, impuesto: 6.30, cat: "Envíos" }
+            ]
+        }
     },
 
     /* ------------------------------------------------------------- */
@@ -244,8 +278,20 @@ window.PROYECTOS = [
             "Seguimiento proactivo de los clientes.",
             "Un software que se adapta al negocio, y no al revés."
         ],
-        demo: "automotive",
-        capturas: {}
+        demo: null,
+        capturas: {},
+        experiencia: "automotive",
+        escena: {
+            lema: "Cada cuota, cada vencimiento y cada cliente, bajo control.",
+            fecha: "Martes, 15 de marzo",
+            tareas: [
+                { id: "t1", hora: "09:00", tipo: "cobro", cliente: "J. Ficticio", vehiculo: "Monovolumen", cuota: 22, importe: 245, texto: "Cuota que vence hoy" },
+                { id: "t2", hora: "10:30", tipo: "retraso", cliente: "M. Ejemplo", vehiculo: "Turismo compacto", cuota: 14, importe: 189, dias: 10, texto: "Cuota vencida hace 10 días",
+                  historial: ["12/01 · Cuota 12 pagada", "12/02 · Cuota 13 pagada con 3 días de retraso", "05/03 · Cuota 14 vencida"] },
+                { id: "t3", hora: "12:00", tipo: "cobro", cliente: "L. Muestra", vehiculo: "Utilitario", cuota: 6, importe: 156, texto: "Cuota que vence hoy" },
+                { id: "t4", hora: "16:00", tipo: "aviso", cliente: "R. Prueba", vehiculo: "Furgoneta", cuota: 31, importe: 312, texto: "Vence en 3 días" }
+            ]
+        }
     },
 
     /* ------------------------------------------------------------- */
@@ -284,7 +330,19 @@ window.PROYECTOS = [
             "Oportunidades que aparecen al conectar la red.",
             "Presentaciones profesionales a través de contactos comunes."
         ],
-        demo: "nautico",
-        capturas: {}
+        demo: null,
+        capturas: {},
+        experiencia: "nautico",
+        escena: {
+            lema: "Cada tarjeta es una puerta. La red es la oportunidad.",
+            evento: "Salón náutico (demo)",
+            tarjetas: [
+                { id: "marta", n: "Marta Ejemplo", cargo: "Refit Project Manager", empresa: "Astillero Demo", ciudad: "Palma" },
+                { id: "jordi", n: "Jordi Muestra", cargo: "Capitán", barco: "M/Y Demo One", ciudad: "Barcelona" },
+                { id: "ana", n: "Ana Prueba", cargo: "Yacht broker", empresa: "Broker Demo", ciudad: "Mónaco" },
+                { id: "luca", n: "Luca Ficticio", cargo: "Ingeniero naval", empresa: "Astillero Demo", ciudad: "Génova" }
+            ],
+            busqueda: { texto: "Busco un astillero para un refit en Palma", destino: "Astillero Demo" }
+        }
     }
 ];

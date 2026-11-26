@@ -319,6 +319,209 @@
             '</section>';
     }
 
+
+    /* =============================================================
+       EXPERIENCIAS PROPIAS: cada universo con su composición
+       ============================================================= */
+    var gbp2 = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
+    function rolHTML(p, d) {
+        return '<span class="u-rol entra" style="--d:' + (d || .1) + 's"' + (/^[A-Z][a-z]+ [A-Z]/.test(p.rolEtiqueta) ? ' lang="en"' : '') + '>' + esc(p.rolEtiqueta) + '</span>';
+    }
+    function avisoSim(texto) { return '<p class="x-aviso">Simulación · ' + esc(texto) + '</p>'; }
+
+    /* ---------- FLIIA: claridad para hoy, posibilidades para mañana ---------- */
+    function modeloFliia(e, extra) {
+        extra = extra || {};
+        var ingresos = e.ingresos + (extra.ingresos || 0);
+        var variables = e.variables + (extra.gastos || 0);
+        var queda = ingresos - e.fijos - variables;
+        var puedes = queda - e.colchon;
+        var restante = e.sueno.objetivo - e.sueno.ahorrado;
+        var meses = puedes > 0 ? Math.ceil(restante / puedes) : null;
+        var patrimonio = e.patrimonio.reduce(function (t, x) { return t + x[1]; }, 0);
+        return { ingresos: ingresos, variables: variables, queda: queda, puedes: puedes, restante: restante, meses: meses, patrimonio: patrimonio,
+                 pctSueno: e.sueno.ahorrado / e.sueno.objetivo };
+    }
+    function frasesSueno(e, m) {
+        return m.meses ? 'Si el mes termina así, podréis aportar ' + eur0.format(m.puedes) + ' al ' + e.sueno.n.toLowerCase() + ' y llegaréis en ' + (m.meses === 1 ? '1 mes' : m.meses + ' meses') + '.'
+            : 'Este mes no quedaría margen para el ' + e.sueno.n.toLowerCase() + ' sin tocar el colchón.';
+    }
+    function escenaFliia(p) {
+        var e = p.escena, m = modeloFliia(e);
+        var planetas = [
+            { id: 'dia', n: 'Día a día', v: eur0.format(m.variables) + ' gastados',
+              d: '<p>Este mes: ' + eur0.format(m.ingresos) + ' de ingresos, ' + eur0.format(e.fijos) + ' de gastos fijos y ' + eur0.format(m.variables) + ' en el día a día.</p><ul class="fl-movs" data-movs></ul>' },
+            { id: 'suenos', n: 'Sueños', v: Math.round(m.pctSueno * 100) + ' %',
+              d: '<p class="fl-sueno-n">' + esc(e.sueno.n) + '</p><div class="fl-progreso"><i style="width:' + (m.pctSueno * 100) + '%"></i></div><p>' + eur0.format(e.sueno.ahorrado) + ' de ' + eur0.format(e.sueno.objetivo) + '.</p><p class="fl-futuro" data-futuro>' + esc(frasesSueno(e, m)) + '</p>' },
+            { id: 'patrimonio', n: 'Patrimonio', v: eur0.format(m.patrimonio),
+              d: '<dl class="fl-lista">' + e.patrimonio.map(function (x) { return '<div><dt>' + esc(x[0]) + '</dt><dd>' + eur0.format(x[1]) + '</dd></div>'; }).join('') + '<div class="total"><dt>Total</dt><dd>' + eur0.format(m.patrimonio) + '</dd></div></dl>' },
+            { id: 'kipus', n: 'Kipus', v: e.kipus.length + ' compartidos',
+              d: '<p>Economías compartidas con otras personas, sin mezclar toda tu vida financiera.</p><dl class="fl-lista">' + e.kipus.map(function (k) { return '<div><dt>' + esc(k.n) + ' · ' + k.personas + ' personas</dt><dd>tu parte: ' + eur0.format(k.tuParte) + '</dd></div>'; }).join('') + '</dl>' },
+            { id: 'decisiones', n: 'Decisiones', v: '1 pendiente',
+              d: '<p class="fl-pregunta">' + esc(e.decision.pregunta) + '</p><button type="button" class="fl-boton" data-decidir hidden>Analizar la decisión</button><p class="fl-respuesta" data-respuesta></p>' }
+        ];
+        return '<section class="fl-escena" id="escena" aria-labelledby="fl-nombre">' +
+            '<div class="fl-fondo" aria-hidden="true"><i></i><i></i><i></i></div>' +
+            '<header class="fl-cabecera">' + rolHTML(p) +
+                '<h1 class="fl-nombre entra" id="fl-nombre" style="--d:.18s">' + esc(p.nombre) + '</h1>' +
+                '<p class="fl-lema entra" style="--d:.26s">' + esc(e.lema) + '</p>' +
+            '</header>' +
+            '<div class="fl-sistema entra" style="--d:.34s">' +
+                '<svg class="fl-orbitas" viewBox="0 0 800 800" aria-hidden="true"><circle cx="400" cy="400" r="230"/><circle cx="400" cy="400" r="330" class="fina"/><circle class="fl-onda" cx="400" cy="400" r="150"/></svg>' +
+                '<div class="fl-nucleo" role="status" aria-live="polite">' +
+                    '<span class="et">Puedes gastar este mes</span>' +
+                    '<strong class="fl-cifra" data-cifra>' + eur0.format(m.puedes) + '</strong>' +
+                    '<span class="sub" data-sub>sin tocar tu colchón de ' + eur0.format(e.colchon) + '</span>' +
+                '</div>' +
+                '<ul class="fl-planetas" aria-label="Dimensiones de la economía familiar">' +
+                planetas.map(function (pl, k) {
+                    return '<li class="fl-planeta" style="--i:' + k + '"><a href="#fl-' + pl.id + '" data-planeta="' + pl.id + '" aria-controls="fl-' + pl.id + '"><b>' + esc(pl.n) + '</b><span data-valor="' + pl.id + '">' + esc(pl.v) + '</span></a></li>';
+                }).join('') +
+                '</ul>' +
+            '</div>' +
+            '<div class="fl-detalles">' +
+            planetas.map(function (pl) {
+                return '<article class="fl-detalle" id="fl-' + pl.id + '"><h2>' + esc(pl.n) + '</h2>' + pl.d + '</article>';
+            }).join('') +
+            '</div>' +
+            '<form class="fl-voz entra" style="--d:.5s" data-voz>' +
+                '<button type="button" class="fl-mic" data-mic aria-label="Hablar con Fliia (simulado)" hidden><span></span></button>' +
+                '<label class="solo-lectores" for="fl-frase">Dile a Fliia qué ha pasado</label>' +
+                '<input id="fl-frase" autocomplete="off" placeholder="Dile a Fliia qué ha pasado…" />' +
+                '<button type="submit" class="fl-enviar">Registrar</button>' +
+            '</form>' +
+            '<div class="fl-ejemplos entra" style="--d:.56s">' + e.ejemplos.map(function (t) { return '<button type="button" data-ejemplo hidden>' + esc(t) + '</button>'; }).join('') + '</div>' +
+            '<p class="fl-msg" data-msg aria-live="polite"></p>' +
+            avisoSim('familia ficticia y datos inventados. En la aplicación real, esto también se puede hacer con la voz.') +
+        '</section>' +
+        '<section class="x-despues"><div class="x-despues-texto aparece">' +
+            '<h2>Una economía, muchas vidas.</h2>' +
+            '<p>' + esc(p.problema) + '</p>' +
+            '<p>' + esc(p.vision) + '</p>' +
+        '</div></section>';
+    }
+
+    /* ---------- OUTBILL: del documento suelto a la gestoría ---------- */
+    function formatoOutbill(e, emp, v) { return (e.empresas[emp].moneda === 'GBP' ? gbp2 : eur2).format(v); }
+    function escenaOutbill(p) {
+        var e = p.escena;
+        var tarjeta = function (d) {
+            return '<li class="ob-doc" data-doc="' + esc(d.id) + '" data-emp="' + d.empresa + '">' +
+                '<span class="ob-tipo">' + esc(d.tipo) + '</span><strong>' + esc(d.emisor) + '</strong>' +
+                '<span class="ob-total">' + formatoOutbill(e, d.empresa, d.total) + '</span>' +
+                '<span class="ob-campos"><span>' + esc(e.empresas[d.empresa].n) + '</span><span>' + esc(d.cat) + '</span><span>' + e.empresas[d.empresa].impuesto + ' ' + formatoOutbill(e, d.empresa, d.impuesto) + '</span></span>' +
+                (d.revisar ? '<span class="ob-revisar">Revisar: ' + esc(d.revisar) + '</span>' : '') +
+            '</li>';
+        };
+        var paquete = Object.keys(e.empresas).map(function (k) {
+            var docs = e.documentos.filter(function (d) { return d.empresa === k; });
+            var imp = docs.reduce(function (t, d) { return t + d.impuesto; }, 0);
+            return '<div class="ob-carpeta" data-carpeta="' + k + '"><strong>' + esc(e.empresas[k].n) + '</strong>' +
+                '<span><b data-n>' + docs.length + '</b> de ' + docs.length + ' documentos</span>' +
+                '<span>' + e.empresas[k].impuesto + ' soportado: <b data-imp>' + formatoOutbill(e, k, imp) + '</b></span></div>';
+        }).join('');
+        return '<section class="ob-escena" id="escena" aria-labelledby="ob-nombre">' +
+            '<header class="ob-cabecera">' +
+                '<div>' + rolHTML(p) + '<h1 class="ob-nombre entra" id="ob-nombre" style="--d:.18s">' + esc(p.nombre) + '</h1>' +
+                '<p class="ob-lema entra" style="--d:.26s">' + esc(e.lema) + '</p></div>' +
+                '<div class="ob-contadores entra" style="--d:.34s" aria-live="polite">' +
+                    '<div class="ob-contador grande"><span>Listos para la gestoría</span><strong><b data-listos>0</b> / ' + e.documentos.length + '</strong></div>' +
+                    '<div class="ob-contador"><span>Datos tecleados a mano</span><strong>0</strong></div>' +
+                '</div>' +
+            '</header>' +
+            '<div class="ob-cadena entra" style="--d:.42s">' +
+            e.etapas.map(function (et, k) {
+                return '<section class="ob-etapa" data-etapa="' + k + '" aria-labelledby="ob-et-' + k + '">' +
+                    '<h2 id="ob-et-' + k + '"><span>' + String(k + 1).padStart(2, '0') + '</span>' + esc(et) + '</h2>' +
+                    (k === 0 ? '<ol class="ob-pila">' + e.documentos.map(tarjeta).join('') + '</ol>' :
+                     k === 4 ? '<div class="ob-paquete">' + paquete + '</div>' : '<ol class="ob-pila"></ol>') +
+                '</section>';
+            }).join('') +
+            '</div>' +
+            '<div class="ob-controles" data-controles hidden>' +
+                '<button type="button" class="ob-boton" data-uno>Procesar el siguiente documento</button>' +
+                '<button type="button" class="ob-boton principal" data-todo>Procesarlo todo</button>' +
+                '<button type="button" class="ob-boton sec" data-reset>Reiniciar</button>' +
+            '</div>' +
+            '<p class="ob-msg" data-msg aria-live="polite"></p>' +
+            avisoSim('documentos y empresas ficticios. ' + p.aviso) +
+        '</section>';
+    }
+
+    /* ---------- AUTOMOTIVE FINANCE: tu día bajo control ---------- */
+    function escenaAutomotive(p) {
+        var e = p.escena;
+        var porCobrar = e.tareas.filter(function (t) { return t.tipo !== 'aviso'; }).reduce(function (s, t) { return s + t.importe; }, 0);
+        var atencion = e.tareas.filter(function (t) { return t.tipo === 'retraso' || t.tipo === 'aviso'; }).length;
+        var accion = { cobro: 'Registrar el cobro', retraso: 'Revisar historial y preparar la comunicación de seguimiento', aviso: 'Programar un aviso al cliente' };
+        return '<section class="am-escena" id="escena" aria-labelledby="am-nombre">' +
+            '<header class="am-cabecera">' +
+                '<div>' + rolHTML(p) + '<h1 class="am-nombre entra" id="am-nombre" style="--d:.18s">' + esc(p.nombre) + '</h1>' +
+                '<p class="am-lema entra" style="--d:.26s">' + esc(e.lema) + '</p></div>' +
+                '<p class="am-fecha entra" style="--d:.3s">' + esc(e.fecha) + '<span>Jornada de un concesionario ficticio</span></p>' +
+            '</header>' +
+            '<div class="am-kpis entra" style="--d:.36s" aria-live="polite">' +
+                '<div class="am-kpi grande"><span>Por cobrar hoy</span><strong data-kpi="pendiente">' + eur0.format(porCobrar) + '</strong></div>' +
+                '<div class="am-kpi"><span>Cobrado hoy</span><strong data-kpi="cobrado">' + eur0.format(0) + '</strong></div>' +
+                '<div class="am-kpi"><span>Requieren atención</span><strong data-kpi="atencion">' + atencion + '</strong></div>' +
+                '<div class="am-kpi"><span>Jornada</span><strong><b data-kpi="hechas">0</b> / ' + e.tareas.length + '</strong><i class="am-barra"><i data-kpi="barra"></i></i></div>' +
+            '</div>' +
+            '<ol class="am-dia entra" style="--d:.44s" aria-label="Tareas del día">' +
+            e.tareas.map(function (t) {
+                return '<li class="am-tarea" data-tarea="' + esc(t.id) + '" data-tipo="' + t.tipo + '">' +
+                    '<button type="button" class="am-tarea-cab" data-elegir="' + esc(t.id) + '" aria-expanded="false">' +
+                        '<span class="am-hora">' + esc(t.hora) + '</span>' +
+                        '<span class="am-punto" aria-hidden="true"></span>' +
+                        '<span class="am-cliente">' + esc(t.cliente) + ' <em>' + esc(t.vehiculo) + '</em></span>' +
+                        '<span class="am-texto">' + esc(t.texto) + ' · cuota ' + t.cuota + ' · ' + eur0.format(t.importe) + '</span>' +
+                    '</button>' +
+                    '<div class="am-acciones" data-acciones><p class="am-accion-txt">' + esc(accion[t.tipo]) + '.</p></div>' +
+                '</li>';
+            }).join('') +
+            '</ol>' +
+            '<div class="am-final" data-final hidden><strong>Tu día, bajo control.</strong><span data-final-txt></span></div>' +
+            avisoSim('concesionario, clientes y cuotas ficticios. La demo no envía ninguna comunicación.') +
+        '</section>';
+    }
+
+    /* ---------- NÁUTICO: el valor de tu red ---------- */
+    function escenaNautico(p) {
+        var e = p.escena;
+        return '<section class="nt-escena" id="escena" aria-labelledby="nt-nombre">' +
+            '<div class="nt-mapa" data-mapa aria-hidden="true"></div>' +
+            '<header class="nt-cabecera">' + rolHTML(p) +
+                '<h1 class="nt-nombre entra" id="nt-nombre" style="--d:.18s">' + esc(p.nombre) + '</h1>' +
+                '<p class="nt-lema entra" style="--d:.26s">' + esc(e.lema) + '</p>' +
+            '</header>' +
+            '<div class="nt-contadores entra" style="--d:.32s" aria-live="polite">' +
+                '<div><strong data-c="contactos">0</strong><span>Contactos</span></div>' +
+                '<div><strong data-c="entidades">0</strong><span>Empresas y barcos</span></div>' +
+                '<div><strong data-c="conexiones">0</strong><span>Conexiones</span></div>' +
+            '</div>' +
+            '<div class="nt-tarjetas entra" style="--d:.4s">' +
+                '<p class="nt-et">Tarjetas recogidas en el ' + esc(e.evento) + '. Pulsa una para digitalizarla.</p>' +
+                '<ul>' + e.tarjetas.map(function (t) {
+                    return '<li><button type="button" class="nt-tarjeta" data-tarjeta="' + esc(t.id) + '">' +
+                        '<strong>' + esc(t.n) + '</strong><span>' + esc(t.cargo) + '</span>' +
+                        '<em>' + esc(t.empresa || t.barco) + ' · ' + esc(t.ciudad) + '</em></button></li>';
+                }).join('') + '</ul>' +
+            '</div>' +
+            '<div class="nt-busqueda entra" style="--d:.48s">' +
+                '<p class="nt-et">Cuando surge una oportunidad</p>' +
+                '<button type="button" class="nt-buscar" data-buscar disabled>' + esc(e.busqueda.texto) + '</button>' +
+                '<p class="nt-resultado" data-resultado aria-live="polite"></p>' +
+            '</div>' +
+            avisoSim('personas, empresas, barcos y evento ficticios.') +
+        '</section>' +
+        '<section class="x-despues"><div class="x-despues-texto aparece">' +
+            '<h2>Cada contacto, con su contexto.</h2>' +
+            '<p>' + esc(p.problema) + '</p>' +
+            '<p>' + esc(p.ejemplo) + '</p>' +
+        '</div></section>';
+    }
+
+    var experiencias = { fliia: escenaFliia, outbill: escenaOutbill, automotive: escenaAutomotive, nautico: escenaNautico };
+
     /* Contenido completo de un universo (todo lo que va dentro de <main>) */
     function universo(p, proyectos) {
         /* =============================================================
@@ -335,7 +538,9 @@
 
         var html = '';
 
-        if (!p.centro) html += '<section class="u-hero" id="inicio">' +
+        var propia = p.experiencia && experiencias[p.experiencia];
+        if (propia) html += propia(p, raiz);
+        if (!p.centro && !propia) html += '<section class="u-hero" id="inicio">' +
             '<div class="u-escena" aria-hidden="true">' + (escenas[p.id] || '') + '</div>' +
             '<div class="u-hero-inner">' +
                 '<span class="u-rol entra" style="--d:.1s"' + (/^[A-Z][a-z]+ [A-Z]/.test(p.rolEtiqueta) ? ' lang="en"' : '') + '>' + esc(p.rolEtiqueta) + '</span>' +
@@ -350,7 +555,7 @@
         '</section>';
 
         if (p.centro) html += centroTimon(p) + despuesTimon(p, raiz);
-        else {
+        else if (!propia) {
         html += '<section class="u-bloque" id="problema">' + cab('El problema') +
             '<h2 class="u-titulo aparece">Todo empezó con una necesidad real.</h2>' +
             '<p class="u-grande aparece">' + esc(p.problema) + '</p>' +
@@ -530,7 +735,8 @@
         };
     }
 
-    var api = { esc: esc, escenas: escenas, universo: universo, portada: portada, modeloTimon: modeloTimon, lecturaTimon: lecturaTimon, valorTimon: valorTimon, nombreMes: nombreMes };
+    var api = { esc: esc, escenas: escenas, universo: universo, portada: portada, modeloTimon: modeloTimon, lecturaTimon: lecturaTimon, valorTimon: valorTimon, nombreMes: nombreMes,
+        modeloFliia: modeloFliia, frasesSueno: frasesSueno, formatoOutbill: formatoOutbill };
     raizGlobal.DFS_PLANTILLAS = api;
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -485,6 +485,379 @@
        Todas las vistas comparten la misma empresa ficticia.
        ============================================================= */
     if (p.centro && window.DFS_PLANTILLAS) iniciarCentro();
+    if (p.experiencia && window.DFS_PLANTILLAS) {
+        var exp = { fliia: expFliia, outbill: expOutbill, automotive: expAutomotive, nautico: expNautico }[p.experiencia];
+        if (exp) { document.body.classList.add('exp-viva'); exp(window.DFS_PLANTILLAS, p.escena); }
+    }
+
+    function mostrarOcultos(raizEl) {
+        raizEl.querySelectorAll('[hidden][data-mic], [hidden][data-ejemplo], [hidden][data-decidir], [hidden][data-controles]').forEach(function (el) { el.hidden = false; });
+    }
+
+    /* =============================================================
+       FLIIA · una economía viva que responde a lo que dices
+       ============================================================= */
+    function expFliia(P, e) {
+        var escena = document.getElementById('escena');
+        mostrarOcultos(escena);
+        var extra = { ingresos: 0, gastos: 0 }, movs = [];
+        var cifra = escena.querySelector('[data-cifra]'), sub = escena.querySelector('[data-sub]');
+        var msg = escena.querySelector('[data-msg]'), input = document.getElementById('fl-frase');
+        var e0 = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+        var e2 = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+        var planetas = escena.querySelectorAll('[data-planeta]'), detalles = escena.querySelectorAll('.fl-detalle');
+        var actual = null, ultimo = P.modeloFliia(e).puedes;
+
+        function abrir(id) {
+            actual = actual === id ? null : id;
+            planetas.forEach(function (a) { a.setAttribute('aria-expanded', a.getAttribute('data-planeta') === actual ? 'true' : 'false'); });
+            detalles.forEach(function (d) { d.hidden = d.id !== 'fl-' + actual; });
+            escena.classList.toggle('con-detalle', !!actual);
+            if (actual) medir('fliia-' + actual, true);
+        }
+        planetas.forEach(function (a) {
+            a.addEventListener('click', function (ev) { ev.preventDefault(); abrir(a.getAttribute('data-planeta')); });
+        });
+        detalles.forEach(function (d) {
+            d.hidden = true;
+            var cerrar = document.createElement('button');
+            cerrar.type = 'button'; cerrar.className = 'fl-cerrar'; cerrar.setAttribute('aria-label', 'Cerrar'); cerrar.textContent = '✕';
+            cerrar.addEventListener('click', function () { abrir(actual); });
+            d.insertBefore(cerrar, d.firstChild);
+        });
+
+        function pintar(pulso) {
+            var m = P.modeloFliia(e, extra);
+            animarCifra(cifra, ultimo, m.puedes, function (v) { return e0.format(v); });
+            ultimo = m.puedes;
+            sub.textContent = m.puedes >= 0 ? 'sin tocar tu colchón de ' + e0.format(e.colchon) : 'tendrías que tocar el colchón';
+            escena.querySelector('[data-valor="dia"]').textContent = e0.format(m.variables) + ' gastados';
+            escena.querySelector('[data-futuro]').textContent = P.frasesSueno(e, m);
+            escena.querySelector('[data-valor="suenos"]').textContent = m.meses ? 'en ' + m.meses + (m.meses === 1 ? ' mes' : ' meses') : 'en pausa';
+            escena.querySelector('[data-movs]').innerHTML = movs.slice(0, 4).map(function (x) {
+                return '<li><span>' + esc(x.c) + '</span><b>' + (x.v > 0 ? '+' : '') + e2.format(x.v) + '</b></li>';
+            }).join('');
+            if (pulso && !sinMovimiento) {
+                escena.classList.remove('pulso'); void escena.offsetWidth; escena.classList.add('pulso');
+                pulso.forEach(function (id) {
+                    var pl = escena.querySelector('[data-planeta="' + id + '"]').parentNode;
+                    pl.classList.remove('late'); void pl.offsetWidth; pl.classList.add('late');
+                });
+            }
+            return m;
+        }
+
+        var categorias = [
+            [/s[uú]per|mercado|compra|fruta|panader/i, 'Supermercado'],
+            [/cena|comida|restaurante|caf[eé]|bar\b/i, 'Restauración'],
+            [/gasolina|parking|taxi|tren|metro|bus/i, 'Transporte'],
+            [/farmacia|m[eé]dico|dentista/i, 'Salud']
+        ];
+        function registrar(texto) {
+            var mm = texto.match(/(\d{1,6}(?:[.,]\d{1,2})?)\s*(?:€|eur|euros?)?/i);
+            if (!mm) { msg.textContent = 'No encuentro el importe. Prueba con algo como «Gasté 12 € en la farmacia».'; return; }
+            var importe = parseFloat(mm[1].replace(',', '.'));
+            if (!(importe > 0) || importe > 100000) { msg.textContent = 'Prueba con un importe entre 1 € y 100.000 €.'; return; }
+            var ingreso = /ingres|cobr|me han pagado|n[oó]mina|recib/i.test(texto);
+            var concepto = ingreso ? 'Ingreso extra' : 'Gasto';
+            categorias.forEach(function (c) { if (concepto === 'Gasto' && c[0].test(texto)) concepto = c[1]; });
+            if (ingreso) extra.ingresos += importe; else extra.gastos += importe;
+            movs.unshift({ c: concepto, v: ingreso ? importe : -importe });
+            var m = pintar(['dia', 'suenos']);
+            msg.textContent = (ingreso ? 'Ingreso de ' : 'Gasto de ') + e2.format(importe) + ' registrado. ' +
+                (m.puedes >= 0 ? 'Puedes gastar ' + e0.format(m.puedes) + ' este mes' : 'Este mes tendrías que tocar el colchón') +
+                (m.meses ? ' y el viaje queda a ' + m.meses + (m.meses === 1 ? ' mes.' : ' meses.') : '.');
+            medir('demo-fliia', true);
+        }
+
+        escena.querySelector('[data-voz]').addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            if (input.value.trim()) { registrar(input.value.trim()); input.value = ''; }
+        });
+        escena.querySelectorAll('[data-ejemplo]').forEach(function (b) {
+            b.addEventListener('click', function () { registrar(b.textContent); });
+        });
+
+        /* Micrófono simulado: escribe una frase como si se dictara */
+        var dictados = e.ejemplos.slice(), nDict = 0, escuchando = false;
+        escena.querySelector('[data-mic]').addEventListener('click', function () {
+            if (escuchando) return;
+            escuchando = true;
+            var boton = this, frase = dictados[nDict++ % dictados.length], k = 0;
+            boton.classList.add('escuchando');
+            input.value = '';
+            input.placeholder = 'Escuchando… (simulado)';
+            var t = setInterval(function () {
+                input.value = frase.slice(0, ++k);
+                if (k >= frase.length) {
+                    clearInterval(t);
+                    setTimeout(function () {
+                        boton.classList.remove('escuchando');
+                        input.placeholder = 'Dile a Fliia qué ha pasado…';
+                        registrar(input.value); input.value = ''; escuchando = false;
+                    }, 350);
+                }
+            }, sinMovimiento ? 0 : 38);
+        });
+
+        escena.querySelector('[data-decidir]').addEventListener('click', function () {
+            var m = P.modeloFliia(e, extra), despues = m.puedes - e.decision.importe;
+            var conDecision = P.modeloFliia(e, { ingresos: extra.ingresos, gastos: extra.gastos + e.decision.importe });
+            escena.querySelector('[data-respuesta]').textContent = despues >= 0 ?
+                'Sí. Después de la compra podrías gastar ' + e0.format(despues) + ' este mes sin tocar el colchón. ' + P.frasesSueno(e, conDecision) :
+                'Mejor esperar: faltarían ' + e0.format(-despues) + ' para no tocar el colchón y el viaje quedaría en pausa este mes.';
+            medir('fliia-decision', true);
+        });
+        pintar();
+    }
+
+    /* =============================================================
+       OUTBILL · la pila de documentos se convierte en orden
+       ============================================================= */
+    function expOutbill(P, e) {
+        var escena = document.getElementById('escena');
+        mostrarOcultos(escena);
+        var pilas = Array.prototype.map.call(escena.querySelectorAll('.ob-etapa'), function (et) { return et.querySelector('.ob-pila'); });
+        var listos = escena.querySelector('[data-listos]'), msg = escena.querySelector('[data-msg]');
+        var paso = sinMovimiento ? 0 : 520, enCurso = 0, hechos = 0, cola = [];
+        var original = pilas[0].innerHTML;
+
+        function carpetas() {
+            Object.keys(e.empresas).forEach(function (k) {
+                var docs = e.documentos.filter(function (d) { return d.empresa === k; });
+                var dentro = docs.filter(function (d) { return d.listo; });
+                var c = escena.querySelector('[data-carpeta="' + k + '"]');
+                c.querySelector('[data-n]').textContent = dentro.length;
+                c.querySelector('[data-imp]').textContent = P.formatoOutbill(e, k, dentro.reduce(function (t, d) { return t + d.impuesto; }, 0));
+                c.classList.toggle('llena', dentro.length === docs.length);
+            });
+            listos.textContent = hechos;
+        }
+        function mover(li, etapa) {
+            li.classList.remove('entra-doc'); void li.offsetWidth;
+            pilas[etapa].appendChild(li);
+            li.classList.add('entra-doc');
+            li.setAttribute('data-en', etapa);
+        }
+        function procesar(li, fin) {
+            var d = e.documentos.filter(function (x) { return x.id === li.getAttribute('data-doc'); })[0];
+            enCurso++;
+            mover(li, 1); li.classList.add('leyendo');
+            setTimeout(function () {
+                li.classList.remove('leyendo'); li.classList.add('leido');
+                mover(li, 2); li.classList.add('ordenado');
+                setTimeout(function () {
+                    mover(li, 3);
+                    var terminar = function () {
+                        li.classList.add('revisado');
+                        setTimeout(function () {
+                            li.classList.add('archivado');
+                            setTimeout(function () {
+                                li.remove(); d.listo = true; hechos++; enCurso--; carpetas();
+                                if (hechos === e.documentos.length) {
+                                    msg.textContent = 'Todo listo: la documentación de las dos empresas está ordenada y preparada para la gestoría, sin teclear un solo dato.';
+                                    escena.classList.add('completo');
+                                }
+                                if (fin) fin();
+                            }, paso * 0.6);
+                        }, paso * 0.6);
+                    };
+                    if (d.revisar) {
+                        li.classList.add('pide-revision');
+                        var b = document.createElement('button');
+                        b.type = 'button'; b.className = 'ob-confirmar'; b.textContent = 'Confirmar';
+                        b.addEventListener('click', function () { b.remove(); li.classList.remove('pide-revision'); msg.textContent = ''; terminar(); });
+                        li.appendChild(b);
+                        msg.textContent = 'Un documento necesita tu revisión: ' + d.emisor + ' (' + d.revisar.toLowerCase() + ').';
+                        b.focus({ preventScroll: true });
+                    } else setTimeout(terminar, paso * 0.5);
+                }, paso);
+            }, paso * 1.4);
+        }
+        function siguiente(fin) {
+            var li = pilas[0].querySelector('.ob-doc');
+            if (li) { procesar(li, fin); medir('demo-outbill', true); return true; }
+            return false;
+        }
+        escena.querySelector('[data-uno]').addEventListener('click', function () { siguiente(); });
+        escena.querySelector('[data-todo]').addEventListener('click', function () {
+            var n = 0;
+            while (siguiente()) { n++; if (n > 20) break; }
+            /* escalonar la salida */
+            Array.prototype.forEach.call(escena.querySelectorAll('.ob-doc'), function (li, k) { li.style.transitionDelay = (k * 60) + 'ms'; });
+        });
+        escena.querySelector('[data-reset]').addEventListener('click', function () {
+            if (enCurso) return;
+            pilas.forEach(function (p, k) { if (p) p.innerHTML = k === 0 ? original : ''; });
+            e.documentos.forEach(function (d) { d.listo = false; });
+            hechos = 0; msg.textContent = ''; escena.classList.remove('completo'); carpetas();
+        });
+        e.documentos.forEach(function (d) { d.listo = false; });
+        carpetas();
+    }
+
+    /* =============================================================
+       AUTOMOTIVE · una jornada que avanza con cada acción
+       ============================================================= */
+    function expAutomotive(P, e) {
+        var escena = document.getElementById('escena');
+        var e0 = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+        var estado = { cobrado: 0, pendiente: 0, atencion: 0, hechas: 0, seguimiento: 0, avisos: 0 };
+        e.tareas.forEach(function (t) {
+            if (t.tipo !== 'aviso') estado.pendiente += t.importe;
+            if (t.tipo !== 'cobro') estado.atencion++;
+        });
+        var kpi = function (k) { return escena.querySelector('[data-kpi="' + k + '"]'); };
+        function pintar() {
+            kpi('pendiente').textContent = e0.format(estado.pendiente);
+            kpi('cobrado').textContent = e0.format(estado.cobrado);
+            kpi('atencion').textContent = estado.atencion;
+            kpi('hechas').textContent = estado.hechas;
+            kpi('barra').style.width = (estado.hechas / e.tareas.length * 100) + '%';
+            if (estado.hechas === e.tareas.length) {
+                var f = escena.querySelector('[data-final]');
+                f.hidden = false;
+                escena.querySelector('[data-final-txt]').textContent = 'Cobrado hoy: ' + e0.format(estado.cobrado) + '. ' +
+                    (estado.seguimiento ? estado.seguimiento + ' cuota en seguimiento, con la gestión registrada. ' : '') +
+                    (estado.avisos ? estado.avisos + ' aviso programado.' : '');
+            }
+        }
+        function elegir(id) {
+            escena.querySelectorAll('.am-tarea').forEach(function (li) {
+                var si = li.getAttribute('data-tarea') === id;
+                li.classList.toggle('actual', si);
+                li.querySelector('.am-tarea-cab').setAttribute('aria-expanded', si ? 'true' : 'false');
+            });
+        }
+        function hecha(li, texto) {
+            li.classList.add('hecha'); li.classList.remove('actual');
+            li.querySelector('[data-acciones]').innerHTML = '<p class="am-ok">✓ ' + esc(texto) + '</p>';
+            estado.hechas++;
+            var sig = escena.querySelector('.am-tarea:not(.hecha)');
+            if (sig) elegir(sig.getAttribute('data-tarea'));
+            pintar();
+            medir('demo-automotive', true);
+        }
+        e.tareas.forEach(function (t) {
+            var li = escena.querySelector('[data-tarea="' + t.id + '"]'), acc = li.querySelector('[data-acciones]');
+            li.querySelector('[data-elegir]').addEventListener('click', function () { if (!li.classList.contains('hecha')) elegir(t.id); });
+            if (t.tipo === 'cobro') {
+                acc.innerHTML = '<p class="am-accion-txt">El cliente ha pagado la cuota ' + t.cuota + '.</p><button type="button" class="am-boton">Registrar cobro de ' + e0.format(t.importe) + '</button>';
+                acc.querySelector('button').addEventListener('click', function () {
+                    estado.cobrado += t.importe; estado.pendiente -= t.importe;
+                    hecha(li, 'Cobro de ' + e0.format(t.importe) + ' registrado');
+                });
+            } else if (t.tipo === 'retraso') {
+                acc.innerHTML = '<p class="am-accion-txt">La cuota ' + t.cuota + ' venció hace ' + t.dias + ' días y no consta como pagada.</p>' +
+                    '<div class="am-botones"><button type="button" class="am-boton sec" data-hist>Ver historial</button><button type="button" class="am-boton" data-prep>Preparar comunicación</button></div>' +
+                    '<ul class="am-historial" hidden>' + t.historial.map(function (h) { return '<li>' + esc(h) + '</li>'; }).join('') + '</ul><div data-carta></div>';
+                acc.querySelector('[data-hist]').addEventListener('click', function () {
+                    var ul = acc.querySelector('.am-historial'); ul.hidden = !ul.hidden;
+                    this.textContent = ul.hidden ? 'Ver historial' : 'Ocultar historial';
+                });
+                acc.querySelector('[data-prep]').addEventListener('click', function () {
+                    this.remove();
+                    acc.querySelector('[data-carta]').innerHTML =
+                        '<div class="am-carta">Hola, ' + esc(t.cliente) + ':\n\nTe escribimos porque la cuota n.º ' + t.cuota + ' de la financiación de tu vehículo, por importe de ' + e0.format(t.importe) + ', venció el 5 de marzo y todavía no consta como pagada.\n\nSi ya la has abonado, puedes ignorar este mensaje. Si necesitas organizar el pago, estamos a tu disposición.\n\nUn saludo.</div>' +
+                        '<button type="button" class="am-boton" data-reg>Registrar gestión</button>';
+                    acc.querySelector('[data-reg]').addEventListener('click', function () {
+                        estado.atencion--; estado.seguimiento++;
+                        hecha(li, 'Comunicación preparada y gestión registrada en el historial');
+                    });
+                });
+            } else if (t.tipo === 'aviso') {
+                acc.innerHTML = '<p class="am-accion-txt">La cuota ' + t.cuota + ' (' + e0.format(t.importe) + ') vence el 18 de marzo.</p><button type="button" class="am-boton">Programar aviso para el 17 de marzo</button>';
+                acc.querySelector('button').addEventListener('click', function () {
+                    estado.atencion--; estado.avisos++;
+                    hecha(li, 'Aviso programado para el 17 de marzo');
+                });
+            }
+        });
+        elegir(e.tareas[0].id);
+        pintar();
+    }
+
+    /* =============================================================
+       NÁUTICO · una red que crece con cada tarjeta
+       ============================================================= */
+    function expNautico(P, e) {
+        var escena = document.getElementById('escena');
+        var mapa = escena.querySelector('[data-mapa]');
+        var pos = {
+            yo: [600, 300], evento: [600, 100],
+            marta: [800, 200], jordi: [390, 200], ana: [400, 385], luca: [1000, 310],
+            'Astillero Demo': [1010, 165], 'M/Y Demo One': [200, 280], 'Broker Demo': [200, 380]
+        };
+        var nodos = { yo: { t: 'yo', n: 'Tú' }, evento: { t: 'evento', n: e.evento } };
+        var enlaces = [['yo', 'evento']];
+        var ruta = [], resaltados = {};
+
+        function forma(id, n) {
+            var x = pos[id][0], y = pos[id][1], cls = 'nt-n nt-' + n.t + (n.nuevo ? ' nuevo' : '') + (ruta.indexOf(id) > -1 ? ' ruta' : '');
+            var f = n.t === 'empresa' ? '<rect x="' + (x - 13) + '" y="' + (y - 13) + '" width="26" height="26" rx="5"/>' :
+                n.t === 'barco' ? '<path d="M' + x + ' ' + (y - 15) + 'L' + (x + 15) + ' ' + (y + 12) + 'H' + (x - 15) + 'Z"/>' :
+                n.t === 'evento' ? '<path d="M' + x + ' ' + (y - 16) + 'L' + (x + 16) + ' ' + y + 'L' + x + ' ' + (y + 16) + 'L' + (x - 16) + ' ' + y + 'Z"/>' :
+                '<circle cx="' + x + '" cy="' + y + '" r="' + (n.t === 'yo' ? 16 : 11) + '"/>';
+            return '<g class="' + cls + '">' + f + '<text x="' + x + '" y="' + (y + (n.t === 'yo' ? 36 : 32)) + '">' + esc(n.n) + '</text>' +
+                (n.sub ? '<text class="sub" x="' + x + '" y="' + (y + 48) + '">' + esc(n.sub) + '</text>' : '') + '</g>';
+        }
+        function dibujar() {
+            var enRuta = function (a, b) { return !!(resaltados[a + '|' + b] || resaltados[b + '|' + a]); };
+            var estrecho = window.matchMedia('(max-width: 900px)').matches;
+            mapa.innerHTML = '<svg viewBox="' + (estrecho ? '70 45 1060 420' : '0 0 1200 700') + '" preserveAspectRatio="xMidYMid meet">' +
+                '<g class="nt-olas"><path d="M0 640C200 600 380 680 600 640S980 590 1200 650"/><path d="M0 675C220 635 400 715 620 675S1000 625 1200 685"/></g>' +
+                enlaces.map(function (l) {
+                    var a = pos[l[0]], b = pos[l[1]];
+                    return '<line class="nt-l' + (l[2] ? ' nuevo' : '') + (enRuta(l[0], l[1]) ? ' ruta' : '') + '" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>';
+                }).join('') +
+                Object.keys(nodos).map(function (k) { return forma(k, nodos[k]); }).join('') + '</svg>';
+            Object.keys(nodos).forEach(function (k) { nodos[k].nuevo = false; });
+            enlaces.forEach(function (l) { l[2] = false; });
+            var personas = Object.keys(nodos).filter(function (k) { return nodos[k].t === 'persona'; }).length;
+            var entidades = Object.keys(nodos).filter(function (k) { return nodos[k].t === 'empresa' || nodos[k].t === 'barco'; }).length;
+            escena.querySelector('[data-c="contactos"]').textContent = personas;
+            escena.querySelector('[data-c="entidades"]').textContent = entidades;
+            escena.querySelector('[data-c="conexiones"]').textContent = enlaces.length - 1;
+        }
+        function enlazar(a, b) { enlaces.push([a, b, true]); }
+
+        escena.querySelectorAll('[data-tarjeta]').forEach(function (b) {
+            b.addEventListener('click', function () {
+                if (b.disabled) return;
+                var t = e.tarjetas.filter(function (x) { return x.id === b.getAttribute('data-tarjeta'); })[0];
+                b.disabled = true; b.classList.add('escaneando');
+                setTimeout(function () {
+                    b.classList.remove('escaneando'); b.classList.add('digitalizada');
+                    nodos[t.id] = { t: 'persona', n: t.n, sub: t.cargo, nuevo: true };
+                    enlazar('yo', t.id); enlazar(t.id, 'evento');
+                    var ent = t.empresa || t.barco;
+                    if (!nodos[ent]) nodos[ent] = { t: t.empresa ? 'empresa' : 'barco', n: ent, nuevo: true };
+                    enlazar(t.id, ent);
+                    ruta = []; resaltados = {};
+                    dibujar();
+                    escena.querySelector('[data-buscar]').disabled = false;
+                    medir('demo-nautico', true);
+                }, sinMovimiento ? 0 : 900);
+            });
+        });
+        escena.querySelector('[data-buscar]').addEventListener('click', function () {
+            var destino = e.busqueda.destino;
+            var res = escena.querySelector('[data-resultado]');
+            var quienes = e.tarjetas.filter(function (t) { return nodos[t.id] && t.empresa === destino; });
+            if (!quienes.length) {
+                ruta = []; resaltados = {};
+                res.textContent = 'Todavía no hay nadie de ' + destino + ' en tu red. Digitaliza más tarjetas de la feria.';
+            } else {
+                ruta = ['yo', destino]; resaltados = {};
+                quienes.forEach(function (t) { ruta.push(t.id); resaltados['yo|' + t.id] = 1; resaltados[t.id + '|' + destino] = 1; });
+                res.textContent = quienes.map(function (t) { return t.n + ' (' + t.cargo + ', ' + t.ciudad + ')'; }).join(' y ') +
+                    (quienes.length > 1 ? ' trabajan' : ' trabaja') + ' en ' + destino + '. ' + (quienes.length > 1 ? 'Los conociste' : 'La conociste') + ' en el ' + e.evento + ': ya tienes por dónde empezar.';
+            }
+            dibujar();
+            medir('nautico-oportunidad', true);
+        });
+        dibujar();
+    }
 
     function iniciarCentro() {
         var P = window.DFS_PLANTILLAS, c = p.centro, e = c.empresa;
